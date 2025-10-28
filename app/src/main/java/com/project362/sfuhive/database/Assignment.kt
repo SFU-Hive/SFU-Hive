@@ -22,7 +22,7 @@ data class Assignment (
     var assignmentName: String = "",
 
     @ColumnInfo(name = "due_at_column")
-    var dueAt: Calendar = Calendar.getInstance(),
+    var dueAt: String = "",
 
     @ColumnInfo(name = "points_possible_column")
     var pointsPossible: Double = 0.0,

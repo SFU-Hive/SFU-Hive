@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        Util.getCanvasAssignments(this)
+        Util.getCanvasAssignments(this, this)
     }
 }
 

@@ -4,6 +4,14 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.util.Log
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import com.project362.sfuhive.database.Assignment
+import com.project362.sfuhive.database.AssignmentDatabase
+import com.project362.sfuhive.database.AssignmentDatabaseDao
+import com.project362.sfuhive.database.AssignmentRepository
+import com.project362.sfuhive.database.AssignmentViewModel
+import com.project362.sfuhive.database.AssignmentViewModelFactory
 import org.json.JSONArray
 import org.json.JSONTokener
 import java.net.HttpURLConnection
@@ -11,9 +19,18 @@ import java.net.URL
 
 object Util {
 
-    fun getCanvasAssignments(context: Context) {
+    private lateinit var database: AssignmentDatabase
+    private lateinit var databaseDao: AssignmentDatabaseDao
+    private lateinit var repository: AssignmentRepository
+    private lateinit var viewModelFactory: AssignmentViewModelFactory
+
+    private lateinit var assignmentViewModel: AssignmentViewModel
+
+    fun getCanvasAssignments(owner: ViewModelStoreOwner, context: Context) {
         Thread {
             try {
+                viewModelFactory = getViewModelFactory(context)
+                assignmentViewModel = ViewModelProvider(owner, viewModelFactory).get(AssignmentViewModel::class.java)
 
                 // get key from manifest and set URL
                 val ai: ApplicationInfo = context.packageManager
@@ -42,19 +59,28 @@ object Util {
                     for (i in 0 until assignmentArray.length()) {
 
                         // get all relevant assignment info
-                        val assignment = assignmentArray.getJSONObject(i)
-                        val assnDue = assignment.optInt("due_at")
-                        val assnName = assignment.optString("name")
-                        val assnPoints = assignment.optInt("points_possible")
+                        val canvasAssignment = assignmentArray.getJSONObject(i)
+                        val assignmentId = canvasAssignment.optLong("id")
+                        val assnDue = canvasAssignment.optString("due_at", "")
+                        val assnName = canvasAssignment.optString("name", "")
+                        val assnPoints = canvasAssignment.optDouble("points_possible", 0.0)
 
                         //TODO: CREATE ASSIGNMENT OBJECT THAT STORES ASSIGNMENT NAME, POINTS, AND DUE DATE etc.
 
                         // use if u wanna log assignments
-                        Log.d(
-                            "CanvasAPI",
-                            "Course Name: $courseName, Assignment Name: $assnName, Assignment Points: $assnPoints, Assignment Due: $assnDue"
-                        )
+//                        Log.d(
+//                            "CanvasAPI",
+//                            "Course Name: $courseName, Assignment Name: $assnName, Assignment Points: $assnPoints, Assignment Due: $assnDue"
+//                        )
 
+                        val assignment = Assignment()
+                        assignment.assignmentId = assignmentId
+                        assignment.courseName = courseName
+                        assignment.assignmentName = assnName
+                        assignment.pointsPossible = assnPoints
+                        assignment.dueAt = assnDue
+
+                        assignmentViewModel.insert(assignment)
                     }
                 }
             } catch (e: Exception) {
@@ -89,8 +115,16 @@ object Util {
         val coursesArray = JSONArray(tokener)
 
         // log response
-        Log.d("CanvasAPI", response)
+//        Log.d("CanvasAPI", response)
 
         return coursesArray
+    }
+
+    fun getViewModelFactory(context: Context): AssignmentViewModelFactory {
+        database = AssignmentDatabase.getInstance(context)
+        databaseDao = database.assignmentDatabaseDao
+        repository = AssignmentRepository(databaseDao)
+        viewModelFactory = AssignmentViewModelFactory(repository)
+        return viewModelFactory
     }
 }
