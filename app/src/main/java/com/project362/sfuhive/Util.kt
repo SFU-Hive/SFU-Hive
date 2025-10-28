@@ -29,6 +29,9 @@ object Util {
                     val courseId = course.optInt("id")
                     val courseName = course.optString("name")
 
+                    if (courseName == null || courseName == "") {
+                        continue
+                    }
 
 
                     // get assignments for each course
