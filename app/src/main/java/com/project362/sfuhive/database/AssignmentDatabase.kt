@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 // adapted from RoomDatabase demo
-@Database(entities = [Assignment::class], version = 1)
+@Database(entities = [Assignment::class], version = 3, exportSchema = false)
 abstract class AssignmentDatabase : RoomDatabase() {
     abstract val assignmentDatabaseDao: AssignmentDatabaseDao
 
@@ -19,10 +19,10 @@ abstract class AssignmentDatabase : RoomDatabase() {
                 var instance = INSTANCE
                 if (instance == null) {
                     instance = Room.databaseBuilder(
-                        context.applicationContext,
-                        AssignmentDatabase::class.java,
-                        "Assignment_table"
-                    ).build()
+                                        context.applicationContext,
+                                        AssignmentDatabase::class.java,
+                                        "Assignment_table"
+                                    ).fallbackToDestructiveMigration(false).build()
                     INSTANCE = instance
                 }
                 return instance

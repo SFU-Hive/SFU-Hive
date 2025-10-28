@@ -8,11 +8,9 @@ import java.util.Calendar
 // adapted from RoomDatabase demo
 @Entity(tableName = "assignment_table")
 data class Assignment (
-    @PrimaryKey(autoGenerate = true)
-    var id: Long = 0L,
-
-    // different from the database primary id, this is id from Canvas for this assignment
-    @ColumnInfo(name = "assignment_id_column")
+//@PrimaryKey(autoGenerate = true)
+//    var id: Long = 0L,
+    @PrimaryKey(autoGenerate = false)
     var assignmentId: Long = 0L,
 
     @ColumnInfo(name = "course_name_column")

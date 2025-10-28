@@ -27,16 +27,18 @@ object Util {
     private lateinit var assignmentViewModel: AssignmentViewModel
 
     fun getCanvasAssignments(owner: ViewModelStoreOwner, context: Context) {
-        Thread {
             try {
                 viewModelFactory = getViewModelFactory(context)
                 assignmentViewModel = ViewModelProvider(owner, viewModelFactory).get(AssignmentViewModel::class.java)
+
+                // delete all before inserting for fresh restart
+                assignmentViewModel.deleteAll()
 
                 // get key from manifest and set URL
                 val ai: ApplicationInfo = context.packageManager
                     .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
                 val token =  ai.metaData.getString("keyValue")
-                val coursesURL = URL("https://canvas.sfu.ca/api/v1/courses")
+                val coursesURL = URL("https://canvas.sfu.ca/api/v1/courses?enrollment_state=active")
 
                 val coursesArray = getJsonArrayFromURL(coursesURL, token)
 
@@ -65,15 +67,11 @@ object Util {
                         val assnName = canvasAssignment.optString("name", "")
                         val assnPoints = canvasAssignment.optDouble("points_possible", 0.0)
 
-                        //TODO: CREATE ASSIGNMENT OBJECT THAT STORES ASSIGNMENT NAME, POINTS, AND DUE DATE etc.
-
                         // use if u wanna log assignments
-//                        Log.d(
-//                            "CanvasAPI",
-//                            "Course Name: $courseName, Assignment Name: $assnName, Assignment Points: $assnPoints, Assignment Due: $assnDue"
-//                        )
+                        Log.d("CanvasAPI", "Course Name: $courseName, Assignment Name: $assnName, Assignment Points: $assnPoints, Assignment Due: $assnDue")
 
                         val assignment = Assignment()
+                        // manually setting id
                         assignment.assignmentId = assignmentId
                         assignment.courseName = courseName
                         assignment.assignmentName = assnName
@@ -83,13 +81,14 @@ object Util {
                         assignmentViewModel.insert(assignment)
                     }
                 }
+
+                val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                prefs.edit().putBoolean("assignments_loaded", true).apply()
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 Log.d("CanvasAPI", "Error: ${e.message}")
             }
-
-
-        }.start()
     }
 
     private fun getJsonArrayFromURL(
@@ -115,7 +114,7 @@ object Util {
         val coursesArray = JSONArray(tokener)
 
         // log response
-//        Log.d("CanvasAPI", response)
+        Log.d("CanvasResp", response)
 
         return coursesArray
     }

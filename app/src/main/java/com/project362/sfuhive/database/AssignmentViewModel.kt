@@ -18,6 +18,10 @@ class AssignmentViewModel(private val repository: AssignmentRepository) : ViewMo
     fun getAssignment(id: Long): Assignment? {
         return repository.getAssignment(id)
     }
+
+    fun deleteAll(){
+        repository.deleteAll()
+    }
 }
 
 class AssignmentViewModelFactory (private val repository: AssignmentRepository) : ViewModelProvider.Factory {

@@ -23,4 +23,10 @@ class AssignmentRepository(private val assignmentDatabaseDao: AssignmentDatabase
         }
     }
 
+    fun deleteAll(){
+        CoroutineScope(IO).launch {
+            assignmentDatabaseDao.deleteAll()
+        }
+    }
+
 }
