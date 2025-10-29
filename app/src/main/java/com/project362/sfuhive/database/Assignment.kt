@@ -8,8 +8,9 @@ import java.util.Calendar
 // adapted from RoomDatabase demo
 @Entity(tableName = "assignment_table")
 data class Assignment (
-//@PrimaryKey(autoGenerate = true)
+//    @PrimaryKey(autoGenerate = true)
 //    var id: Long = 0L,
+
     @PrimaryKey(autoGenerate = false)
     var assignmentId: Long = 0L,
 

@@ -3,6 +3,7 @@ package com.project362.sfuhive
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,22 +25,18 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var viewModelFactory: AssignmentViewModelFactory
     private lateinit var assignmentViewModel: AssignmentViewModel
+    private lateinit var loadButton: Button
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            SFUHiveTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
-        }
+        setContentView(R.layout.activity_main)
 
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val loaded = prefs.getBoolean("assignments_loaded", false)
+        loadButton = findViewById(R.id.load)
+
+
+//        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+//        val loaded = prefs.getBoolean("assignments_loaded", false)
 
 
         viewModelFactory = Util.getViewModelFactory(this)
@@ -51,29 +48,12 @@ class MainActivity : ComponentActivity() {
             Log.d("DatabaseCheck", "Assignments count: ${it.size}")
         })
 
-        // put all assignments into database on start if not there
-//        if (!loaded) {
-        lifecycleScope.launch {
-            Util.getCanvasAssignments(this@MainActivity, this@MainActivity)
+
+        loadButton.setOnClickListener {
+            // put all assignments into database on start if not there
+            Thread {
+                Util.getCanvasAssignments(this, this)
+            }.start()
         }
-//        } else {
-//            Log.d("MainActivity", "Assignments already loaded — skipping fetch")
-//        }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SFUHiveTheme {
-        Greeting("Android")
     }
 }
