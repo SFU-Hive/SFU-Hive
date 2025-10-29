@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.secrets_gradle_plugin") version "0.6.1"
+    id("kotlin-kapt")
 }
 
 android {
@@ -56,4 +58,15 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // for chrome custom tabs
+    implementation("androidx.browser:browser:1.9.0")
+
+    // from RoomDatabase Lecture
+    // Room components
+    val room_version = "2.7.0"
+    val lifecycle_version = "2.9.1"
+    implementation("androidx.room:room-ktx:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
 }
