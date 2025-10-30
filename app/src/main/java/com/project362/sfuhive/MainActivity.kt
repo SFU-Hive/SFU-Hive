@@ -35,10 +35,6 @@ class MainActivity : ComponentActivity() {
         loadButton = findViewById(R.id.load)
 
 
-//        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-//        val loaded = prefs.getBoolean("assignments_loaded", false)
-
-
         viewModelFactory = Util.getViewModelFactory(this)
         assignmentViewModel =
             ViewModelProvider(this, viewModelFactory).get(AssignmentViewModel::class.java)
@@ -54,6 +50,8 @@ class MainActivity : ComponentActivity() {
             Thread {
                 Util.getCanvasAssignments(this, this)
             }.start()
+
+
         }
     }
 }

@@ -2,4 +2,10 @@
 <resources>
 
     <style name="Theme.SFUHive" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Button.White" parent="ThemeOverlay.AppCompat">
+        <item name="colorAccent">@color/white</item>
+    </style>
+    <style name="Back.DarkRed" parent="ThemeOverlay.AppCompat">
+        <item name="colorAccent">@color/dark_red</item>
+    </style>
 </resources>
