@@ -9,4 +9,8 @@
     <style name="Back.DarkRed" parent="ThemeOverlay.AppCompat">
         <item name="colorAccent">@color/dark_red</item>
     </style>
+
+    <style name="Background.grey" parent="ThemeOverlay.AppCompat">
+        <item name="colorAccent">@color/light_grey</item>
+    </style>
 </resources>

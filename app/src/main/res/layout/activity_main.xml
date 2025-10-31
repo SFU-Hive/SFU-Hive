@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_red">
+    android:background="@drawable/gradient_background_start">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -29,8 +29,10 @@
             android:layout_height="wrap_content"
             android:id="@+id/load"
             android:text="@string/get_started"
-            android:theme="@style/Button.White"
-            android:textColor="@color/black"/>
+            android:background="@drawable/rounded_button"
+            android:padding="16dp"
+            android:elevation="8dp"
+            android:shadowColor="@color/black"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

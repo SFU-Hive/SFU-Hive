@@ -54,10 +54,17 @@ class NavActivity : AppCompatActivity() {
         navFragmentAdapter = NavFragmentAdapter(this, fragments)
         viewPager2.adapter = navFragmentAdapter
 
-        tabConfigurationStrategy = TabConfigurationStrategy {
-            tab: TabLayout.Tab, position: Int ->
-            tab.text = tabTitles[position] }
-        tabLayoutMediator = TabLayoutMediator(tabLayout, viewPager2, tabConfigurationStrategy)
+        val tabLayoutMediator = TabLayoutMediator(tabLayout, viewPager2) { tab, position ->
+            // Set icon for each tab
+            when (position) {
+                0 -> tab.setIcon(R.drawable.rounded_dashboard_24)
+                1 -> tab.setIcon(R.drawable.rounded_calendar_today_24)
+                2 -> tab.setIcon(R.drawable.rounded_add_task_24)
+                3 -> tab.setIcon(R.drawable.rounded_heart_smile_24)
+                4 -> tab.setIcon(R.drawable.round_card_giftcard_24)
+            }
+        }
+
         tabLayoutMediator.attach()
     }
 
