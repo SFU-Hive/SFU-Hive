@@ -1,25 +1,15 @@
 package com.project362.sfuhive
 
-import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.project362.sfuhive.database.AssignmentViewModel
 import com.project362.sfuhive.database.AssignmentViewModelFactory
-import com.project362.sfuhive.ui.theme.SFUHiveTheme
-import kotlinx.coroutines.launch
+
 
 class MainActivity : ComponentActivity() {
 
@@ -51,7 +41,9 @@ class MainActivity : ComponentActivity() {
                 Util.getCanvasAssignments(this, this)
             }.start()
 
-
+            // open to dashboard
+            intent = Intent(this, NavActivity::class.java)
+            startActivity(intent)
         }
     }
 }
