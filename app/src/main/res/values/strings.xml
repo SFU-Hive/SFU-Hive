@@ -2,4 +2,13 @@
     <string name="app_name">SFU Hive</string>
     <string name="welcome">Welcome</string>
     <string name="get_started">Get Started</string>
+    <string name="difficulty">Difficulty</string>
+    <string name="time_spent_approx_in_hours">Time Spent (approx in hours)</string>
+    <string-array name="difficulty">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
 </resources>

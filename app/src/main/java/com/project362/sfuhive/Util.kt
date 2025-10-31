@@ -25,6 +25,11 @@ object Util {
 
     private val CANVAS_KEY = "keyValue"
 
+    val PREFS_KEY = "app_prefs"
+
+    val LASY_SYNC_KEY = "last_sync"
+
+
     private lateinit var database: AssignmentDatabase
     private lateinit var databaseDao: AssignmentDatabaseDao
     private lateinit var repository: AssignmentRepository
@@ -35,7 +40,9 @@ object Util {
     // data class for assignment submission
     data class SubmittedAssignment(
         val assignmentId: Long,
-        val grade: Double?,
+        val assignmentName: String,
+        val courseName: String,
+        val grade: Double?
     )
 
     fun getCanvasAssignments(owner: ViewModelStoreOwner, context: Context) {
@@ -94,9 +101,6 @@ object Util {
                     }
                 }
 
-                val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-                prefs.edit().putBoolean("assignments_loaded", true).apply()
-
             } catch (e: Exception) {
                 e.printStackTrace()
                 Log.d("CanvasAPI", "Error: ${e.message}")
@@ -112,7 +116,7 @@ object Util {
 
             // the URL address is from ChatGPT
             val submissionsURL =
-                URL("https://canvas.sfu.ca/api/v1/users/self/submissions?include[]=assignment")
+                URL("https://canvas.sfu.ca/api/v1/users/self/submissions?include[]=assignment&include[]=course")
 
             // fetch submissions
             val submissionsArray = getJsonArrayFromURL(submissionsURL, token)
@@ -130,8 +134,8 @@ object Util {
         val newAssignmentSubmissions = mutableListOf<SubmittedAssignment>()
 
         // get prefs for last assignment sync
-        val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val lastSync = prefs.getLong("last_sync", 0L)
+        val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
+        val lastSync = prefs.getLong(LASY_SYNC_KEY, 0L)
 
         // get submissions list as JSON array
         val submissions = getRecentSubmissions(context)
@@ -145,6 +149,7 @@ object Util {
         for (i in 0 until submissions.length()) {
             val sub = submissions.getJSONObject(i)
             val assignmentObj = sub.getJSONObject("assignment")
+            val courseObj = sub.getJSONObject("course")
             val state = sub.optString("workflow_state")
             val submittedAt = sub.optString("submitted_at")
 
@@ -158,18 +163,24 @@ object Util {
                     .toInstant()
                     .toEpochMilli()
 
+                Log.d("Submission", "Submitted assignment: ${assignmentObj.optLong("id")}, Score: ${sub.optDouble("score")}, Submitted at: $submittedAt")
+
                 // check if assignment was submitted after last sync
                 if (submittedTime > lastSync) {
+
+                    // build submitted assignment object
                     val assignment = SubmittedAssignment(
                         assignmentId = assignmentObj.optLong("id"),
+                        assignmentName = assignmentObj.optString("name"),
+                        courseName = courseObj.optString("name"),
                         grade = sub.optDouble("score"))
+
+                    // add submitted assignment to return list
                     newAssignmentSubmissions.add(assignment)
                 }
-
             }
         }
 
-        prefs.edit().putLong("last_sync", System.currentTimeMillis()).apply()
         return newAssignmentSubmissions
     }
 
