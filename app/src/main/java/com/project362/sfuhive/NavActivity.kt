@@ -10,7 +10,7 @@ import com.google.android.material.tabs.TabLayoutMediator.TabConfigurationStrate
 import com.project362.sfuhive.Calendar.CalendarFragment
 import com.project362.sfuhive.Dashboard.DashboardFragment
 import com.project362.sfuhive.Progress.ProgressFragment
-import com.project362.sfuhive.Tasks.TasksFragment
+import com.project362.sfuhive.Assignments.AssignmentFragment
 import com.project362.sfuhive.Wellness.WellnessFragment
 import java.util.ArrayList
 
@@ -20,7 +20,7 @@ class NavActivity : AppCompatActivity() {
     private lateinit var calenderFrag: CalendarFragment
     private lateinit var dashboardFrag: DashboardFragment
     private lateinit var progressFrag: ProgressFragment
-    private lateinit var tasksFrag: TasksFragment
+    private lateinit var tasksFrag: AssignmentFragment
     private lateinit var wellnessFrag: WellnessFragment
     private lateinit var viewPager2: ViewPager2
     private lateinit var tabLayout: TabLayout
@@ -41,7 +41,7 @@ class NavActivity : AppCompatActivity() {
         calenderFrag = CalendarFragment()
         dashboardFrag = DashboardFragment()
         progressFrag = ProgressFragment()
-        tasksFrag = TasksFragment()
+        tasksFrag = AssignmentFragment()
         wellnessFrag = WellnessFragment()
 
         fragments = ArrayList()
@@ -59,7 +59,7 @@ class NavActivity : AppCompatActivity() {
             when (position) {
                 0 -> tab.setIcon(R.drawable.rounded_dashboard_24)
                 1 -> tab.setIcon(R.drawable.rounded_calendar_today_24)
-                2 -> tab.setIcon(R.drawable.rounded_add_task_24)
+                2 -> tab.setIcon(R.drawable.rounded_assignment_24)
                 3 -> tab.setIcon(R.drawable.rounded_heart_smile_24)
                 4 -> tab.setIcon(R.drawable.round_card_giftcard_24)
             }
