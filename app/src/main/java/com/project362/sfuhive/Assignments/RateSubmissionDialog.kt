@@ -3,6 +3,7 @@ package com.project362.sfuhive.Assignments
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.widget.EditText
@@ -45,6 +46,9 @@ class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
         courseNameView = view.findViewById(R.id.course_name)
         assignmentNameView = view.findViewById(R.id.assignment_name)
 
+        // set input type
+        timeEditText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+
         // set view accordingly
         courseNameView.text = courseName
         assignmentNameView.text = assignmentName
@@ -70,6 +74,9 @@ class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
                     "RateSubmission",
                     "Rated $assignmentName with difficulty $difficulty, time $timeSpent min"
                 )
+
+                // notify parent from ChatGPT
+                parentFragmentManager.setFragmentResult("RateSubmission", Bundle())
             }
         }
     }
