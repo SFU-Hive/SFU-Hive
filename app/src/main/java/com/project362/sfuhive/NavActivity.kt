@@ -51,6 +51,7 @@ class NavActivity : AppCompatActivity() {
         fragments.add(tasksFrag)
         fragments.add(wellnessFrag)
 
+
         navFragmentAdapter = NavFragmentAdapter(this, fragments)
         viewPager2.adapter = navFragmentAdapter
 
