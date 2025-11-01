@@ -7,9 +7,13 @@ import android.util.Log
 import android.widget.Button
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.auth
 import com.project362.sfuhive.Assignments.RateSubmissionDialog
 import com.project362.sfuhive.Util.SubmittedAssignment
 import com.project362.sfuhive.database.AssignmentViewModel
@@ -20,12 +24,30 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewModelFactory: AssignmentViewModelFactory
     private lateinit var assignmentViewModel: AssignmentViewModel
     private lateinit var loadButton: Button
+    private lateinit var auth: FirebaseAuth
+    private var user: FirebaseUser? = null
 
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // init firebase
+        FirebaseApp.initializeApp(this)
+        auth = Firebase.auth
+
+        auth.signInAnonymously()
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Sign in success, update UI with the signed-in user's information
+                    Log.d("FirebaseAuth", "signInAnonymously:success")
+                    user = auth.currentUser
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Log.w("FirebaseAuth", "signInAnonymously:failure", task.exception)
+                }
+            }
 
         loadButton = findViewById(R.id.load)
 
@@ -68,8 +90,11 @@ class MainActivity : AppCompatActivity() {
         val bundle = Bundle()
         bundle.putLong(Util.ASSIGNMENT_ID_KEY, newSubmissions[index].assignmentId)
         bundle.putString(Util.ASSIGNMENT_NAME_KEY, newSubmissions[index].assignmentName)
+        bundle.putLong(Util.COURSE_ID_KEY, newSubmissions[index].courseId)
         bundle.putString(Util.COURSE_NAME_KEY, newSubmissions[index].courseName)
         bundle.putDouble(Util.GRADE_KEY, newSubmissions[index].grade)
+        bundle.putString("USER_UID", user?.uid)
+
 
         dialog.arguments = bundle
         dialog.isCancelable = false

@@ -31,6 +31,7 @@ object Util {
 
     const val ASSIGNMENT_ID_KEY = "assignment_id"
     const val ASSIGNMENT_NAME_KEY = "assignment_name"
+    const val COURSE_ID_KEY = "course_id"
     const val COURSE_NAME_KEY = "course_name"
     const val GRADE_KEY = "grade_key"
 
@@ -45,8 +46,9 @@ object Util {
     data class SubmittedAssignment(
         val assignmentId: Long,
         val assignmentName: String,
+        val courseId: Long,
         val courseName: String,
-        val grade: Double
+        val grade: Double,
     )
 
     fun getCanvasAssignments(owner: ViewModelStoreOwner, context: Context) {
@@ -207,6 +209,7 @@ object Util {
                     val assignment = SubmittedAssignment(
                         assignmentId = assignmentObj.optLong("id"),
                         assignmentName = assignmentObj.optString("name"),
+                        courseId = courseObj.optLong("id"),
                         courseName = courseObj.optString("name"),
                         grade = submissionObj.optDouble("score"))
 

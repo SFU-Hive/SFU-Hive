@@ -11,6 +11,8 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import com.google.firebase.Firebase
+import com.google.firebase.database.database
 import com.project362.sfuhive.R
 import com.project362.sfuhive.Util
 
@@ -18,27 +20,53 @@ class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     private var assignmentID: Long? = 0L
     private var assignmentName: String? = ""
+    private var courseID: Long? = 0L
     private var courseName: String? = ""
     private var grade: Double? = 0.0
     lateinit var difficultySpinner: Spinner
     lateinit var timeEditText: EditText
     lateinit var courseNameView: TextView
     lateinit var assignmentNameView: TextView
+    lateinit var ratedAssignment: RatedAssignment
+    var userUid: String? = null
+
+
+    data class RatedAssignment(
+        var courseId: Long = 0,
+        var courseName: String = "",
+        var assignmentId: Long = 0,
+        var assignmentName: String = "",
+        var hoursSpent: Double = 0.0,
+        var difficulty: Int = 0
+    )
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         lateinit var ret: Dialog
+
+        // create rated assignment object
+        ratedAssignment = RatedAssignment()
 
         //get arguments
         val bundle = arguments
         assignmentID = bundle?.getLong(Util.ASSIGNMENT_ID_KEY)
         assignmentName = bundle?.getString(Util.ASSIGNMENT_NAME_KEY)
+        courseID = bundle?.getLong(Util.COURSE_ID_KEY)
         courseName = bundle?.getString(Util.COURSE_NAME_KEY)
         grade = bundle?.getDouble(Util.GRADE_KEY)
+        userUid = arguments?.getString("USER_UID")
         val builder = AlertDialog.Builder(requireActivity())
         val view: View = requireActivity().layoutInflater.inflate(
             R.layout.rate_submission_dialog,
             null
         )
+
+        // set rated assignment data
+        ratedAssignment.courseId = courseID!!
+        ratedAssignment.courseName = courseName!!
+        ratedAssignment.assignmentId = assignmentID!!
+        ratedAssignment.assignmentName = assignmentName!!
+        ratedAssignment.hoursSpent = grade!!
+
 
         // get views
         difficultySpinner = view.findViewById(R.id.difficulty_spinner)
@@ -61,13 +89,22 @@ class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
         return ret
     }
 
-    override fun onClick(p0: DialogInterface?, p1: Int) {
+    override fun onClick(p0: DialogInterface, p1: Int) {
         when (p1) {
             DialogInterface.BUTTON_POSITIVE -> {
-                val difficulty = difficultySpinner.selectedItem.toString()
+                val difficulty = difficultySpinner.selectedItem.toString().toInt()
                 val timeSpent = timeEditText.text.toString().toDoubleOrNull() ?: 0.0
 
+                ratedAssignment.difficulty = difficulty
+                ratedAssignment.hoursSpent = timeSpent
+
                 // TODO: save to online database
+
+                // Write a message to the database
+                val database = Firebase.database
+                val myRef = database.getReference("message").child(userUid ?: return)
+
+                myRef.setValue("Hello, World!")
 
                 // log result
                 Log.d(
