@@ -38,6 +38,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
 }
 
@@ -69,4 +70,11 @@ dependencies {
     implementation("androidx.room:room-ktx:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
+
+    //for calendar
+    implementation("com.kizitonwose.calendar:view:2.4.0")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    // AndroidX Fragment
+    implementation("androidx.fragment:fragment-ktx:1.8.5")
+
 }

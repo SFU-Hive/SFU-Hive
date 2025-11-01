@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/calendarRoot"
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Top bar -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/btnPrevMonth"
+            android:contentDescription="Previous month"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_media_previous"
+            android:padding="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tvMonthYear"
+            android:text="November 2025"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginHorizontal="12dp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+
+        <ImageButton
+            android:id="@+id/btnNextMonth"
+            android:contentDescription="Next month"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_media_next"
+            android:padding="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- Weekday header -->
+    <LinearLayout
+        android:id="@+id/weekdayHeader"
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="7">
+
+        <!-- Repeat 7 labels -->
+        <TextView style="@style/WeekdayCell" android:text="Mon"/>
+        <TextView style="@style/WeekdayCell" android:text="Tue"/>
+        <TextView style="@style/WeekdayCell" android:text="Wed"/>
+        <TextView style="@style/WeekdayCell" android:text="Thu"/>
+        <TextView style="@style/WeekdayCell" android:text="Fri"/>
+        <TextView style="@style/WeekdayCell" android:text="Sat"/>
+        <TextView style="@style/WeekdayCell" android:text="Sun"/>
+    </LinearLayout>
+
+    <!-- Calendar grid -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/calendarRecycler"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp" />
+
+
+</LinearLayout>

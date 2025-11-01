@@ -1,6 +1,6 @@
 package com.project362.sfuhive
 
-import android.content.Context
+import android.content.Intent //added for calendar
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -18,8 +18,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.project362.sfuhive.database.AssignmentViewModel
 import com.project362.sfuhive.database.AssignmentViewModelFactory
-import com.project362.sfuhive.ui.theme.SFUHiveTheme
-import kotlinx.coroutines.launch
+import com.project362.sfuhive.ui.calendar.CalendarActivity //added for calendar
 
 class MainActivity : ComponentActivity() {
 
@@ -27,6 +26,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var assignmentViewModel: AssignmentViewModel
     private lateinit var loadButton: Button
 
+    //added for calendar
+    private lateinit var calendarButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +55,13 @@ class MainActivity : ComponentActivity() {
             Thread {
                 Util.getCanvasAssignments(this, this)
             }.start()
+        }
+
+        //added for calendar
+        calendarButton = findViewById(R.id.btnCalendar)
+
+        calendarButton.setOnClickListener {
+            startActivity(Intent(this, CalendarActivity::class.java))
         }
     }
 }

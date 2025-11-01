@@ -23,6 +23,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--calendar-->
+        <activity
+            android:name=".ui.calendar.CalendarActivity"
+            android:exported="false"
+            android:label="Calendar"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+
         <meta-data
             android:name="keyValue"
             android:value = "${KEY}"/>
