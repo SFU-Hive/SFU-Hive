@@ -14,6 +14,7 @@ import androidx.fragment.app.DialogFragment
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
 import com.project362.sfuhive.R
+import com.project362.sfuhive.RatedAssignment
 import com.project362.sfuhive.Util
 
 class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
@@ -29,16 +30,6 @@ class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
     lateinit var assignmentNameView: TextView
     lateinit var ratedAssignment: RatedAssignment
     var userUid: String? = null
-
-
-    data class RatedAssignment(
-        var courseId: Long = 0,
-        var courseName: String = "",
-        var assignmentId: Long = 0,
-        var assignmentName: String = "",
-        var hoursSpent: Double = 0.0,
-        var difficulty: Int = 0
-    )
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         lateinit var ret: Dialog

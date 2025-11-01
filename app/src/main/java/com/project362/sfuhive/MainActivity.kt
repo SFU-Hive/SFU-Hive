@@ -1,5 +1,6 @@
 package com.project362.sfuhive
 
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -15,6 +16,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
 import com.project362.sfuhive.Assignments.RateSubmissionDialog
+import com.project362.sfuhive.Util.LAST_SYNC_KEY
+import com.project362.sfuhive.Util.PREFS_KEY
 import com.project362.sfuhive.Util.SubmittedAssignment
 import com.project362.sfuhive.database.AssignmentViewModel
 import com.project362.sfuhive.database.AssignmentViewModelFactory
@@ -84,7 +87,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleNewSubmissions(newSubmissions: List<SubmittedAssignment>, index: Int = 0) {
-        if (index >= newSubmissions.size) return // all done
+        if (index >= newSubmissions.size) {
+            val prefs = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
+            prefs.edit().putLong(LAST_SYNC_KEY, System.currentTimeMillis()).apply()
+            return
+        }
 
         val dialog = RateSubmissionDialog()
         val bundle = Bundle()
