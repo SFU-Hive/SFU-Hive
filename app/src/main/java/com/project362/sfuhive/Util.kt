@@ -23,12 +23,16 @@ import java.time.format.DateTimeFormatter
 
 object Util {
 
-    private val CANVAS_KEY = "keyValue"
+    private const val CANVAS_KEY = "keyValue"
 
-    val PREFS_KEY = "app_prefs"
+    const val PREFS_KEY = "app_prefs"
 
-    val LASY_SYNC_KEY = "last_sync"
+    const val LAST_SYNC_KEY = "last_sync"
 
+    const val ASSIGNMENT_ID_KEY = "assignment_id"
+    const val ASSIGNMENT_NAME_KEY = "assignment_name"
+    const val COURSE_NAME_KEY = "course_name"
+    const val GRADE_KEY = "grade_key"
 
     private lateinit var database: AssignmentDatabase
     private lateinit var databaseDao: AssignmentDatabaseDao
@@ -42,7 +46,7 @@ object Util {
         val assignmentId: Long,
         val assignmentName: String,
         val courseName: String,
-        val grade: Double?
+        val grade: Double
     )
 
     fun getCanvasAssignments(owner: ViewModelStoreOwner, context: Context) {
@@ -113,15 +117,45 @@ object Util {
             val ai: ApplicationInfo = context.packageManager
                 .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
             val token = ai.metaData.getString(CANVAS_KEY)
+            // master return array
+            val allSubmissions = JSONArray()
 
-            // the URL address is from ChatGPT
-            val submissionsURL =
-                URL("https://canvas.sfu.ca/api/v1/users/self/submissions?include[]=assignment&include[]=course")
+            val coursesURL = URL("https://canvas.sfu.ca/api/v1/courses?enrollment_state=active")
 
-            // fetch submissions
-            val submissionsArray = getJsonArrayFromURL(submissionsURL, token)
-            return submissionsArray
+            val coursesArray = getJsonArrayFromURL(coursesURL, token)
+
+            // for course id and course names
+            for (i in 0 until coursesArray.length()) {
+                val course = coursesArray.getJSONObject(i)
+                val courseId = course.optInt("id")
+                val courseName = course.optString("name")
+
+                if (courseName == null || courseName == "") {
+                    continue
+                }
+
+                // the URL address is from ChatGPT
+                val submissionsURL =
+                    URL("https://canvas.sfu.ca/api/v1/courses/$courseId/assignments?include[]=submission")
+
+                // fetch submissions
+                val submissionsArray = getJsonArrayFromURL(submissionsURL, token)
+//                Log.d("Submission", "Fetched ${submissionsArray.length()} submissions")
+//                Log.d("Submission", "Fetched DATA $submissionsArray")
+
+                // append each item to master array
+                for (j in 0 until submissionsArray.length()) {
+                    val assignment = submissionsArray.getJSONObject(j)
+
+                    // add course info to the assignment
+                    assignment.put("course", course)
+                    allSubmissions.put(assignment)
+//                    Log.d("Submission", "Fetched ${allSubmissions.length()} submissions")
+                }
+            }
+            return allSubmissions
         } catch (e: Exception) {
+            Log.d("Submission", "ERROR IN TRY getRecentSubmissions", e)
             e.printStackTrace()
             return null
         }
@@ -135,23 +169,26 @@ object Util {
 
         // get prefs for last assignment sync
         val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
-        val lastSync = prefs.getLong(LASY_SYNC_KEY, 0L)
+        val lastSync = prefs.getLong(LAST_SYNC_KEY, 0L)
 
         // get submissions list as JSON array
-        val submissions = getRecentSubmissions(context)
+        val assignments = getRecentSubmissions(context)
 
         // return empty if no new submissions
-        if (submissions == null) {
+        if (assignments == null) {
             return emptyList()
         }
 
         // extract all JSON objects
-        for (i in 0 until submissions.length()) {
-            val sub = submissions.getJSONObject(i)
-            val assignmentObj = sub.getJSONObject("assignment")
-            val courseObj = sub.getJSONObject("course")
-            val state = sub.optString("workflow_state")
-            val submittedAt = sub.optString("submitted_at")
+        for (i in 0 until assignments.length()) {
+            val assignmentObj = assignments.getJSONObject(i)
+            val submissionObj = assignmentObj.getJSONObject("submission")
+            val courseObj = assignmentObj.getJSONObject("course")
+            val state = submissionObj.optString("workflow_state")
+            val submittedAt = submissionObj.optString("submitted_at")
+
+            Log.d("Submission", "Fetched $state, ASSIGNMENT: ${assignmentObj.optString("name")}, " +
+                    "COURSE: ${courseObj.optString("name")}, SCORE: ${submissionObj.optDouble("score")}")
 
             // check if assignment has been submitted
             if (state == "submitted" && submittedAt != null) {
@@ -163,8 +200,6 @@ object Util {
                     .toInstant()
                     .toEpochMilli()
 
-                Log.d("Submission", "Submitted assignment: ${assignmentObj.optLong("id")}, Score: ${sub.optDouble("score")}, Submitted at: $submittedAt")
-
                 // check if assignment was submitted after last sync
                 if (submittedTime > lastSync) {
 
@@ -173,7 +208,7 @@ object Util {
                         assignmentId = assignmentObj.optLong("id"),
                         assignmentName = assignmentObj.optString("name"),
                         courseName = courseObj.optString("name"),
-                        grade = sub.optDouble("score"))
+                        grade = submissionObj.optDouble("score"))
 
                     // add submitted assignment to return list
                     newAssignmentSubmissions.add(assignment)
@@ -207,7 +242,7 @@ object Util {
         val coursesArray = JSONArray(tokener)
 
         // log response
-        Log.d("CanvasResp", response)
+        //Log.d("CanvasResp", response)
 
         return coursesArray
     }
