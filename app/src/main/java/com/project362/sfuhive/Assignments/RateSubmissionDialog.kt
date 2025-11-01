@@ -98,13 +98,17 @@ class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
                 ratedAssignment.difficulty = difficulty
                 ratedAssignment.hoursSpent = timeSpent
 
-                // TODO: save to online database
-
                 // Write a message to the database
                 val database = Firebase.database
-                val myRef = database.getReference("message").child(userUid ?: return)
+                val myRef = database.getReference("rated_assignments").child(userUid ?: return)
 
-                myRef.setValue("Hello, World!")
+                myRef.push().setValue(ratedAssignment)
+                    .addOnSuccessListener {
+                        Log.d("FirebaseDB", "Rated assignment saved successfully")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.d("FirebaseDB", "Failed to save rated assignment")
+                    }
 
                 // log result
                 Log.d(
