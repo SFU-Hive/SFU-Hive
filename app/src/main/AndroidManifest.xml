@@ -26,6 +26,10 @@
         <meta-data
             android:name="keyValue"
             android:value = "${KEY}"/>
+
+        <activity android:name=".Progress.Badges.BadgeActivity" />
+        <activity android:name=".Progress.Rewards.RewardActivity"/>
+        <activity android:name=".Progress.Streaks.StreakActivity"/>
     </application>
 
 </manifest>

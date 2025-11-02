@@ -1,26 +1,33 @@
 package com.project362.sfuhive.Progress
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.project362.sfuhive.Progress.Badges.Badge
 import com.project362.sfuhive.R
 import android.widget.ImageView
 import android.widget.TextView
-import com.project362.sfuhive.Calendar.CalendarFragment
-import com.project362.sfuhive.Dashboard.DashboardFragment
-import com.project362.sfuhive.Progress.Badges.BadgeFragment
-import com.project362.sfuhive.Progress.Rewards.RewardFragment
-import com.project362.sfuhive.Progress.Streaks.StreakFragment
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import com.project362.sfuhive.Progress.Badges.BadgeActivity
+import com.project362.sfuhive.Progress.Rewards.RewardActivity
+import com.project362.sfuhive.Progress.Streaks.StreakActivity
 
 class ProgressFragment : Fragment() {
     private lateinit var progressViewModel : ProgressViewModel
 
-    private lateinit var badgeFrag: BadgeFragment
-    private lateinit var rewardsFrag: RewardFragment
-    private lateinit var streaksFrag: StreakFragment
+    private lateinit var badgeActivity: BadgeActivity
+    private lateinit var rewardsActivity: RewardActivity
+    private lateinit var streaksActivity: StreakActivity
+
+    private lateinit var badgeResult: ActivityResultLauncher<Intent>
+    private lateinit var rewardResult: ActivityResultLauncher<Intent>
+    private lateinit var streakResult: ActivityResultLauncher<Intent>
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -29,32 +36,35 @@ class ProgressFragment : Fragment() {
 
         val badgesTitleView: TextView =view.findViewById<TextView>(R.id.badges_title)
         val rewardsTitleView: TextView =view.findViewById<TextView>(R.id.rewards_title)
-        badgeFrag = BadgeFragment()
-        rewardsFrag= RewardFragment()
-        streaksFrag= StreakFragment()
+        val streaksTitleView: TextView =view.findViewById<TextView>(R.id.streaks_title)
+        badgeActivity = BadgeActivity()
+        rewardsActivity= RewardActivity()
+        streaksActivity= StreakActivity()
 
+        val badgeIntent = Intent(activity, BadgeActivity::class.java)
+        val rewardIntent = Intent(activity, RewardActivity::class.java)
+        val streakIntent = Intent(activity, StreakActivity::class.java)
+
+        badgeResult=registerBadgeActivity()
+        rewardResult=registerRewardActivity()
+        streakResult=registerStreakActivity()
 
         // Set onClickListener on all titles to change the fragment to the fragment associated with it
 
         badgesTitleView.setOnClickListener {
             // on click take user to all the badges
-            //fragTransaction.show()
-            val fragTransaction=parentFragmentManager.beginTransaction()
-            fragTransaction.setReorderingAllowed(true)
-            fragTransaction.replace(context.c badgeFrag)
-            fragTransaction.commit()
-
+            badgeResult.launch(badgeIntent)
 
         }
 
         rewardsTitleView.setOnClickListener {
-            // on click take user to all the badges
-
+            // on click take user to all the rewards
+            rewardResult.launch(rewardIntent)
         }
 
-        rewardsTitleView.setOnClickListener {
-            // on click take user to all the badges
-
+        streaksTitleView.setOnClickListener {
+            // on click take user to all the streaks
+            streakResult.launch(streakIntent)
         }
 
 
@@ -73,7 +83,50 @@ class ProgressFragment : Fragment() {
         pinnedReward1View.setImageResource(progressViewModel.getPinnedReward(0).getIconId())
         pinnedReward2View.setImageResource(progressViewModel.getPinnedReward(1).getIconId())
         pinnedReward3View.setImageResource(progressViewModel.getPinnedReward(2).getIconId())
-
         return view
+    }
+
+
+    private fun registerBadgeActivity(): ActivityResultLauncher<Intent> {
+        val result =registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                println("Badge result was ok!")
+                println("Activity was ${result.data}")
+
+            }else{
+                println("Badge result NOT OK!")
+            }
+        }
+        return result
+    }
+
+    private fun registerRewardActivity(): ActivityResultLauncher<Intent> {
+        val result =registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                println("Reward result was ok!")
+                println("Activity was ${result.data}")
+
+            }else{
+                println("Reward result NOT OK!")
+            }
+        }
+        return result
+    }
+
+    private fun registerStreakActivity(): ActivityResultLauncher<Intent> {
+        val result = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result: ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                println("Streak result was ok!")
+                println("Activity was ${result.data}")
+
+            } else {
+                println("Streak result NOT OK!")
+            }
+        }
+        return result
     }
 }
