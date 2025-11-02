@@ -1,36 +1,57 @@
 package com.project362.sfuhive.ui.calendar
 
+import android.os.Build
 import android.os.Bundle
-import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.ComponentActivity
-import androidx.appcompat.app.AppCompatActivity
+import androidx.annotation.RequiresApi
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.project362.sfuhive.R
+import com.project362.sfuhive.Util
+import com.project362.sfuhive.database.AssignmentViewModel
+import com.project362.sfuhive.database.AssignmentViewModelFactory
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import android.widget.ImageButton
 
-class CalendarActivity : ComponentActivity(){
+class CalendarActivity : ComponentActivity() {
 
     private lateinit var monthYearText: TextView
-    private lateinit var calendarRecycler: RecyclerView
+    private lateinit var selectedDateText: TextView
+    private lateinit var calendarRecycler: androidx.recyclerview.widget.RecyclerView
     private lateinit var btnPrev: ImageButton
     private lateinit var btnNext: ImageButton
+    private lateinit var tasksRecycler: androidx.recyclerview.widget.RecyclerView
+    private lateinit var taskAdapter: TaskAdapter
+    private lateinit var assignmentViewModel: AssignmentViewModel
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private var selectedDate: LocalDate = LocalDate.now()
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_calendar)
 
-        monthYearText = findViewById(R.id.tvMonthYear)
-        calendarRecycler = findViewById(R.id.calendarRecycler)
-        btnPrev = findViewById<ImageButton>(R.id.btnPrevMonth)
-        btnNext = findViewById<ImageButton>(R.id.btnNextMonth)
+        // ✅ ViewModel Setup
+        assignmentViewModel =
+            ViewModelProvider(this, Util.getViewModelFactory(this))
+                .get(AssignmentViewModel::class.java)
 
+        // ✅ UI References
+        monthYearText = findViewById(R.id.tvMonthYear)
+        selectedDateText = findViewById(R.id.tvSelectedDate)
+        calendarRecycler = findViewById(R.id.calendarRecycler)
+        tasksRecycler = findViewById(R.id.tasksRecycler)
+        btnPrev = findViewById(R.id.btnPrevMonth)
+        btnNext = findViewById(R.id.btnNextMonth)
+
+        tasksRecycler.layoutManager = LinearLayoutManager(this)
+        taskAdapter = TaskAdapter(listOf())
+        tasksRecycler.adapter = taskAdapter
 
         btnPrev.setOnClickListener {
             selectedDate = selectedDate.minusMonths(1)
@@ -45,27 +66,46 @@ class CalendarActivity : ComponentActivity(){
         updateCalendar()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun updateCalendar() {
-        val yearMonth = YearMonth.from(selectedDate)
-        val daysInMonth = yearMonth.lengthOfMonth()
+        assignmentViewModel.allAssignmentsLiveData.observe(this) { assignments ->
 
-        val firstOfMonth = selectedDate.withDayOfMonth(1)
-        val dayOfWeek = firstOfMonth.dayOfWeek.value % 7 // shift to align Sunday first
+            val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+            val assignmentDates = assignments.mapNotNull {
+                try { LocalDate.parse(it.dueAt, formatter) } catch (_: Exception) { null }
+            }.toSet()
 
-        val days = mutableListOf<LocalDate?>()
+            val yearMonth = YearMonth.from(selectedDate)
+            val daysInMonth = yearMonth.lengthOfMonth()
+            val firstDay = selectedDate.withDayOfMonth(1)
+            val shift = firstDay.dayOfWeek.value % 7
 
-        for (i in 1..dayOfWeek) {
-            days.add(null)
+            val days = MutableList(shift) { null } +
+                    (1..daysInMonth).map { selectedDate.withDayOfMonth(it) }
+
+            monthYearText.text = selectedDate.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
+
+            calendarRecycler.layoutManager = GridLayoutManager(this, 7)
+            calendarRecycler.adapter =
+                CalendarAdapter(days, assignmentDates, selectedDate) { date ->
+                    showAssignmentsForDay(date)
+                }
+
+            showAssignmentsForDay(selectedDate)
         }
-        for (day in 1..daysInMonth) {
-            days.add(selectedDate.withDayOfMonth(day))
-        }
+    }
 
-        monthYearText.text = selectedDate.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun showAssignmentsForDay(date: LocalDate) {
+        selectedDate = date
+        selectedDateText.text = date.format(DateTimeFormatter.ofPattern("MMM dd"))
 
-        calendarRecycler.layoutManager = GridLayoutManager(this, 7)
-        calendarRecycler.adapter = CalendarAdapter(days) { date ->
-            // TODO: Later show assignments for the selected day
-        }
+        val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+        val filteredList = assignmentViewModel.allAssignmentsLiveData.value?.filter {
+            try { LocalDate.parse(it.dueAt, formatter) == date }
+            catch (_: Exception) { false }
+        }.orEmpty()
+
+        taskAdapter.update(filteredList)
     }
 }

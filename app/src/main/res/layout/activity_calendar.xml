@@ -25,7 +25,6 @@
 
         <TextView
             android:id="@+id/tvMonthYear"
-            android:text="November 2025"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginHorizontal="12dp"
@@ -51,7 +50,6 @@
         android:layout_height="wrap_content"
         android:weightSum="7">
 
-        <!-- Repeat 7 labels -->
         <TextView style="@style/WeekdayCell" android:text="Mon"/>
         <TextView style="@style/WeekdayCell" android:text="Tue"/>
         <TextView style="@style/WeekdayCell" android:text="Wed"/>
@@ -59,6 +57,7 @@
         <TextView style="@style/WeekdayCell" android:text="Fri"/>
         <TextView style="@style/WeekdayCell" android:text="Sat"/>
         <TextView style="@style/WeekdayCell" android:text="Sun"/>
+
     </LinearLayout>
 
     <!-- Calendar grid -->
@@ -69,5 +68,19 @@
         android:layout_weight="1"
         android:layout_marginTop="8dp" />
 
+    <!-- Selected date title -->
+    <TextView
+        android:id="@+id/tvSelectedDate"
+        android:text="Tasks"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
+    <!-- Tasks list -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/tasksRecycler"
+        android:layout_width="match_parent"
+        android:layout_height="220dp" />
 </LinearLayout>

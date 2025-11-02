@@ -32,6 +32,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        var coreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "11"
@@ -76,5 +77,9 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     // AndroidX Fragment
     implementation("androidx.fragment:fragment-ktx:1.8.5")
+
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    implementation("androidx.cardview:cardview:1.0.0")
+
 
 }
