@@ -2,9 +2,11 @@ package com.project362.sfuhive.Progress.Badges
 
 import android.graphics.drawable.Drawable
 
-class Badge(private val iconComplete : Int, // this is the id Int of the R.drawable.completedBadgeIcon
-            private val iconLocked :  Int, // this is the id Int of the R.drawable.lockedBadgeIcon
-            private val description :  String) {
+class Badge(
+    private val title :  String,
+    private val iconComplete : Int, // this is the id Int of the R.drawable.completedBadgeIcon
+    private val iconLocked :  Int, // this is the id Int of the R.drawable.lockedBadgeIcon
+    private val description :  String) {
 
     private var isComplete: Boolean = false
 
@@ -35,6 +37,10 @@ class Badge(private val iconComplete : Int, // this is the id Int of the R.drawa
     // Call this function to run
     public fun updateBadgeProgress(){
         updateProgress()
+    }
+
+    public fun getTitle() :String{
+        return title
     }
 
 }

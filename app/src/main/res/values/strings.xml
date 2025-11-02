@@ -13,4 +13,5 @@
     <string name="badges_title">Badges</string>
     <string name="rewards_title">Rewards</string>
     <string name="streaks_title">Streaks</string>
+    <string name="not_found">Not Found</string>
 </resources>

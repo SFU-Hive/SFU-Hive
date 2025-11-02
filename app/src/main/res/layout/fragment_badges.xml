@@ -10,4 +10,13 @@
         android:text="@string/badges_title" />
 
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id= "@+id/badge_selection"
+        android:layout_margin="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="450dp"
+        android:numColumns="3">
+    </androidx.recyclerview.widget.RecyclerView>
+
+
 </LinearLayout>
