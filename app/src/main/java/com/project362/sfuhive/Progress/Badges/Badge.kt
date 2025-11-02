@@ -15,7 +15,9 @@ class Badge(private val iconComplete : Int, // this is the id Int of the R.drawa
     }
 
     public fun getIconId(): Int{
-
+        if(isComplete == false){
+            return iconLocked
+        }
         return iconComplete
     }
 
