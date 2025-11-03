@@ -10,7 +10,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
 
-class BadgeAdapter(context: Context, private val badges : List<Badge>) : RecyclerView.Adapter<BadgeAdapter.ViewHolder>(){
+class BadgeAdapter(
+    context: Context,
+    private val badges : List<Badge>,
+    private val viewModel: BadgeActivityViewModel
+):RecyclerView.Adapter<BadgeAdapter.ViewHolder>(){
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -28,13 +32,19 @@ class BadgeAdapter(context: Context, private val badges : List<Badge>) : Recycle
     ) {
         holder.badgeIconView.setImageResource(badges.get(position).getIconId())
         holder.badgeTitleView.text = badges.get(position).getTitle()
+        holder.view.setOnClickListener {
+            println("setting featured badge to {${badges.get(position).getTitle()}}")
+            viewModel.setFeaturedBadge(badges.get(position))
+        }
     }
 
     override fun getItemCount(): Int {
         return badges.size
     }
 
-    class ViewHolder(val view :View) : RecyclerView.ViewHolder(
+
+
+    class ViewHolder(val view :View, ) : RecyclerView.ViewHolder(
         view
     ) {
         val badgeIconView : ImageView
@@ -43,7 +53,6 @@ class BadgeAdapter(context: Context, private val badges : List<Badge>) : Recycle
         init {
             badgeIconView = view.findViewById<ImageView>(R.id.icon_view)
             badgeTitleView= view.findViewById<TextView>(R.id.badge_title_view)
-
         }
 
     }

@@ -13,6 +13,7 @@
 
     <!--Adapted from: https://developer.android.com/develop/ui/views/layout/cardview-->
     <androidx.cardview.widget.CardView
+        android:id = "@+id/featured_badge"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
