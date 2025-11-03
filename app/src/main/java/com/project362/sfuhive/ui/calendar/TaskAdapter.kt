@@ -1,7 +1,5 @@
 package com.project362.sfuhive.ui.calendar
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,16 +7,17 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
 import com.project362.sfuhive.database.Assignment
-import java.time.OffsetDateTime
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class TaskAdapter(private var items: List<Assignment>) :
     RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
-    inner class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvTaskTitle: TextView = itemView.findViewById(R.id.tvTaskTitle)
-        val tvPriorityBadge: TextView = itemView.findViewById(R.id.tvPriorityBadge)
-        val tvDueDate: TextView = itemView.findViewById(R.id.tvDueDate)
+    inner class TaskViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val tvTaskName: TextView = view.findViewById(R.id.tvTaskName)
+        val tvPriority: TextView = view.findViewById(R.id.tvPriority)
+        val tvDueDate: TextView = view.findViewById(R.id.tvDueDate)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
@@ -29,25 +28,22 @@ class TaskAdapter(private var items: List<Assignment>) :
 
     override fun getItemCount() = items.size
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = items[position]
 
-        // ✅ Combine Course + Assignment name
-        val courseName = if (!task.courseName.isNullOrBlank()) "${task.courseName}: " else ""
-        holder.tvTaskTitle.text = "$courseName${task.assignmentName}"
+        // ✅ Extract short code from "CMPT362 D100 Mobile Apps"
+        val courseCode = task.courseName.split(" ").firstOrNull() ?: "Course"
+
+        // ✅ Display: CMPT362: Assignment title
+        holder.tvTaskName.text = "$courseCode: ${task.assignmentName}"
 
         // ✅ Format due date
-        holder.tvDueDate.text = try {
-            val parsed = OffsetDateTime.parse(task.dueAt)
-            "Due: ${parsed.format(DateTimeFormatter.ofPattern("MMM dd"))}"
-        } catch (_: Exception) {
-            "Due: ${task.dueAt.substringBefore('T')}"
-        }
+        val date = task.dueAt.substringBefore("T")
+        holder.tvDueDate.text = "Due: $date"
 
-        // ✅ Static priority for now
-        holder.tvPriorityBadge.text = "High"
-        holder.tvPriorityBadge.setBackgroundResource(R.drawable.bg_priority_badge)
+        // ✅ Always High Priority (as requested)
+        holder.tvPriority.text = "High"
+        holder.tvPriority.setBackgroundResource(R.drawable.bg_priority_high)
     }
 
     fun update(newList: List<Assignment>) {

@@ -18,7 +18,7 @@
         android:layout_marginTop="2dp"
         android:layout_width="6dp"
         android:layout_height="6dp"
-        android:background="@android:color/holo_blue_light"
+        android:background="@drawable/bg_event_dot"
         android:visibility="gone" />
 
 </LinearLayout>
