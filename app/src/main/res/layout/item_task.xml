@@ -4,50 +4,62 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginVertical="6dp"
-    card_view:cardElevation="6dp"
-    card_view:cardCornerRadius="14dp"
-    android:padding="14dp">
+    card_view:cardElevation="0dp"
+    card_view:cardCornerRadius="6dp"
+    card_view:cardUseCompatPadding="true"
+    card_view:contentPadding="0dp">
 
-    <RelativeLayout
+    <!-- ✅ Border + content wrapper -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_task_border"
+        android:orientation="vertical"
+        android:padding="10dp">
 
-        <TextView
-            android:id="@+id/tvTaskName"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:textColor="#000000"
-            android:text="CourseCode: AssignmentName"
-            android:maxLines="2"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toStartOf="@id/tvPriority"
-            android:layout_margin="12dp"/>
+            android:background="@android:color/white">
 
-        <TextView
-            android:id="@+id/tvPriority"
-            android:textColor="@android:color/white"
-            android:text="Priority"
-            android:textStyle="bold"
-            android:textSize="12sp"
-            android:paddingVertical="4dp"
-            android:paddingHorizontal="12dp"
-            android:layout_alignParentRight="true"
-            android:background="@drawable/bg_priority_high"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="15dp"/>
+            <!-- Task title -->
+            <TextView
+                android:id="@+id/tvTaskName"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:text="CourseCode: AssignmentName"
+                android:maxLines="2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@id/tvPriority"
+                android:layout_marginEnd="60dp" />
 
-        <TextView
-            android:id="@+id/tvDueDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/tvTaskName"
-            android:layout_marginLeft="15dp"
-            android:layout_marginBottom="10dp"
-            android:text="Due: ---"
-            android:textColor="#808080"
-            android:textSize="13sp" />
-    </RelativeLayout>
+            <!-- Priority badge -->
+            <TextView
+                android:id="@+id/tvPriority"
+                android:textColor="@android:color/white"
+                android:text="High"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:paddingVertical="4dp"
+                android:paddingHorizontal="12dp"
+                android:layout_alignParentEnd="true"
+                android:background="@drawable/bg_priority_high"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <!-- Due date -->
+            <TextView
+                android:id="@+id/tvDueDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tvTaskName"
+                android:layout_marginTop="6dp"
+                android:text="Due: ---"
+                android:textColor="#808080"
+                android:textSize="13sp" />
+        </RelativeLayout>
+    </LinearLayout>
 
 </androidx.cardview.widget.CardView>
