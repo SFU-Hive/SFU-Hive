@@ -8,10 +8,21 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
 
 // adapted from Daniel Dawda's MyRuns3 with assistance from ChatGPT
-class CourseAdapter(private val courses: List<String>) : RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
+class CourseAdapter(private val courses: List<String>, private val onItemClick: (Long) -> Unit) : RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
 
     inner class CourseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val courseNameText: TextView = itemView.findViewById(R.id.text)
+
+        // assistance from ChatGPT
+        init {
+            itemView.setOnClickListener {
+                val position = getBindingAdapterPosition()
+                if (position != RecyclerView.NO_POSITION) {
+                    val itemId = courses[position]
+                    onItemClick(itemId)
+                }
+            }
+        }
     }
 
     override fun onCreateViewHolder(

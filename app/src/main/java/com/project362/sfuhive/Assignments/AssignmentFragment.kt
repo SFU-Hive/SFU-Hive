@@ -1,5 +1,6 @@
 package com.project362.sfuhive.Assignments
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -29,6 +30,8 @@ class AssignmentFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         loadCoursesFromFirebase()
+
+
 
         return view
     }
@@ -60,13 +63,14 @@ class AssignmentFragment : Fragment() {
 
         ratedAssignmentsRef.get().addOnSuccessListener { snapshot ->
             // map id to assignment name
-            val courseMap = mutableMapOf<Long, String>()
+            val courseMap = mutableMapOf<Long, Int>()
 
             snapshot.children.forEach { userNode  ->
                 userNode.children.forEach { assignmentNode ->
                     val assignment = assignmentNode.getValue(RatedAssignment::class.java)
-                    if (assignment != null) {
-                        courseMap[assignment.courseId] = assignment.courseName
+                    if (assignment != null && courseMap[assignment.courseId] == null) {
+                        courseMap[assignment.courseId] = 1
+
                     }
                 }
             }
