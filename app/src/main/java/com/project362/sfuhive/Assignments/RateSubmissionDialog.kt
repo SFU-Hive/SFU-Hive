@@ -40,7 +40,7 @@ class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
         var assignmentId: Long = 0L,
         var assignmentName: String = "",
         var hoursSpent: Double = 0.0,
-        var difficulty: Int = 0
+        var difficulty: Double = 0.0
     ): Parcelable
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -95,7 +95,7 @@ class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
     override fun onClick(p0: DialogInterface, p1: Int) {
         when (p1) {
             DialogInterface.BUTTON_POSITIVE -> {
-                val difficulty = difficultySpinner.selectedItem.toString().toInt()
+                val difficulty = difficultySpinner.selectedItem.toString().toDoubleOrNull() ?: 0.0
                 val timeSpent = timeEditText.text.toString().toDoubleOrNull() ?: 0.0
 
                 ratedAssignment.difficulty = difficulty

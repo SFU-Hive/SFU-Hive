@@ -24,6 +24,7 @@
         </activity>
         <activity android:name=".NavActivity" />
         <activity android:name=".Assignments.ListAssignmentsActivity" />
+        <activity android:name=".Assignments.DisplayRatedAssignmentActivity" />
         <meta-data
             android:name="keyValue"
             android:value = "${KEY}"/>

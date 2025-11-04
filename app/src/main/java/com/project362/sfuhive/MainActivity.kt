@@ -36,6 +36,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // use this to reset your sync window (if you wanna push more duplicates into the database)
+//        val prefs = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
+//        prefs.edit().putLong(LAST_SYNC_KEY, 0).apply()
+
         // init firebase
         FirebaseApp.initializeApp(this)
         auth = Firebase.auth
