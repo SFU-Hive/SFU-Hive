@@ -13,8 +13,12 @@ import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.Progress.Badges.BadgeActivity
 import com.project362.sfuhive.Progress.Rewards.RewardActivity
+import com.project362.sfuhive.Progress.Rewards.RewardActivityViewModel
+import com.project362.sfuhive.Progress.Rewards.RewardAdapter
 import com.project362.sfuhive.Progress.Streaks.StreakActivity
 
 class ProgressFragment : Fragment() {
@@ -72,17 +76,26 @@ class ProgressFragment : Fragment() {
         val pinnedBadge2View: ImageView = view.findViewById<ImageView>(R.id.pinned_badge2)
         val pinnedBadge3View: ImageView=view.findViewById<ImageView>(R.id.pinned_badge3)
 
-        val pinnedReward1View: ImageView=view.findViewById<ImageView>(R.id.pinned_reward1)
-        val pinnedReward2View: ImageView = view.findViewById<ImageView>(R.id.pinned_reward2)
-        val pinnedReward3View: ImageView=view.findViewById<ImageView>(R.id.pinned_reward3)
 
+
+        val pinnedRewardsView: RecyclerView=view.findViewById<RecyclerView>(R.id.pinned_rewards)
+
+        val rewardActivityVM=RewardActivityViewModel(progressViewModel.getAllPinnedRewards())
+
+        // Note: RewardsVM isn't needed here I'm just using it to reuse other objects I've written already
+        // sorry 'bout it -Miro
+        val pinnedRewardsAdapter = context?.let {
+            RewardAdapter(it,
+            progressViewModel.getAllPinnedRewards(),
+            rewardActivityVM)
+        }
+
+        pinnedRewardsView.layoutManager= GridLayoutManager(context,3)
+        pinnedRewardsView.adapter=pinnedRewardsAdapter
         pinnedBadge1View.setImageResource(progressViewModel.getPinnedBadge(0).getIconId())
         pinnedBadge2View.setImageResource(progressViewModel.getPinnedBadge(1).getIconId())
         pinnedBadge3View.setImageResource(progressViewModel.getPinnedBadge(2).getIconId())
 
-        pinnedReward1View.setImageResource(progressViewModel.getPinnedReward(0).getIconId())
-        pinnedReward2View.setImageResource(progressViewModel.getPinnedReward(1).getIconId())
-        pinnedReward3View.setImageResource(progressViewModel.getPinnedReward(2).getIconId())
         return view
     }
 

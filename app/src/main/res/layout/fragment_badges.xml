@@ -15,7 +15,8 @@
     <androidx.cardview.widget.CardView
         android:id = "@+id/featured_badge"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="10dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:padding="4dp"
@@ -59,7 +60,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="supporting text"
+                android:text=""
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/subhead" />
@@ -71,7 +72,7 @@
         android:id= "@+id/badge_selection"
         android:layout_margin="30dp"
         android:layout_width="match_parent"
-        android:layout_height="450dp"
+        android:layout_height="350dp"
         android:numColumns="3">
     </androidx.recyclerview.widget.RecyclerView>
 

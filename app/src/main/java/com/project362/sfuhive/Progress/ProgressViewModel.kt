@@ -15,17 +15,17 @@ class ProgressViewModel : ViewModel(){
 
     private var tmpBadgesList = listOf<Badge>(
         Badge(
-            "Badge1",
+            "Badge 1",
             R.drawable.badge2_place_holder,
             R.drawable.badge_place_holder,
             "This is Pinned Badge 1"),
         Badge(
-            "Badge2",
+            "Badge 2",
             R.drawable.badge2_place_holder,
             R.drawable.badge_place_holder,
             "This is Pinned Badge 2"),
         Badge(
-            "Badge3",
+            "Badge 3",
             R.drawable.badge2_place_holder,
             R.drawable.badge_place_holder,
             "This is Pinned Badge 3")
@@ -34,14 +34,17 @@ class ProgressViewModel : ViewModel(){
     private var tmpRewardsList = listOf<Reward>(
         Reward(
             R.drawable.icon_place_holder,
+            "Reward 1",
             100,
             "This is Pinned Reward 1"),
         Reward(
             R.drawable.icon_place_holder,
+            "Reward 2",
             10,
             "This is Pinned Reward 2"),
         Reward(
             R.drawable.icon_place_holder,
+            "Reward 3",
             20,
             "This is Pinned Reward 3"),
     )
@@ -59,6 +62,10 @@ class ProgressViewModel : ViewModel(){
     public fun getPinnedReward(position: Int): Reward{
 
         return pinnedRewards.value!!.get(position)
+    }
+
+    public fun getAllPinnedRewards(): List<Reward>{
+        return tmpRewardsList
     }
 
 

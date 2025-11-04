@@ -53,37 +53,14 @@
         android:text="@string/rewards_title"
         android:textSize="24sp"
         android:padding="20dp"/>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="center">
 
-        <ImageView
-            android:id = "@+id/pinned_reward1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/image_not_found"
-            android:contentDescription = "@string/pinned_badge1"
-            android:layout_margin="10dp"/>
-
-        <ImageView
-            android:id = "@+id/pinned_reward2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/image_not_found"
-            android:contentDescription = "@string/pinned_badge2"
-            android:layout_margin="10dp"/>
-
-        <ImageView
-            android:id = "@+id/pinned_reward3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/image_not_found"
-            android:contentDescription = "@string/pinned_badge3"
-            android:layout_margin="10dp"/>
-
-    </LinearLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id= "@+id/pinned_rewards"
+        android:layout_margin="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:numColumns="3">
+    </androidx.recyclerview.widget.RecyclerView>
 
 
     <TextView

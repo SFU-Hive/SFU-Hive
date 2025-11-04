@@ -56,7 +56,4 @@ class BadgeAdapter(
         }
 
     }
-
-
-
 }
