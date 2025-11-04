@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
 
 // adapted from Daniel Dawda's MyRuns3 with assistance from ChatGPT
-class CourseAdapter(private val courses: List<String>, private val onItemClick: (Long) -> Unit) : RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
+class CourseAdapter(private val courses: List<AssignmentFragment.Course>, private val onItemClick: (AssignmentFragment.Course) -> Unit) : RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
 
     inner class CourseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val courseNameText: TextView = itemView.findViewById(R.id.text)
@@ -38,7 +38,7 @@ class CourseAdapter(private val courses: List<String>, private val onItemClick: 
         holder: CourseViewHolder,
         position: Int
     ) {
-        holder.courseNameText.text = courses[position]
+        holder.courseNameText.text = courses[position].name
     }
 
     override fun getItemCount(): Int {

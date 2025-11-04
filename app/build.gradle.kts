@@ -5,6 +5,7 @@ plugins {
     id("com.google.secrets_gradle_plugin") version "0.6.1"
     id("com.google.gms.google-services")
     id("kotlin-kapt")
+    id("kotlin-parcelize")
 }
 
 android {

@@ -3,6 +3,7 @@ package com.project362.sfuhive.Assignments
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
+import android.os.Parcelable
 import android.text.InputType
 import android.util.Log
 import android.view.View
@@ -14,8 +15,8 @@ import androidx.fragment.app.DialogFragment
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
 import com.project362.sfuhive.R
-import com.project362.sfuhive.RatedAssignment
 import com.project362.sfuhive.Util
+import kotlinx.parcelize.Parcelize
 
 class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
 
@@ -30,6 +31,17 @@ class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
     lateinit var assignmentNameView: TextView
     lateinit var ratedAssignment: RatedAssignment
     var userUid: String? = null
+
+    // parcelize usage from ChatGPT
+    @Parcelize
+    data class RatedAssignment (
+        var courseId: Long = 0L,
+        var courseName: String = "",
+        var assignmentId: Long = 0L,
+        var assignmentName: String = "",
+        var hoursSpent: Double = 0.0,
+        var difficulty: Int = 0
+    ): Parcelable
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         lateinit var ret: Dialog
