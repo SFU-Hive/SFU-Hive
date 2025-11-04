@@ -19,6 +19,8 @@ class RewardActivityViewModel(
             featuredReward.value= reward
         }
 
+
+
     }
 
 
