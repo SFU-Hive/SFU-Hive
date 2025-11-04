@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.SFUHive" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Base.Theme.SFUHive" parent="Theme.Material3.DayNight.NoActionBar" />
+    <style name="Theme.SFUHive" parent="Base.Theme.SFUHive" />
+    <style name="Button.White" parent="ThemeOverlay.AppCompat">
+        <item name="colorAccent">@color/white</item>
+    </style>
+    <style name="Back.DarkRed" parent="ThemeOverlay.AppCompat">
+        <item name="colorAccent">@color/dark_red</item>
+    </style>
+
+    <style name="Background.grey" parent="ThemeOverlay.AppCompat">
+        <item name="colorAccent">@color/light_grey</item>
+    </style>
 </resources>

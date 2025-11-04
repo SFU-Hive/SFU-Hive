@@ -3,7 +3,9 @@ package com.project362.sfuhive
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.project362.sfuhive.database.Assignment
@@ -16,8 +18,22 @@ import org.json.JSONArray
 import org.json.JSONTokener
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 object Util {
+
+    private const val CANVAS_KEY = "keyValue"
+
+    const val PREFS_KEY = "app_prefs"
+
+    const val LAST_SYNC_KEY = "last_sync"
+
+    const val ASSIGNMENT_ID_KEY = "assignment_id"
+    const val ASSIGNMENT_NAME_KEY = "assignment_name"
+    const val COURSE_ID_KEY = "course_id"
+    const val COURSE_NAME_KEY = "course_name"
+    const val GRADE_KEY = "grade_key"
 
     private lateinit var database: AssignmentDatabase
     private lateinit var databaseDao: AssignmentDatabaseDao
@@ -25,6 +41,15 @@ object Util {
     private lateinit var viewModelFactory: AssignmentViewModelFactory
 
     private lateinit var assignmentViewModel: AssignmentViewModel
+
+    // data class for assignment submission
+    data class SubmittedAssignment(
+        val assignmentId: Long,
+        val assignmentName: String,
+        val courseId: Long,
+        val courseName: String,
+        val grade: Double,
+    )
 
     fun getCanvasAssignments(owner: ViewModelStoreOwner, context: Context) {
             try {
@@ -37,7 +62,7 @@ object Util {
                 // get key from manifest and set URL
                 val ai: ApplicationInfo = context.packageManager
                     .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-                val token =  ai.metaData.getString("keyValue")
+                val token =  ai.metaData.getString(CANVAS_KEY)
                 val coursesURL = URL("https://canvas.sfu.ca/api/v1/courses?enrollment_state=active")
 
                 val coursesArray = getJsonArrayFromURL(coursesURL, token)
@@ -82,13 +107,119 @@ object Util {
                     }
                 }
 
-                val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-                prefs.edit().putBoolean("assignments_loaded", true).apply()
-
             } catch (e: Exception) {
                 e.printStackTrace()
                 Log.d("CanvasAPI", "Error: ${e.message}")
             }
+    }
+
+    private fun getRecentSubmissions(context: Context) : JSONArray? {
+        try {
+            // get key from manifest and set URL
+            val ai: ApplicationInfo = context.packageManager
+                .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+            val token = ai.metaData.getString(CANVAS_KEY)
+            // master return array
+            val allSubmissions = JSONArray()
+
+            val coursesURL = URL("https://canvas.sfu.ca/api/v1/courses?enrollment_state=active")
+
+            val coursesArray = getJsonArrayFromURL(coursesURL, token)
+
+            // for course id and course names
+            for (i in 0 until coursesArray.length()) {
+                val course = coursesArray.getJSONObject(i)
+                val courseId = course.optInt("id")
+                val courseName = course.optString("name")
+
+                if (courseName == null || courseName == "") {
+                    continue
+                }
+
+                // the URL address is from ChatGPT
+                val submissionsURL =
+                    URL("https://canvas.sfu.ca/api/v1/courses/$courseId/assignments?include[]=submission")
+
+                // fetch submissions
+                val submissionsArray = getJsonArrayFromURL(submissionsURL, token)
+//                Log.d("Submission", "Fetched ${submissionsArray.length()} submissions")
+//                Log.d("Submission", "Fetched DATA $submissionsArray")
+
+                // append each item to master array
+                for (j in 0 until submissionsArray.length()) {
+                    val assignment = submissionsArray.getJSONObject(j)
+
+                    // add course info to the assignment
+                    assignment.put("course", course)
+                    allSubmissions.put(assignment)
+//                    Log.d("Submission", "Fetched ${allSubmissions.length()} submissions")
+                }
+            }
+            return allSubmissions
+        } catch (e: Exception) {
+            Log.d("Submission", "ERROR IN TRY getRecentSubmissions", e)
+            e.printStackTrace()
+            return null
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getNewlySubmittedAssignments(context: Context): List<SubmittedAssignment> {
+
+        // return object
+        val newAssignmentSubmissions = mutableListOf<SubmittedAssignment>()
+
+        // get prefs for last assignment sync
+        val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
+        val lastSync = prefs.getLong(LAST_SYNC_KEY, 0L)
+
+        // get submissions list as JSON array
+        val assignments = getRecentSubmissions(context)
+
+        // return empty if no new submissions
+        if (assignments == null) {
+            return emptyList()
+        }
+
+        // extract all JSON objects
+        for (i in 0 until assignments.length()) {
+            val assignmentObj = assignments.getJSONObject(i)
+            val submissionObj = assignmentObj.getJSONObject("submission")
+            val courseObj = assignmentObj.getJSONObject("course")
+            val state = submissionObj.optString("workflow_state")
+            val submittedAt = submissionObj.optString("submitted_at")
+
+            Log.d("Submission", "Fetched $state, ASSIGNMENT: ${assignmentObj.optString("name")}, " +
+                    "COURSE: ${courseObj.optString("name")}, SCORE: ${submissionObj.optDouble("score")}")
+
+            // check if assignment has been submitted
+            if (submissionObj != null && (state == "submitted" || state == "graded") && submittedAt != null && submittedAt != "null") {
+
+                // this part generated by ChatGPT
+                // parses the submission date into a long millisecond stamp
+                val submittedTime = OffsetDateTime
+                    .parse(submittedAt, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+                    .toInstant()
+                    .toEpochMilli()
+
+                // check if assignment was submitted after last sync
+                if (submittedTime > lastSync) {
+
+                    // build submitted assignment object
+                    val assignment = SubmittedAssignment(
+                        assignmentId = assignmentObj.optLong("id"),
+                        assignmentName = assignmentObj.optString("name"),
+                        courseId = courseObj.optLong("id"),
+                        courseName = courseObj.optString("name"),
+                        grade = submissionObj.optDouble("score"))
+
+                    // add submitted assignment to return list
+                    newAssignmentSubmissions.add(assignment)
+                }
+            }
+        }
+
+        return newAssignmentSubmissions
     }
 
     private fun getJsonArrayFromURL(
@@ -114,7 +245,7 @@ object Util {
         val coursesArray = JSONArray(tokener)
 
         // log response
-        Log.d("CanvasResp", response)
+        //Log.d("CanvasResp", response)
 
         return coursesArray
     }
