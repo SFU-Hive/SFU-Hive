@@ -45,12 +45,12 @@ class CalendarActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_calendar)
 
-        // ✅ ViewModel Setup
+        // ViewModel Setup
         assignmentViewModel =
             ViewModelProvider(this, Util.getViewModelFactory(this))
                 .get(AssignmentViewModel::class.java)
 
-        // ✅ UI References
+        // UI References
         monthYearText = findViewById(R.id.tvMonthYear)
         selectedDateText = findViewById(R.id.tvSelectedDate)
         calendarRecycler = findViewById(R.id.calendarRecycler)
@@ -72,7 +72,7 @@ class CalendarActivity : ComponentActivity() {
             updateCalendar()
         }
 
-        // ✅ Google Calendar Setup
+        // Google Calendar Setup
         googleHelper = GoogleCalendarHelper(this) { events ->
             handleGoogleEvents(events)
         }
@@ -88,7 +88,7 @@ class CalendarActivity : ComponentActivity() {
             updateCalendar()
         }
 
-        // ✅ NEW: Refresh button logic
+        // NEW: Refresh button logic
         findViewById<Button>(R.id.refreshButton)?.setOnClickListener {
             val account = GoogleSignIn.getLastSignedInAccount(this)
             if (account != null) {
@@ -102,7 +102,7 @@ class CalendarActivity : ComponentActivity() {
         updateCalendar()
     }
 
-    // ✅ Observe DB assignments and merge with Google events (in memory)
+    // Observe DB assignments and merge with Google events (in memory)
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateCalendar() {
         assignmentViewModel.allAssignmentsLiveData.observe(this) { assignments ->
@@ -125,7 +125,7 @@ class CalendarActivity : ComponentActivity() {
                 }
             }
 
-            // ✅ Include Google Calendar events using same proximity logic
+            // Include Google Calendar events using same proximity logic
             for ((date, events) in googleEventsByDate) {
                 val diff = date.toEpochDay() - selectedDate.toEpochDay()
                 val priority = when (diff) {
@@ -165,7 +165,7 @@ class CalendarActivity : ComponentActivity() {
     }
 
 
-    // ✅ Display both Canvas and Google events (not saved)
+    // Display both Canvas and Google events (not saved)
     @RequiresApi(Build.VERSION_CODES.O)
     private fun showAssignmentsForDay(date: LocalDate) {
         selectedDate = date
@@ -194,7 +194,7 @@ class CalendarActivity : ComponentActivity() {
         taskAdapter.update(combined)
     }
 
-    // ✅ Handle Google sign-in results
+    // Handle Google sign-in results
     private val signInLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK && result.data != null) {
@@ -202,7 +202,7 @@ class CalendarActivity : ComponentActivity() {
             }
         }
 
-    // ✅ Called when Google events fetched (not persisted)
+    // Called when Google events fetched (not persisted)
     @RequiresApi(Build.VERSION_CODES.O)
     private fun handleGoogleEvents(events: List<Event>) {
         googleEventsByDate.clear()

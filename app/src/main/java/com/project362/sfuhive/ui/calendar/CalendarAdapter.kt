@@ -47,7 +47,7 @@ class CalendarAdapter(
         if (date != null) {
             holder.dayText.text = date.dayOfMonth.toString()
 
-            // ✅ Highlight selected date
+            // Highlight selected date
             if (date == selectedDate) {
                 holder.bgHighlight.visibility = View.VISIBLE
                 holder.bgHighlight.setBackgroundResource(R.drawable.bg_day_selected)
@@ -61,7 +61,7 @@ class CalendarAdapter(
                 )
             }
 
-            // ✅ Handle events for this day
+            // Handle events for this day
             val tasks = assignmentsByDate[date].orEmpty()
             if (tasks.isNotEmpty()) {
                 holder.dotContainer.visibility = View.VISIBLE

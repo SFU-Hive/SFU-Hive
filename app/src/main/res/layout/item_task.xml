@@ -9,7 +9,7 @@
     card_view:cardUseCompatPadding="true"
     card_view:contentPadding="0dp">
 
-    <!-- ✅ Border + content wrapper -->
+    <!-- Border + content wrapper -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

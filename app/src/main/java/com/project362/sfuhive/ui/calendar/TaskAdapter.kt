@@ -31,17 +31,17 @@ class TaskAdapter(private var items: List<Assignment>) :
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = items[position]
 
-        // ✅ Extract short code from "CMPT362 D100 Mobile Apps"
+        // Extract short code from "CMPT362 D100 Mobile Apps"
         val courseCode = task.courseName.split(" ").firstOrNull() ?: "Course"
 
-        // ✅ Display: CMPT362: Assignment title
+        // Display: CMPT362: Assignment title
         holder.tvTaskName.text = "$courseCode: ${task.assignmentName}"
 
-        // ✅ Format due date
+        // Format due date
         val date = task.dueAt.substringBefore("T")
         holder.tvDueDate.text = "Due: $date"
 
-        // ✅ Always High Priority (as requested)
+        // Always High Priority (as requested)
         holder.tvPriority.text = "High"
         holder.tvPriority.setBackgroundResource(R.drawable.bg_priority_high)
     }
