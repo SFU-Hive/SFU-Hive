@@ -7,8 +7,8 @@
     <!-- Circular highlight for selected date -->
     <View
         android:id="@+id/bgHighlight"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
         android:background="@drawable/bg_day_selected"
         android:layout_gravity="center"
         android:visibility="gone" />
@@ -16,21 +16,46 @@
     <!-- Date number -->
     <TextView
         android:id="@+id/dayText"
-        android:textSize="14sp"
-        android:textColor="@android:color/black"
-        android:gravity="center"
-        android:layout_gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textSize="14sp"
+        android:textColor="@android:color/black" />
 
-    <!-- Event dot -->
-    <View
-        android:id="@+id/eventIndicator"
-        android:layout_width="6dp"
-        android:layout_height="6dp"
+    <!-- Dots container (max 3 dots) -->
+    <LinearLayout
+        android:id="@+id/eventIndicatorContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center|bottom"
         android:layout_marginBottom="6dp"
-        android:background="@drawable/bg_event_dot"
-        android:visibility="gone" />
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <View
+            android:id="@+id/dot1"
+            android:layout_width="6dp"
+            android:layout_height="6dp"
+            android:layout_margin="1dp"
+            android:background="@drawable/dot_shape"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/dot2"
+            android:layout_width="6dp"
+            android:layout_height="6dp"
+            android:layout_margin="1dp"
+            android:background="@drawable/dot_shape"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/dot3"
+            android:layout_width="6dp"
+            android:layout_height="6dp"
+            android:layout_margin="1dp"
+            android:background="@drawable/dot_shape"
+            android:visibility="gone" />
+    </LinearLayout>
 
 </FrameLayout>

@@ -23,5 +23,5 @@
     <color name="priority_high">#E53935</color>
     <color name="priority_medium">#FB8C00</color>
     <color name="priority_low">#1E88E5</color>
-s
+    <color name="priority_default">#1E88E5</color> <!-- blue -->
 </resources>

@@ -108,23 +108,36 @@ class CalendarActivity : ComponentActivity() {
         assignmentViewModel.allAssignmentsLiveData.observe(this) { assignments ->
             val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
 
-            // Canvas assignments from DB
-            val canvasAssignments = assignments.groupBy(
-                keySelector = {
-                    try { LocalDate.parse(it.dueAt, formatter) } catch (_: Exception) { null }
-                },
-                valueTransform = { "Assignment" }
-            ).filterKeys { it != null }.mapKeys { it.key!! }
+            val prioritizedMap = mutableMapOf<LocalDate, List<String>>()
 
-            // Merge with in-memory Google events
-            val mergedAssignments = mutableMapOf<LocalDate, List<String>>()
-            for ((date, list) in canvasAssignments) mergedAssignments[date] = list
-            for ((date, events) in googleEventsByDate) {
-                val existing = mergedAssignments[date] ?: listOf()
-                mergedAssignments[date] = existing + events.map { it.summary ?: "Untitled Event" }
+            for (assignment in assignments) {
+                val date = try { LocalDate.parse(assignment.dueAt, formatter) } catch (_: Exception) { null }
+                if (date != null) {
+                    val diff = date.toEpochDay() - selectedDate.toEpochDay()
+                    val priority = when (diff) {
+                        0L -> "high"    // due on selected date
+                        -1L, 1L -> "medium" // near selected date
+                        else -> "low"
+                    }
+
+                    val existing = prioritizedMap[date] ?: listOf()
+                    prioritizedMap[date] = existing + priority
+                }
             }
 
-            // Build calendar UI
+            // ✅ Include Google Calendar events using same proximity logic
+            for ((date, events) in googleEventsByDate) {
+                val diff = date.toEpochDay() - selectedDate.toEpochDay()
+                val priority = when (diff) {
+                    0L -> "high"
+                    -1L, 1L -> "medium"
+                    else -> "low"
+                }
+
+                val existing = prioritizedMap[date] ?: listOf()
+                prioritizedMap[date] = existing + List(events.size) { priority }
+            }
+
             val yearMonth = YearMonth.from(selectedDate)
             val daysInMonth = yearMonth.lengthOfMonth()
             val firstDay = selectedDate.withDayOfMonth(1)
@@ -137,7 +150,7 @@ class CalendarActivity : ComponentActivity() {
 
             val adapter = CalendarAdapter(
                 days = days,
-                assignmentsByDate = mergedAssignments,
+                assignmentsByDate = prioritizedMap,
                 selectedDate = selectedDate
             ) { date ->
                 selectedDate = date
@@ -150,6 +163,7 @@ class CalendarActivity : ComponentActivity() {
             showAssignmentsForDay(selectedDate)
         }
     }
+
 
     // ✅ Display both Canvas and Google events (not saved)
     @RequiresApi(Build.VERSION_CODES.O)

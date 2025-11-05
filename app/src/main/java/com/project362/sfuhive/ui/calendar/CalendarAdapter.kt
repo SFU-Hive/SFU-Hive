@@ -4,6 +4,7 @@ import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
@@ -20,8 +21,13 @@ class CalendarAdapter(
 
     inner class DayViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val dayText: TextView = itemView.findViewById(R.id.dayText)
-        val eventIndicator: View = itemView.findViewById(R.id.eventIndicator)
-        val bgHighlight: View? = itemView.findViewById(R.id.bgHighlight) // optional in layout
+        val bgHighlight: View = itemView.findViewById(R.id.bgHighlight)
+        val dotContainer: LinearLayout = itemView.findViewById(R.id.eventIndicatorContainer)
+        val dots: List<View> = listOf(
+            itemView.findViewById(R.id.dot1),
+            itemView.findViewById(R.id.dot2),
+            itemView.findViewById(R.id.dot3)
+        )
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DayViewHolder {
@@ -33,48 +39,51 @@ class CalendarAdapter(
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: DayViewHolder, position: Int) {
         val date = days[position]
-
-        holder.eventIndicator.visibility = View.GONE
         holder.dayText.text = ""
-        holder.bgHighlight?.visibility = View.GONE
+        holder.bgHighlight.visibility = View.GONE
+        holder.dotContainer.visibility = View.GONE
+        holder.dots.forEach { it.visibility = View.GONE }
 
         if (date != null) {
             holder.dayText.text = date.dayOfMonth.toString()
 
             // ✅ Highlight selected date
             if (date == selectedDate) {
-                holder.bgHighlight?.visibility = View.VISIBLE
-                holder.bgHighlight?.setBackgroundResource(R.drawable.bg_day_selected)
+                holder.bgHighlight.visibility = View.VISIBLE
+                holder.bgHighlight.setBackgroundResource(R.drawable.bg_day_selected)
                 holder.dayText.setTextColor(
                     ContextCompat.getColor(holder.itemView.context, android.R.color.white)
                 )
             } else {
-                holder.bgHighlight?.visibility = View.GONE
+                holder.bgHighlight.visibility = View.GONE
                 holder.dayText.setTextColor(
                     ContextCompat.getColor(holder.itemView.context, android.R.color.black)
                 )
             }
 
-            // ✅ Show dot if tasks exist
-            val tasks = assignmentsByDate[date]
-            if (!tasks.isNullOrEmpty()) {
-                holder.eventIndicator.visibility = View.VISIBLE
+            // ✅ Handle events for this day
+            val tasks = assignmentsByDate[date].orEmpty()
+            if (tasks.isNotEmpty()) {
+                holder.dotContainer.visibility = View.VISIBLE
 
-                // Pick color based on priority tag stored
-                val priority = tasks.first()
-                val colorRes = when (priority.lowercase()) {
-                    "high" -> R.color.priority_high
-                    "medium" -> R.color.priority_medium
-                    "low" -> R.color.priority_low
-                    else -> R.color.priority_low
+                val visibleEvents = tasks.take(3)
+                visibleEvents.forEachIndexed { index, task ->
+                    val dot = holder.dots[index]
+                    dot.visibility = View.VISIBLE
+
+                    val colorRes = when {
+                        task.contains("high", true) -> R.color.priority_high
+                        task.contains("medium", true) -> R.color.priority_medium
+                        task.contains("low", true) -> R.color.priority_low
+                        else -> R.color.priority_default
+                    }
+
+                    dot.backgroundTintList =
+                        ContextCompat.getColorStateList(holder.itemView.context, colorRes)
                 }
-                holder.eventIndicator.backgroundTintList =
-                    ContextCompat.getColorStateList(holder.itemView.context, colorRes)
             }
 
-            holder.itemView.setOnClickListener {
-                onDayClicked(date)
-            }
+            holder.itemView.setOnClickListener { onDayClicked(date) }
         }
     }
 
@@ -84,10 +93,10 @@ class CalendarAdapter(
         selectedDate = newDate
         notifyDataSetChanged()
     }
+
     fun updateAssignments(newData: Map<LocalDate, List<String>>) {
         assignmentsByDate.clear()
         assignmentsByDate.putAll(newData)
         notifyDataSetChanged()
     }
-
 }
