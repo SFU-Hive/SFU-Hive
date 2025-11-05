@@ -2,36 +2,44 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:id="@+id/calendarRoot"
-    android:orientation="vertical"
-    android:padding="20dp"
-    android:background="@color/white"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:padding="20dp">
 
     <!-- Title -->
     <TextView
         android:id="@+id/tvTitle"
-        android:text="My Calendar"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:gravity="center_horizontal"
-        android:layout_marginBottom="12dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:gravity="center_horizontal"
+        android:text="My Calendar"
+        android:textColor="@android:color/black"
+        android:textSize="28sp"
+        android:textStyle="bold" />
 
     <Button
         android:id="@+id/signInButton"
-        android:layout_width="wrap_content"
+        android:layout_width="178dp"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:text="Sign in with Google" />
 
     <Button
         android:id="@+id/signOutButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sign Out"
-        android:layout_marginStart="16dp" />
+        android:layout_gravity="center_horizontal"
+        android:text="Sign Out" />
+
+    <Button
+        android:id="@+id/refreshButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="REFRESH EVENTS" />
 
     <!-- Calendar container with visible black border -->
     <FrameLayout
@@ -42,69 +50,89 @@
         android:padding="6dp">
 
         <LinearLayout
-            android:orientation="vertical"
-            android:background="@android:color/white"
-            android:padding="16dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <!-- Month Header -->
             <LinearLayout
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <ImageButton
                     android:id="@+id/btnPrevMonth"
-                    android:background="@android:color/transparent"
-                    android:src="@drawable/ic_chevron_left"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="4dp" />
+                    android:background="@android:color/transparent"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_chevron_left" />
 
                 <TextView
                     android:id="@+id/tvMonthYear"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/black"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content" />
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
                 <ImageButton
                     android:id="@+id/btnNextMonth"
-                    android:background="@android:color/transparent"
-                    android:src="@drawable/ic_chevron_right"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="4dp" />
+                    android:background="@android:color/transparent"
+                    android:padding="4dp"
+                    android:src="@drawable/ic_chevron_right" />
             </LinearLayout>
 
             <!-- Weekday header -->
             <LinearLayout
                 android:id="@+id/weekdayHeader"
-                android:layout_marginTop="8dp"
-                android:weightSum="7"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:weightSum="7">
 
-                <TextView style="@style/WeekdayCell" android:text="Mon"/>
-                <TextView style="@style/WeekdayCell" android:text="Tue"/>
-                <TextView style="@style/WeekdayCell" android:text="Wed"/>
-                <TextView style="@style/WeekdayCell" android:text="Thu"/>
-                <TextView style="@style/WeekdayCell" android:text="Fri"/>
-                <TextView style="@style/WeekdayCell" android:text="Sat"/>
-                <TextView style="@style/WeekdayCell" android:text="Sun"/>
+                <TextView
+                    style="@style/WeekdayCell"
+                    android:text="Sun" />
+
+                <TextView
+                    style="@style/WeekdayCell"
+                    android:text="Mon" />
+
+                <TextView
+                    style="@style/WeekdayCell"
+                    android:text="Tue" />
+
+                <TextView
+                    style="@style/WeekdayCell"
+                    android:text="Wed" />
+
+                <TextView
+                    style="@style/WeekdayCell"
+                    android:text="Thu" />
+
+                <TextView
+                    style="@style/WeekdayCell"
+                    android:text="Fri" />
+
+                <TextView
+                    style="@style/WeekdayCell"
+                    android:text="Sat" />
             </LinearLayout>
 
             <!-- Calendar Grid -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/calendarRecycler"
-                android:layout_marginTop="12dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp" />
         </LinearLayout>
     </FrameLayout>
 
@@ -112,14 +140,14 @@
     <!-- Today’s Tasks -->
     <TextView
         android:id="@+id/tvSelectedDate"
-        android:text="Today's Tasks"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:layout_marginBottom="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        card_view:cardElevation="0dp"/>
+        android:layout_marginBottom="8dp"
+        android:text="Today's Tasks"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        card_view:cardElevation="0dp" />
 
     <!-- Tasks List -->
     <androidx.recyclerview.widget.RecyclerView
@@ -128,6 +156,6 @@
         android:layout_height="match_parent"
         android:overScrollMode="never"
         android:padding="3dp"
-        card_view:cardElevation="0dp"/>
+        card_view:cardElevation="0dp" />
 
 </LinearLayout>

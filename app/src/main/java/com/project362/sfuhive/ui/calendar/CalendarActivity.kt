@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Button
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -16,6 +17,7 @@ import com.project362.sfuhive.Util
 import com.project362.sfuhive.database.Assignment
 import com.project362.sfuhive.database.AssignmentViewModel
 import com.google.api.services.calendar.model.Event
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -84,6 +86,17 @@ class CalendarActivity : ComponentActivity() {
             googleHelper.signOut()
             googleEventsByDate.clear()
             updateCalendar()
+        }
+
+        // ✅ NEW: Refresh button logic
+        findViewById<Button>(R.id.refreshButton)?.setOnClickListener {
+            val account = GoogleSignIn.getLastSignedInAccount(this)
+            if (account != null) {
+                Toast.makeText(this, "Refreshing Google Calendar...", Toast.LENGTH_SHORT).show()
+                googleHelper.fetchCalendarEvents(account)
+            } else {
+                Toast.makeText(this, "Please sign in with Google first.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         updateCalendar()
@@ -188,5 +201,6 @@ class CalendarActivity : ComponentActivity() {
             }
         }
         updateCalendar()
+        Toast.makeText(this, "Google Calendar updated!", Toast.LENGTH_SHORT).show()
     }
 }

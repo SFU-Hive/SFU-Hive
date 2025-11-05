@@ -65,7 +65,7 @@ class GoogleCalendarHelper(
         }
     }
 
-    private fun fetchCalendarEvents(account: GoogleSignInAccount) {
+    fun fetchCalendarEvents(account: GoogleSignInAccount) {
         val credential = GoogleAccountCredential.usingOAuth2(
             activity, listOf(CalendarScopes.CALENDAR_READONLY)
         )
