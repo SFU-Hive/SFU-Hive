@@ -10,6 +10,10 @@
     <string name="hours_spent">Hours Spent</string>
     <string name="average_hours_spent">Average Hours Spent</string>
     <string name="average_difficulty">Average Difficulty</string>
+    <string name="important_dates">Important Dates</string>
+    <string name="streak">Streak</string>
+    <string name="streak_checkmarks">Streak Checkmarks</string>
+    <string name="files">Files</string>
     <string-array name="difficulty">
         <item>1</item>
         <item>2</item>
