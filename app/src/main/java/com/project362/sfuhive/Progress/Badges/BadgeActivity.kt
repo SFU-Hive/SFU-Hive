@@ -60,10 +60,10 @@ class BadgeActivity : AppCompatActivity(){
         )
     }
     private fun updateFeaturedBadgeView(newBadge: Badge){
-
         featuredImageView.setImageResource(newBadge.getIconId())
         featuredTitleView.text = newBadge.getTitle()
         featuredSubheadView.text = newBadge.getDescription()
+        featuredBodyView.text = newBadge.getTextStatus()
 
 
 

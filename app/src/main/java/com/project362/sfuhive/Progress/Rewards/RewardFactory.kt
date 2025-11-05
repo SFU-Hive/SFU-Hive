@@ -7,35 +7,35 @@ class RewardFactory {
 
     private var allRewards = listOf<Reward>(
         Reward(
-            R.drawable.icon_place_holder,
-            "Reward 1",
+            R.drawable.bottle_red,
+            "Red Bottle",
             100,
-            "This is Pinned Reward 1"),
+            "This bottle is red"),
         Reward(
-            R.drawable.icon_place_holder,
-            "Reward 2",
+            R.drawable.bottle_yellow,
+            "Yellow Bottle",
             10,
-            "This is Pinned Reward 2"),
+            "This bottle is yellow"),
         Reward(
-            R.drawable.icon_place_holder,
-            "Reward 3",
+            R.drawable.bottle_purple,
+            "Purple Bottle",
             20,
-            "This is Pinned Reward 3"),
+            "This bottle is purple"),
         Reward(
-            R.drawable.icon_place_holder,
-            "Reward 4",
+            R.drawable.bottle_green,
+            "Green Bottle",
             25,
-            "This is Pinned Reward 4"),
+            "This bottle is green"),
         Reward(
-            R.drawable.icon_place_holder,
-            "Reward 5",
+            R.drawable.bottle,
+            "Blue Bottle",
             30,
-            "This is Pinned Reward 5"),
+            "This bottle is blue"),
         Reward(
-            R.drawable.icon_place_holder,
-            "Reward 6",
+            R.drawable.reward_chest,
+            "Chest",
             60,
-            "This is Pinned Reward 6")
+            "This is a mystery chest")
     )
     public fun getAllRewards(): List<Reward>{
 

@@ -14,37 +14,16 @@
         android:padding="20dp"
         />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/pinned_badges"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_gravity="center">
+        android:layout_margin="30dp"
+        android:numColumns="3"
+    >
 
-        <ImageView
-            android:id = "@+id/pinned_badge1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/image_not_found"
-            android:contentDescription = "@string/pinned_badge1"
-            android:layout_margin="10dp"/>
 
-        <ImageView
-            android:id = "@+id/pinned_badge2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/image_not_found"
-            android:contentDescription = "@string/pinned_badge2"
-            android:layout_margin="10dp"/>
-
-        <ImageView
-            android:id = "@+id/pinned_badge3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/image_not_found"
-            android:contentDescription = "@string/pinned_badge3"
-            android:layout_margin="10dp"/>
-
-    </LinearLayout>
+    </androidx.recyclerview.widget.RecyclerView>
 
     <TextView
         android:id = "@+id/rewards_title"
@@ -71,5 +50,12 @@
         android:textSize="24sp"
         android:padding="20dp"/>
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id= "@+id/pinned_streaks"
+        android:layout_margin="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:numColumns="3">
+    </androidx.recyclerview.widget.RecyclerView>
 
 </LinearLayout>

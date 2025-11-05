@@ -43,4 +43,12 @@ data class Badge(
         return title
     }
 
+    public fun getTextStatus():String{
+        var status = "Locked"
+        if(isCompleteStatus() == true){
+            status = "Complete!"
+        }
+            return status
+    }
+
 }

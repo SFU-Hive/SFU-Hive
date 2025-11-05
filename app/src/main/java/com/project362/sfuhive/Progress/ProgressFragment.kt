@@ -16,6 +16,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.Progress.Badges.BadgeActivity
+import com.project362.sfuhive.Progress.Badges.BadgeActivityViewModel
+import com.project362.sfuhive.Progress.Badges.BadgeAdapter
 import com.project362.sfuhive.Progress.Rewards.RewardActivity
 import com.project362.sfuhive.Progress.Rewards.RewardActivityViewModel
 import com.project362.sfuhive.Progress.Rewards.RewardAdapter
@@ -72,15 +74,15 @@ class ProgressFragment : Fragment() {
         }
 
 
-        val pinnedBadge1View: ImageView=view.findViewById<ImageView>(R.id.pinned_badge1)
-        val pinnedBadge2View: ImageView = view.findViewById<ImageView>(R.id.pinned_badge2)
-        val pinnedBadge3View: ImageView=view.findViewById<ImageView>(R.id.pinned_badge3)
+        val pinnedBadgesView: RecyclerView=view.findViewById<RecyclerView>(R.id.pinned_badges)
 
 
 
         val pinnedRewardsView: RecyclerView=view.findViewById<RecyclerView>(R.id.pinned_rewards)
 
         val rewardActivityVM=RewardActivityViewModel(progressViewModel.getAllPinnedRewards())
+
+        val badgeActivityVM = BadgeActivityViewModel(progressViewModel.getAllPinnedBadges())
 
         // Note: RewardsVM isn't needed here I'm just using it to reuse other objects I've written already
         // sorry 'bout it -Miro
@@ -90,11 +92,23 @@ class ProgressFragment : Fragment() {
             rewardActivityVM)
         }
 
+
+        val pinnedBadgesAdapter = context?.let {
+            BadgeAdapter(
+                it,
+                progressViewModel.getAllPinnedBadges(),
+                badgeActivityVM
+            )
+        }
+
         pinnedRewardsView.layoutManager= GridLayoutManager(context,3)
         pinnedRewardsView.adapter=pinnedRewardsAdapter
-        pinnedBadge1View.setImageResource(progressViewModel.getPinnedBadge(0).getIconId())
-        pinnedBadge2View.setImageResource(progressViewModel.getPinnedBadge(1).getIconId())
-        pinnedBadge3View.setImageResource(progressViewModel.getPinnedBadge(2).getIconId())
+
+        pinnedBadgesView.layoutManager = GridLayoutManager(context, 3)
+        pinnedBadgesView.adapter=pinnedBadgesAdapter
+
+
+
 
         return view
     }

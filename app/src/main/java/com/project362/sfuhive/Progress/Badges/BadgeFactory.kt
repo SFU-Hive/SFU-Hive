@@ -6,24 +6,24 @@ class BadgeFactory( ){
 
     private var allBadges = listOf<Badge>(
         Badge(
-            "Badge1",
+            "Badge 1",
             R.drawable.badge2_place_holder,
-            R.drawable.badge_place_holder,
+            R.drawable.badge_locked,
             "This is Pinned Badge 1"),
         Badge(
             "Badge2",
             R.drawable.badge2_place_holder,
-            R.drawable.badge_place_holder,
+            R.drawable.badge_locked,
             "This is Pinned Badge 2"),
         Badge(
             "Badge3",
             R.drawable.badge2_place_holder,
-            R.drawable.badge_place_holder,
+            R.drawable.badge_locked,
             "This is Pinned Badge 3"),
         Badge(
             "Badge4",
             R.drawable.badge2_place_holder,
-            R.drawable.badge_place_holder,
+            R.drawable.badge_locked,
             "This is Pinned Badge 4")
 
     )
