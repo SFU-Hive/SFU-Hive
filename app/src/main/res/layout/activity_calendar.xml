@@ -20,7 +20,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <!-- Calendar Card -->
+    <Button
+        android:id="@+id/signInButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign in with Google" />
+
+    <Button
+        android:id="@+id/signOutButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sign Out"
+        android:layout_marginStart="16dp" />
+
     <!-- Calendar container with visible black border -->
     <FrameLayout
         android:layout_width="match_parent"
@@ -117,4 +129,5 @@
         android:overScrollMode="never"
         android:padding="3dp"
         card_view:cardElevation="0dp"/>
+
 </LinearLayout>

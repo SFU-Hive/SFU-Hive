@@ -13,7 +13,7 @@ import java.time.LocalDate
 
 class CalendarAdapter(
     private val days: List<LocalDate?>,
-    private val assignmentsByDate: Map<LocalDate, List<String>>, // date → priority list
+    private var assignmentsByDate: MutableMap<LocalDate, List<String>>,
     private var selectedDate: LocalDate?,
     private val onDayClicked: (LocalDate) -> Unit
 ) : RecyclerView.Adapter<CalendarAdapter.DayViewHolder>() {
@@ -84,4 +84,10 @@ class CalendarAdapter(
         selectedDate = newDate
         notifyDataSetChanged()
     }
+    fun updateAssignments(newData: Map<LocalDate, List<String>>) {
+        assignmentsByDate.clear()
+        assignmentsByDate.putAll(newData)
+        notifyDataSetChanged()
+    }
+
 }
