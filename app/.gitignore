@@ -17,3 +17,4 @@ captures/
 *.class
 *.so
 *.swp
+/app/google-services.json
