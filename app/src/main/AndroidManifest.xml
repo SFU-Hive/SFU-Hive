@@ -23,6 +23,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".NavActivity" />
+        <activity android:name=".Wellness.EnergyMgmtActivity" />
+        <activity android:name=".Wellness.GoalsActivity" />
         <meta-data
             android:name="keyValue"
             android:value = "${KEY}"/>

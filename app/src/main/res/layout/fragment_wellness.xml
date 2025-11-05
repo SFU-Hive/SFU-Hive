@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="10dp">
+    android:padding="10dp"
+    android:id="@+id/wellness_container">
 
     <!-- Wellness Header -->
     <TextView
@@ -47,7 +48,9 @@
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
         app:layout_constraintTop_toBottomOf="@id/divider1"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:onClick="onEnergyClick"
+        android:clickable="true"/>
 
     <!-- Energy Buttons Row -->
     <LinearLayout
@@ -189,7 +192,9 @@
         android:paddingTop="10dp"
         android:paddingBottom="5dp"
         app:layout_constraintTop_toBottomOf="@id/divider3"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:onClick="onGoalClick"
+        android:clickable="true"/>
 
     <TextView
         android:id="@+id/top3_label"
