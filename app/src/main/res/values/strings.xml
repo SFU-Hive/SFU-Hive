@@ -22,4 +22,17 @@
         <item>4</item>
         <item>5</item>
     </string-array>
+    <string name="progress_title">Progression Fragment</string>
+    <string name="calendar_title">Calendar Fragment</string>
+    <string name="dashboard_title">Dashboard Fragment</string>
+    <string name="tasks_title">Tasks Fragment</string>
+    <string name="wellness_title">Wellness Fragment</string>
+    <string name="pinned_badge1">pinned badge 1</string>
+    <string name="pinned_badge2">pinned badge 2</string>
+    <string name="pinned_badge3">pinned badge 3</string>
+    <string name="badges_title">Badges</string>
+    <string name="rewards_title">Rewards</string>
+    <string name="streaks_title">Streaks</string>
+    <string name="not_found">Not Found</string>
+    <string name="redeem">Redeem</string>
 </resources>
