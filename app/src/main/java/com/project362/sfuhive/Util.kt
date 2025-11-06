@@ -23,8 +23,6 @@ import java.time.format.DateTimeFormatter
 
 object Util {
 
-    private const val CANVAS_KEY = "DyPHfk4Bw2x9U9GX33mJaRvZ324hFryeMwDHezEYLeyt4YH8YXXU88F6nUEBVMwA"
-
     const val PREFS_KEY = "app_prefs"
 
     const val LAST_SYNC_KEY = "last_sync"
@@ -62,7 +60,7 @@ object Util {
                 // get key from manifest and set URL
                 val ai: ApplicationInfo = context.packageManager
                     .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-                val token =  ai.metaData.getString(CANVAS_KEY)
+                val token =  ai.metaData.getString("keyValue")
                 val coursesURL = URL("https://canvas.sfu.ca/api/v1/courses?enrollment_state=active")
 
                 val coursesArray = getJsonArrayFromURL(coursesURL, token)
@@ -109,7 +107,7 @@ object Util {
 
             } catch (e: Exception) {
                 e.printStackTrace()
-                Log.d("CanvasAPI", "Error: ${e.message}")
+                Log.e("CanvasAPI", "Error: ", e)
             }
     }
 
@@ -118,7 +116,7 @@ object Util {
             // get key from manifest and set URL
             val ai: ApplicationInfo = context.packageManager
                 .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-            val token = ai.metaData.getString(CANVAS_KEY)
+            val token = ai.metaData.getString("keyValue")
             // master return array
             val allSubmissions = JSONArray()
 

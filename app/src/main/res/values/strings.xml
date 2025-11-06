@@ -14,6 +14,7 @@
     <string name="streak">Streak</string>
     <string name="streak_checkmarks">Streak Checkmarks</string>
     <string name="files">Files</string>
+    <string name="calendar">Calendar</string>
     <string-array name="difficulty">
         <item>1</item>
         <item>2</item>
