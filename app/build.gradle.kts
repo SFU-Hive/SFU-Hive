@@ -82,4 +82,9 @@ dependencies {
 
     //streak drawable
     implementation(libs.material)
+    // for charts
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // for embeded media player
+    implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
 }
