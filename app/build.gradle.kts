@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.Packaging
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -41,6 +43,16 @@ android {
     buildFeatures {
         compose = true
     }
+    packaging {
+        resources {
+            excludes += "/META-INF/DEPENDENCIES"
+            excludes += "/META-INF/DEPENDENCIES.txt"
+            excludes += "/META-INF/LICENSE"
+            excludes += "/META-INF/LICENSE.txt"
+            excludes += "/META-INF/NOTICE"
+            excludes += "/META-INF/NOTICE.txt"
+        }
+    }
 }
 
 dependencies {
@@ -80,11 +92,26 @@ dependencies {
     kapt("androidx.room:room-compiler:$room_version")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
 
-    //streak drawable
-    implementation(libs.material)
     // for charts
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
     // for embeded media player
     implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
+
+    //for calendar
+    implementation("com.kizitonwose.calendar:view:2.4.0")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    // AndroidX Fragment
+    implementation("androidx.fragment:fragment-ktx:1.8.5")
+
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    implementation("androidx.cardview:cardview:1.0.0")
+
+    // Google sign-in + Calendar API (working combination)
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("com.google.http-client:google-http-client-gson:1.43.1")
+    implementation("com.google.api-client:google-api-client-android:1.33.0")
+    implementation("com.google.http-client:google-http-client-android:1.44.1")
+    // NOTE: this version tag must have "-1.34.0" suffix — older tags don't resolve correctly
+    implementation("com.google.apis:google-api-services-calendar:v3-rev411-1.25.0")
 }

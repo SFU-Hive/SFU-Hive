@@ -27,6 +27,7 @@
         <activity android:name=".Wellness.GoalsActivity" />
         <activity android:name=".Assignments.ListAssignmentsActivity" />
         <activity android:name=".Assignments.DisplayRatedAssignmentActivity" />
+        <activity android:name=".Calendar.CalendarActivity" />
         <meta-data
             android:name="keyValue"
             android:value = "${KEY}"/>
