@@ -80,6 +80,8 @@ dependencies {
     kapt("androidx.room:room-compiler:$room_version")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
 
+    //streak drawable
+    implementation(libs.material)
     // for charts
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 

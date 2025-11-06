@@ -23,7 +23,7 @@ import java.time.format.DateTimeFormatter
 
 object Util {
 
-    private const val CANVAS_KEY = "keyValue"
+    private const val CANVAS_KEY = "DyPHfk4Bw2x9U9GX33mJaRvZ324hFryeMwDHezEYLeyt4YH8YXXU88F6nUEBVMwA"
 
     const val PREFS_KEY = "app_prefs"
 
