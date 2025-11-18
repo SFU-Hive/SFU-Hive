@@ -35,4 +35,6 @@
     <string name="streaks_title">Streaks</string>
     <string name="not_found">Not Found</string>
     <string name="redeem">Redeem</string>
+    <string name="recent">Recent</string>
+    <string name="recent_file_image">Recent File Image</string>
 </resources>
