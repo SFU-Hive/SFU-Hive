@@ -56,8 +56,23 @@ class RewardActivity : AppCompatActivity() {
 
         rewardActivityVM.currencyCount.observe(this,Observer{ it ->
             currencyTextView.text = rewardActivityVM.getCurrencyCount().toString()
-
         })
+
+        featuredButtonView.setOnClickListener { it ->
+            //check to see if there is enough currency to redeem this reward
+            if(rewardActivityVM.isRedeemable()){
+                val dialog=PurchaseDialog()
+                dialog.show(supportFragmentManager,"Redeem Reward")
+                // if response is ok
+//                  --> Add reward to database/Inventory
+//                  --> Reduce cost
+                // if response is canceled
+            }else{
+
+                println("Cost too high")
+            }
+
+        }
 
     }
 

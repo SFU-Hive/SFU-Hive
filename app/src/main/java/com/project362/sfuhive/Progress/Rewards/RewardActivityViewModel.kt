@@ -20,17 +20,26 @@ class RewardActivityViewModel(
             featuredReward.value= reward
         }
 
+        public fun getCurrencyCount() : Int{
+                if(currencyCount.value != null){
+                    return currencyCount.value
+                }
+                return 0
+            }
 
-    public fun getCurrencyCount() : Int?{
-            return currencyCount.value
+        public fun setCurrencyCount(newCount:Int?){
+            if(newCount!=null){
+                currencyCount.value=newCount
+            }
         }
 
-    public fun setCurrencyCount(newCount:Int?){
-        if(newCount!=null){
-            currencyCount.value=newCount
+        public fun isRedeemable() : Boolean{
+            var isRedeemable =false
+            if(getCurrencyCount() >= featuredReward.value.getCost() ){
+                isRedeemable = true
+            }
+            return isRedeemable
         }
-    }
-
     }
 
 
