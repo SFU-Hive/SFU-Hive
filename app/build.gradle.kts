@@ -75,8 +75,9 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+
     // Firebase Realtime Database
-    implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
+    implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-auth")
@@ -114,4 +115,5 @@ dependencies {
     implementation("com.google.http-client:google-http-client-android:1.44.1")
     // NOTE: this version tag must have "-1.34.0" suffix — older tags don't resolve correctly
     implementation("com.google.apis:google-api-services-calendar:v3-rev411-1.25.0")
+
 }

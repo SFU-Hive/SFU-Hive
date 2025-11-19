@@ -28,6 +28,9 @@ class RewardActivity : AppCompatActivity() {
 
     private lateinit var featuredButtonView: Button
 
+    private lateinit var currencyTextView : TextView
+    private lateinit var currencyImageView : ImageView
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +49,15 @@ class RewardActivity : AppCompatActivity() {
         featuredSubheadView=featuredRewardView.findViewById<TextView>(R.id.subhead)
         featuredCostView=featuredRewardView.findViewById<TextView>(R.id.cost)
         featuredButtonView=featuredRewardView.findViewById<Button>(R.id.buy_button)
+        currencyTextView = findViewById<TextView>(R.id.currency_text)
+        currencyImageView = findViewById<ImageView>(R.id.currency_image)
+
+        currencyTextView.text = rewardActivityVM.getCurrencyCount().toString()
+
+        rewardActivityVM.currencyCount.observe(this,Observer{ it ->
+            currencyTextView.text = rewardActivityVM.getCurrencyCount().toString()
+
+        })
 
     }
 

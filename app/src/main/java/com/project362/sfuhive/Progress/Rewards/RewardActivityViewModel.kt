@@ -10,6 +10,7 @@ class RewardActivityViewModel(
 
         public var featuredReward: MutableLiveData<Reward> = MutableLiveData<Reward>(allRewards.get(1))
 
+        public var currencyCount: MutableLiveData<Int> = MutableLiveData<Int>(100) // temporary start with 100 currency always. Change this later!!
         public fun getFeaturedBadge(): Reward{
 
             return featuredReward.value
@@ -20,6 +21,15 @@ class RewardActivityViewModel(
         }
 
 
+    public fun getCurrencyCount() : Int?{
+            return currencyCount.value
+        }
+
+    public fun setCurrencyCount(newCount:Int?){
+        if(newCount!=null){
+            currencyCount.value=newCount
+        }
+    }
 
     }
 

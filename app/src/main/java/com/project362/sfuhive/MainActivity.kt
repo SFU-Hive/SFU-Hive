@@ -67,15 +67,6 @@ class MainActivity : AppCompatActivity() {
             Log.d("DatabaseCheck", "Assignments count: ${it.size}")
         })
 
-        Thread {
-            val newSubmissions = Util.getNewlySubmittedAssignments(this)
-            Log.d("Submission", "New submissions count: ${newSubmissions.size}")
-            if (newSubmissions.isNotEmpty()) {
-                runOnUiThread {
-                    handleNewSubmissions(newSubmissions)
-                }
-            }
-        }.start()
 
 
         loadButton.setOnClickListener {
@@ -88,6 +79,22 @@ class MainActivity : AppCompatActivity() {
             intent = Intent(this, NavActivity::class.java)
             startActivity(intent)
         }
+    }
+
+    // Put thread in onStart
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onStart() {
+        super.onStart()
+
+        Thread {
+            val newSubmissions = Util.getNewlySubmittedAssignments(this)
+            Log.d("Submission", "New submissions count: ${newSubmissions.size}")
+            if (newSubmissions.isNotEmpty()) {
+                runOnUiThread {
+                    handleNewSubmissions(newSubmissions)
+                }
+            }
+        }.start()
     }
 
     private fun handleNewSubmissions(newSubmissions: List<SubmittedAssignment>, index: Int = 0) {
@@ -109,7 +116,7 @@ class MainActivity : AppCompatActivity() {
 
         dialog.arguments = bundle
         dialog.isCancelable = false
-        dialog.show(supportFragmentManager, "RateSubmission")
+        dialog.show(supportFragmentManager, "RateSubmission") // Causes "IllegalStateException: Can not perform this action after onSaveInstanceState" Issue on Miro's Device
 
         // this part assisted by ChatGPT
         // Use a listener for when the dialog is dismissed

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "171092291784",
+    "project_id": "sfu-hive",
+    "storage_bucket": "sfu-hive.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:171092291784:android:b44913a99efd6b7e01f5fd",
+        "android_client_info": {
+          "package_name": "com.project362.sfuhive"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtPJLYy6kJErzdWB7d9WzRUv5qaJfPPhc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
