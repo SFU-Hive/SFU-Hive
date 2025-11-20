@@ -8,7 +8,9 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -44,6 +46,13 @@ class AssignmentFragment : Fragment() {
         }
 
         recyclerView.adapter = adapter
+
+        // setup tool bar
+        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
+        toolbar.title = "Courses"
+        (activity as? AppCompatActivity)?.setSupportActionBar(toolbar)
+
+        setHasOptionsMenu(true)
 
         loadCoursesFromFirebase()
 
