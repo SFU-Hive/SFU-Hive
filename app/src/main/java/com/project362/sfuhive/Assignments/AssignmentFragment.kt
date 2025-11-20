@@ -4,16 +4,22 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.database
-import com.project362.sfuhive.R
 import com.project362.sfuhive.Assignments.RateSubmissionDialog.RatedAssignment
+import com.project362.sfuhive.R
+import java.util.*
 
 
 class AssignmentFragment : Fragment() {
@@ -38,15 +44,55 @@ class AssignmentFragment : Fragment() {
         adapter = CourseAdapter(courseList) { selectedCourse ->
             showAssignmentsForCourse(selectedCourse)
         }
+
         recyclerView.adapter = adapter
 
+        // setup tool bar
+        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
+        toolbar.title = "Courses"
+        (activity as? AppCompatActivity)?.setSupportActionBar(toolbar)
+
+        setHasOptionsMenu(true)
+
         loadCoursesFromFirebase()
-
-
 
         return view
     }
 
+    // implementation adapted from https://www.geeksforgeeks.org/android/searchview-in-android-with-recyclerview/
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+
+        inflater.inflate(R.menu.search_menu, menu)
+        val searchItem = menu.findItem(R.id.actionSearch)
+        val searchView = searchItem.actionView as SearchView
+
+        // below line is to call set on query text listener method.
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                filter(newText)
+                return false
+            }
+        })
+        return
+    }
+
+    private fun filter(text: String) {
+        val filtered = ArrayList<Course>()
+
+        for (item in courseList) {
+            // checking if the entered string matched with any item of our recycler view.
+            if (item.name.lowercase().contains(text.lowercase(Locale.getDefault()))) {
+                // if the item is matched we are
+                // adding it to our filtered list.
+                filtered.add(item)
+            }
+            adapter.filterList(filtered)
+        }
+    }
 
     // adapted from Firebase Docs and ChatGPT
     private fun loadCoursesFromFirebase() {
