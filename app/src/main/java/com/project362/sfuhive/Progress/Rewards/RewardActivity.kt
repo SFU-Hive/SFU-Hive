@@ -1,11 +1,18 @@
 package com.project362.sfuhive.Progress.Rewards
 
+import android.app.Activity
+import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,6 +38,9 @@ class RewardActivity : AppCompatActivity() {
     private lateinit var currencyTextView : TextView
     private lateinit var currencyImageView : ImageView
 
+    companion object {
+        val REDEEM = "REDEEM"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +64,22 @@ class RewardActivity : AppCompatActivity() {
 
         currencyTextView.text = rewardActivityVM.getCurrencyCount().toString()
 
+        supportFragmentManager.setFragmentResultListener(REDEEM,this){ requestKey, bundle ->
+            val text_data = bundle.getBundle(PurchaseDialog.DIALOG_RESULT)
+            val user_confirmation = bundle.getString(PurchaseDialog.STRING_RESULT)
+            //val user_confirmation=text_data?.getString(PurchaseDialog.STRING_RESULT,"Error")
+            println("inside dialog result data is: $user_confirmation")
+
+            if(user_confirmation == "redeemed"){
+                //subtract cost of the featured reward
+                rewardActivityVM.subtractCost()
+
+                // TODO: add Reward to database
+
+            }
+        }
+
+
         rewardActivityVM.currencyCount.observe(this,Observer{ it ->
             currencyTextView.text = rewardActivityVM.getCurrencyCount().toString()
         })
@@ -61,7 +87,8 @@ class RewardActivity : AppCompatActivity() {
         featuredButtonView.setOnClickListener { it ->
             //check to see if there is enough currency to redeem this reward
             if(rewardActivityVM.isRedeemable()){
-                val dialog=PurchaseDialog()
+
+                val dialog=PurchaseDialog(rewardActivityVM.getFeaturedReward())
                 dialog.show(supportFragmentManager,"Redeem Reward")
                 // if response is ok
 //                  --> Add reward to database/Inventory
@@ -84,7 +111,7 @@ class RewardActivity : AppCompatActivity() {
             Observer {
                 // update featured badge card
                 println("observer triggered")
-                updateFeaturedRewardView(rewardActivityVM.getFeaturedBadge())
+                updateFeaturedRewardView(rewardActivityVM.getFeaturedReward())
 
             }
         )
