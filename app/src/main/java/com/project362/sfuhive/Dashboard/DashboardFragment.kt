@@ -63,6 +63,8 @@ class DashboardFragment : Fragment() {
             view.findViewById(R.id.streak_item7)
         )
 
+        //TODO Adjust to take in streaks data
+
         for (i in 0 until streakIcons.size) {
             streakIcons[i]?.setImageResource(R.drawable.ic_ring)
         }
@@ -71,7 +73,7 @@ class DashboardFragment : Fragment() {
     }
 
 
-    //Testing Code
+    //Testing Code for Important Dates
     private fun initializeDummyData() {
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
         datesData = listOf(
@@ -79,7 +81,7 @@ class DashboardFragment : Fragment() {
             ImportantDate("CMPT 354", "2025-12-05", "Final Exam", false)
         )
     }
-
+    //Testing Code for Files
     private fun initializeDummyFiles() {
 
         val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
@@ -87,11 +89,9 @@ class DashboardFragment : Fragment() {
             RecentFile("Milestone3_Report.pdf", today, "1.2 MB"),
             RecentFile("Lecture_Slides_Week10.pptx", "2025-11-15", "5.8 MB"),
             RecentFile("Lab08_Instructions.docx", "2025-11-14", "312 KB"),
-            RecentFile("Final_Exam_Study_Guide.pdf", "2025-11-12", "850 KB"),
-            RecentFile("Milestone3_Report.pdf", today, "1.2 MB"),
-            RecentFile("Lecture_Slides_Week10.pptx", "2025-11-15", "5.8 MB"),
-            RecentFile("Lab08_Instructions.docx", "2025-11-14", "312 KB"),
             RecentFile("Final_Exam_Study_Guide.pdf", "2025-11-12", "850 KB")
         )
     }
+
+
 }
