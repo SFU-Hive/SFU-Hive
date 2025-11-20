@@ -95,7 +95,8 @@ class RewardActivity : AppCompatActivity() {
 //                  --> Reduce cost
                 // if response is canceled
             }else{
-
+                val dialog= CantRedeemDialog(rewardActivityVM.getFeaturedReward())
+                dialog.show(supportFragmentManager,"Can't Redeem Reward")
                 println("Cost too high")
             }
 
