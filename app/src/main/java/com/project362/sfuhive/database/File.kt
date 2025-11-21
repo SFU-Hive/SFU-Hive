@@ -10,6 +10,12 @@ data class File (
     @PrimaryKey(autoGenerate = false)
     var fileId: Long = 0L,
 
+    @ColumnInfo(name = "file_course_id_column")
+    var courseId: Long = 0L,
+
+    @ColumnInfo(name = "file_course_name_column")
+    var courseName: String = "",
+
     @ColumnInfo(name = "file_name_column")
     var fileName: String = "",
 

@@ -14,6 +14,8 @@ import com.project362.sfuhive.database.AssignmentDatabaseDao
 import com.project362.sfuhive.database.DataRepository
 import com.project362.sfuhive.database.DataViewModel
 import com.project362.sfuhive.database.DataViewModelFactory
+import com.project362.sfuhive.database.File
+import com.project362.sfuhive.database.FileDatabase
 import com.project362.sfuhive.database.FirebaseRemoteDatabase
 import org.json.JSONArray
 import org.json.JSONTokener
@@ -50,18 +52,25 @@ object Util {
         val grade: Double,
     )
 
-    fun getCanvasAssignments(owner: ViewModelStoreOwner, context: Context) {
+    private fun getToken(context: Context): String? {
+        // get key from manifest and set URL
+        val ai: ApplicationInfo = context.packageManager
+            .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+        val token =  ai.metaData.getString("keyValue")
+
+        return token
+    }
+
+    fun getCanvasData(owner: ViewModelStoreOwner, context: Context) {
             try {
                 viewModelFactory = getViewModelFactory(context)
                 dataViewModel = ViewModelProvider(owner, viewModelFactory).get(DataViewModel::class.java)
 
                 // delete all before inserting for fresh restart
                 dataViewModel.deleteAllAssignments()
+                dataViewModel.deleteAllFiles()
 
-                // get key from manifest and set URL
-                val ai: ApplicationInfo = context.packageManager
-                    .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-                val token =  ai.metaData.getString("keyValue")
+                val token = getToken(context)
                 val coursesURL = URL("https://canvas.sfu.ca/api/v1/courses?enrollment_state=active")
 
                 val coursesArray = getJsonArrayFromURL(coursesURL, token)
@@ -104,6 +113,62 @@ object Util {
 
                         dataViewModel.insertAssignment(assignment)
                     }
+
+                    var filesTabIsPublic = false
+
+                    // find if course has public files
+                    val tabsURL = URL("https://canvas.sfu.ca/api/v1/courses/$courseId/tabs")
+                    val tabsArray = getJsonArrayFromURL(tabsURL, token)
+
+                    // search through tabs
+                    for (i in 0 until tabsArray.length()) {
+                        val tab = tabsArray.getJSONObject(i)
+                        val tabId = tab.optString("id")
+                        val tabVisibility = tab.optString("visibility")
+
+                        // if files tab exists and is public then set flag to true
+                        if (tabId == "files" && tabVisibility == "public") {
+                            filesTabIsPublic = true
+                            break
+                        }
+                    }
+
+                    // skip course files if files unavailable
+                    if (!filesTabIsPublic) {
+                        Log.d("CanvasAPI_Files", "Skipping Course $courseId: Files tab is not public or missing.")
+                        continue
+                    }
+
+                    // get files for each course
+                    val filesURL = URL("https://canvas.sfu.ca/api/v1/courses/$courseId/files")
+                    val fileArray = getJsonArrayFromURL(filesURL, token)
+
+                    // read files
+                    for (i in 0 until fileArray.length()) {
+
+                        // get all relevant file info
+                        val canvasFile = fileArray.getJSONObject(i)
+                        val fileId = canvasFile.optLong("id")
+                        val fileName = canvasFile.optString("display_name", "")
+                        val fileUrl = canvasFile.optString("url", "")
+
+
+                        // use if u wanna log file
+                        Log.d("CanvasAPI_Files", "Course Name: $courseName, File Name: $fileName, File URL: $fileUrl")
+
+
+                        val file = File()
+                        // manually setting id
+                        file.fileId = fileId
+                        file.courseId = courseId.toLong()
+                        file.courseName = courseName
+                        file.fileName = fileName
+                        file.fileURL = fileUrl
+
+                        dataViewModel.insertFile(file)
+                    }
+
+
                 }
 
             } catch (e: Exception) {
@@ -250,10 +315,17 @@ object Util {
     }
 
     fun getViewModelFactory(context: Context): DataViewModelFactory {
+        // assignment database
         database = AssignmentDatabase.getInstance(context)
         databaseDao = database.assignmentDatabaseDao
+
+        // file database
+        val fileDatabase = FileDatabase.getInstance(context)
+        val fileDatabaseDao = fileDatabase.fileDatabaseDao
+
+        // remote database
         val remoteDatabase = FirebaseRemoteDatabase()
-        repository = DataRepository(databaseDao, remoteDatabase)
+        repository = DataRepository(databaseDao, fileDatabaseDao, remoteDatabase)
         viewModelFactory = DataViewModelFactory(repository)
         return viewModelFactory
     }

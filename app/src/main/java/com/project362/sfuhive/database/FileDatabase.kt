@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 // adapted from RoomDatabase demo
-@Database(entities = [Assignment::class], version = 3, exportSchema = false)
+@Database(entities = [File::class], version = 3, exportSchema = false)
 abstract class FileDatabase : RoomDatabase() {
     abstract val fileDatabaseDao: FileDatabaseDao
 
@@ -21,7 +21,7 @@ abstract class FileDatabase : RoomDatabase() {
                     instance = Room.databaseBuilder(
                         context.applicationContext,
                         FileDatabase::class.java,
-                        "file_table"
+                        "File_table"
                     ).fallbackToDestructiveMigration(false).build()
                     INSTANCE = instance
                 }
