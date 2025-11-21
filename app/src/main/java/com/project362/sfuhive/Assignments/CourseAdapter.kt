@@ -48,7 +48,7 @@ class CourseAdapter(courses: List<Course>, private val onItemClick: (Course) -> 
     }
 
     fun filterList(filterList: ArrayList<Course>) {
-        courses = filterList
+        courses = filterList.distinct()
         notifyDataSetChanged()
     }
 
