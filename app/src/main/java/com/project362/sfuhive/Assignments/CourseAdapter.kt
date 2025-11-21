@@ -32,7 +32,7 @@ class CourseAdapter(courses: List<Course>, private val onItemClick: (Course) -> 
         viewType: Int
     ): CourseViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.simple_list_item, parent, false)
+            .inflate(R.layout.list_item, parent, false)
         return CourseViewHolder(view)
     }
 
@@ -48,7 +48,7 @@ class CourseAdapter(courses: List<Course>, private val onItemClick: (Course) -> 
     }
 
     fun filterList(filterList: ArrayList<Course>) {
-        courses = filterList
+        courses = filterList.distinct()
         notifyDataSetChanged()
     }
 

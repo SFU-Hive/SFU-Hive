@@ -33,7 +33,7 @@ class RatedAssignmentAdapter(assignments: List<RatedAssignment>, private val onI
         viewType: Int
     ): AssignmentViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.simple_list_item, parent, false)
+            .inflate(R.layout.list_item, parent, false)
         return AssignmentViewHolder(view)
     }
 
@@ -49,7 +49,7 @@ class RatedAssignmentAdapter(assignments: List<RatedAssignment>, private val onI
     }
 
     fun filterList(filterList: ArrayList<RatedAssignment>) {
-        assignments = filterList
+        assignments = filterList.distinct()
         notifyDataSetChanged()
     }
 

@@ -393,4 +393,8 @@ object Util {
         viewModelFactory = DataViewModelFactory(repository)
         return viewModelFactory
     }
+
+    fun formatDoubleToText(value: Double): String {
+        return String.format("%.1f", value)
+    }
 }

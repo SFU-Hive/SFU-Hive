@@ -8,6 +8,7 @@ import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.widget.EditText
+import android.widget.RatingBar
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -25,7 +26,7 @@ class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
     private var courseID: Long? = 0L
     private var courseName: String? = ""
     private var grade: Double? = 0.0
-    lateinit var difficultySpinner: Spinner
+    lateinit var ratingBar: RatingBar
     lateinit var timeEditText: EditText
     lateinit var courseNameView: TextView
     lateinit var assignmentNameView: TextView
@@ -72,7 +73,7 @@ class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
 
 
         // get views
-        difficultySpinner = view.findViewById(R.id.difficulty_spinner)
+        ratingBar = view.findViewById(R.id.ratingBar)
         timeEditText = view.findViewById(R.id.time_spent)
         courseNameView = view.findViewById(R.id.course_name)
         assignmentNameView = view.findViewById(R.id.assignment_name)
@@ -95,7 +96,8 @@ class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
     override fun onClick(p0: DialogInterface, p1: Int) {
         when (p1) {
             DialogInterface.BUTTON_POSITIVE -> {
-                val difficulty = difficultySpinner.selectedItem.toString().toDoubleOrNull() ?: 0.0
+
+                val difficulty = ratingBar.rating.toString().toDoubleOrNull() ?: 0.0
                 val timeSpent = timeEditText.text.toString().toDoubleOrNull() ?: 0.0
 
                 ratedAssignment.difficulty = difficulty

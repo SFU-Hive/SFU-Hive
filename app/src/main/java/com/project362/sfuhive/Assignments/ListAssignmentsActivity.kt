@@ -62,7 +62,6 @@ class ListAssignmentsActivity: AppCompatActivity() {
         val searchItem = menu.findItem(R.id.actionSearch)
         val searchView = searchItem.actionView as SearchView
 
-        // below line is to call set on query text listener method.
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 return false
@@ -80,10 +79,8 @@ class ListAssignmentsActivity: AppCompatActivity() {
         val filtered = ArrayList<RatedAssignment>()
 
         for (item in assignments) {
-            // checking if the entered string matched with any item of our recycler view.
+            // perform search
             if (item.assignmentName.lowercase().contains(text.lowercase(Locale.getDefault()))) {
-                // if the item is matched we are
-                // adding it to our filtered list.
                 filtered.add(item)
             }
             adapter.filterList(filtered)
