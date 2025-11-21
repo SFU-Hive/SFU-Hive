@@ -94,54 +94,6 @@ class AssignmentFragment : Fragment() {
         }
     }
 
-    // adapted from Firebase Docs and ChatGPT
-    private fun loadCoursesFromFirebase() {
-        val auth = FirebaseAuth.getInstance()
-
-        // check if already signed in
-        if (auth.currentUser != null) {
-            // user is signed in
-            getCourses()
-        } else {
-            // sign in anonymously (or use Google sign-in if available)
-            auth.signInAnonymously()
-                .addOnSuccessListener {
-                    Log.d("FirebaseAuth", "Signed in anonymously: ${it.user?.uid}")
-                    getCourses()
-                }
-                .addOnFailureListener { e ->
-                    Log.d("FirebaseAuth", "Failed to sign in")
-                }
-        }
-    }
-
-    private fun getCourses() {
-        val ratedAssignmentsRef = Firebase.database.getReference("rated_assignments")
-
-        ratedAssignmentsRef.get().addOnSuccessListener { snapshot ->
-            // map id to assignment name
-            val courseMap = mutableMapOf<Long, String>()
-
-            snapshot.children.forEach { userNode  ->
-                userNode.children.forEach { assignmentNode ->
-                    val assignment = assignmentNode.getValue(RatedAssignment::class.java)
-                    if (assignment != null) {
-                        allAssignments.add(assignment)
-                        courseMap[assignment.courseId] = assignment.courseName
-                    }
-                }
-            }
-
-
-//            Log.d("FirebaseDB", "Found assignment: $courseList")
-            courseList.clear()
-            courseList.addAll(courseMap.map { Course(it.key, it.value) })
-            adapter.notifyDataSetChanged()
-        }.addOnFailureListener { e ->
-            Log.d("FirebaseDB", "Failed to load courses")
-        }
-    }
-
     private fun showAssignmentsForCourse(course: Course) {
         val assignmentsForCourse = allAssignments.filter { it.courseId == course.id }
         Log.d("AssignmentsFragment", "Showing assignments for course: ${assignmentsForCourse.size}")

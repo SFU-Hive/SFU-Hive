@@ -7,7 +7,7 @@ import androidx.lifecycle.asLiveData
 import java.lang.IllegalArgumentException
 
 // adapted from RoomDatabase demo
-class AssignmentViewModel(private val repository: AssignmentRepository) : ViewModel() {
+class AssignmentViewModel(private val repository: DataRepository) : ViewModel() {
 
     val allAssignmentsLiveData: LiveData<List<Assignment>> = repository.allAssignments.asLiveData()
 
@@ -24,7 +24,7 @@ class AssignmentViewModel(private val repository: AssignmentRepository) : ViewMo
     }
 }
 
-class AssignmentViewModelFactory (private val repository: AssignmentRepository) : ViewModelProvider.Factory {
+class AssignmentViewModelFactory (private val repository: DataRepository) : ViewModelProvider.Factory {
     override fun<T: ViewModel> create(modelClass: Class<T>) : T{
         if(modelClass.isAssignableFrom(AssignmentViewModel::class.java))
             return AssignmentViewModel(repository) as T

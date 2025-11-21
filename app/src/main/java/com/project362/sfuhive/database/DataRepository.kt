@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 // adapted from RoomDatabase demo
-class AssignmentRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao) {
+class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao) {
 
     val allAssignments: Flow<List<Assignment>> = assignmentDatabaseDao.getAllActivities()
 

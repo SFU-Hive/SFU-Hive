@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.project362.sfuhive.database.Assignment
 import com.project362.sfuhive.database.AssignmentDatabase
 import com.project362.sfuhive.database.AssignmentDatabaseDao
-import com.project362.sfuhive.database.AssignmentRepository
+import com.project362.sfuhive.database.DataRepository
 import com.project362.sfuhive.database.AssignmentViewModel
 import com.project362.sfuhive.database.AssignmentViewModelFactory
 import org.json.JSONArray
@@ -35,7 +35,7 @@ object Util {
 
     private lateinit var database: AssignmentDatabase
     private lateinit var databaseDao: AssignmentDatabaseDao
-    private lateinit var repository: AssignmentRepository
+    private lateinit var repository: DataRepository
     private lateinit var viewModelFactory: AssignmentViewModelFactory
 
     private lateinit var assignmentViewModel: AssignmentViewModel
@@ -251,7 +251,7 @@ object Util {
     fun getViewModelFactory(context: Context): AssignmentViewModelFactory {
         database = AssignmentDatabase.getInstance(context)
         databaseDao = database.assignmentDatabaseDao
-        repository = AssignmentRepository(databaseDao)
+        repository = DataRepository(databaseDao)
         viewModelFactory = AssignmentViewModelFactory(repository)
         return viewModelFactory
     }
