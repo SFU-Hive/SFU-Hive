@@ -6,10 +6,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
+import com.project362.sfuhive.database.FirebaseRemoteDatabase.Course
 
 // adapted from Daniel Dawda's MyRuns3 with assistance from ChatGPT
-class CourseAdapter(private val courses: List<AssignmentFragment.Course>, private val onItemClick: (AssignmentFragment.Course) -> Unit) : RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
+class CourseAdapter(courses: List<Course>, private val onItemClick: (Course) -> Unit) : RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
 
+    private var courses: List<Course>
     inner class CourseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val courseNameText: TextView = itemView.findViewById(R.id.text)
 
@@ -43,5 +45,14 @@ class CourseAdapter(private val courses: List<AssignmentFragment.Course>, privat
 
     override fun getItemCount(): Int {
         return courses.size
+    }
+
+    fun filterList(filterList: ArrayList<Course>) {
+        courses = filterList
+        notifyDataSetChanged()
+    }
+
+    init {
+        this.courses = courses
     }
 }
