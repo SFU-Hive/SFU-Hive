@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 // adapted from RoomDatabase demo
 @Dao
-interface FileDatabaseDoa {
+interface FileDatabaseDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFile(file: File)

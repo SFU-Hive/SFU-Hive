@@ -56,7 +56,7 @@ object Util {
                 dataViewModel = ViewModelProvider(owner, viewModelFactory).get(DataViewModel::class.java)
 
                 // delete all before inserting for fresh restart
-                dataViewModel.deleteAll()
+                dataViewModel.deleteAllAssignments()
 
                 // get key from manifest and set URL
                 val ai: ApplicationInfo = context.packageManager
@@ -102,7 +102,7 @@ object Util {
                         assignment.pointsPossible = assnPoints
                         assignment.dueAt = assnDue
 
-                        dataViewModel.insert(assignment)
+                        dataViewModel.insertAssignment(assignment)
                     }
                 }
 

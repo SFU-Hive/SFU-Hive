@@ -13,17 +13,33 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
 
     val allAssignmentsLiveData: LiveData<List<Assignment>> = repository.allAssignments.asLiveData()
 
-    fun insert(assignment: Assignment) {
-        repository.insert(assignment)
+    fun insertAssignment(assignment: Assignment) {
+        repository.insertAssignment(assignment)
     }
 
     fun getAssignment(id: Long): Assignment? {
         return repository.getAssignment(id)
     }
 
-    fun deleteAll(){
-        repository.deleteAll()
+    fun deleteAllAssignments(){
+        repository.deleteAllAssignments()
     }
+
+    // File section
+    val allFilesLiveData: LiveData<List<File>> = repository.allFiles.asLiveData()
+
+    fun insertFile(file: File) {
+        repository.insertFile(file)
+    }
+
+    fun getFile(id: Long): File? {
+        return repository.getFile(id)
+    }
+
+    fun deleteAllFiles(){
+        repository.deleteAllFiles()
+    }
+
 
     // This section for remote database
     // 💡 Expose the course data to the Fragment for the RecyclerView

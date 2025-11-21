@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase
 // adapted from RoomDatabase demo
 @Database(entities = [Assignment::class], version = 3, exportSchema = false)
 abstract class FileDatabase : RoomDatabase() {
-    abstract val fileDatabaseDoa: FileDatabaseDoa
+    abstract val fileDatabaseDao: FileDatabaseDao
 
     companion object {
         @Volatile
