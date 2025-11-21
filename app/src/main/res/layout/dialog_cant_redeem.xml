@@ -4,4 +4,22 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <TextView
+        android:id="@+id/main_text_cant_redeem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text = "Main Text"
+        android:textSize="24sp"
+        android:textStyle="bold">
+
+    </TextView>
+
+    <TextView
+        android:id="@+id/details_text_cant_redeem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text = "Details"
+        android:textSize="20sp">
+    </TextView>
+
 </LinearLayout>

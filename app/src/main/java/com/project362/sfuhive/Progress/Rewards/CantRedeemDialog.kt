@@ -6,6 +6,7 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.DialogFragment
+import android.widget.TextView
 import com.project362.sfuhive.R
 
 class CantRedeemDialog(theReward:Reward): DialogFragment(), DialogInterface.OnClickListener {
@@ -29,6 +30,10 @@ class CantRedeemDialog(theReward:Reward): DialogFragment(), DialogInterface.OnCl
     }
     private fun populateView():View{
         var view : View = requireActivity().layoutInflater.inflate(R.layout.dialog_cant_redeem, null)
+        var textView=view.findViewById<TextView>(R.id.main_text_cant_redeem)
+        var detailsTextView = view.findViewById<TextView>(R.id.details_text_cant_redeem)
+        textView.text = "Oh No! ${reward.getTitle()} costs ${reward.getCost()}."
+        detailsTextView.text = "You don't have enough coins to redeem ${reward.getTitle()} :("
 
         return view
     }
