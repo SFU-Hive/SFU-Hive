@@ -12,15 +12,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.database
 import com.project362.sfuhive.Assignments.RateSubmissionDialog.RatedAssignment
 import com.project362.sfuhive.R
+import com.project362.sfuhive.Util.getViewModelFactory
+import com.project362.sfuhive.database.DataViewModel
+import com.project362.sfuhive.database.FirebaseRemoteDatabase.Course
 import java.util.*
-
 
 class AssignmentFragment : Fragment() {
 
@@ -28,15 +28,18 @@ class AssignmentFragment : Fragment() {
     private lateinit var adapter: CourseAdapter
     private val courseList = mutableListOf<Course>()
     private val allAssignments = mutableListOf<RatedAssignment>()
-
-    data class Course(
-        val id: Long = 0L,
-        val name: String = ""
-    )
+    private lateinit var viewModel: DataViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_assignments, container, false)
+
+        // fetch and load data from firebase
+        val factory = getViewModelFactory(requireContext().applicationContext)
+        viewModel = ViewModelProvider(this, factory).get(DataViewModel::class.java)
+        viewModel.loadCourses()
+
+        setObservers(viewModel)
 
         recyclerView = view.findViewById(R.id.course_recycler)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -54,9 +57,20 @@ class AssignmentFragment : Fragment() {
 
         setHasOptionsMenu(true)
 
-        loadCoursesFromFirebase()
-
         return view
+    }
+
+    private fun setObservers(viewModel: DataViewModel) {
+        viewModel.courseListLiveData.observe(viewLifecycleOwner) { newCourseList ->
+            courseList.clear()
+            courseList.addAll(newCourseList)
+            adapter.notifyDataSetChanged()
+        }
+
+        viewModel.allAssignmentsStateFlow.observe(viewLifecycleOwner) { assignments ->
+            allAssignments.clear()
+            allAssignments.addAll(assignments)
+        }
     }
 
     // implementation adapted from https://www.geeksforgeeks.org/android/searchview-in-android-with-recyclerview/
@@ -91,54 +105,6 @@ class AssignmentFragment : Fragment() {
                 filtered.add(item)
             }
             adapter.filterList(filtered)
-        }
-    }
-
-    // adapted from Firebase Docs and ChatGPT
-    private fun loadCoursesFromFirebase() {
-        val auth = FirebaseAuth.getInstance()
-
-        // check if already signed in
-        if (auth.currentUser != null) {
-            // user is signed in
-            getCourses()
-        } else {
-            // sign in anonymously (or use Google sign-in if available)
-            auth.signInAnonymously()
-                .addOnSuccessListener {
-                    Log.d("FirebaseAuth", "Signed in anonymously: ${it.user?.uid}")
-                    getCourses()
-                }
-                .addOnFailureListener { e ->
-                    Log.d("FirebaseAuth", "Failed to sign in")
-                }
-        }
-    }
-
-    private fun getCourses() {
-        val ratedAssignmentsRef = Firebase.database.getReference("rated_assignments")
-
-        ratedAssignmentsRef.get().addOnSuccessListener { snapshot ->
-            // map id to assignment name
-            val courseMap = mutableMapOf<Long, String>()
-
-            snapshot.children.forEach { userNode  ->
-                userNode.children.forEach { assignmentNode ->
-                    val assignment = assignmentNode.getValue(RatedAssignment::class.java)
-                    if (assignment != null) {
-                        allAssignments.add(assignment)
-                        courseMap[assignment.courseId] = assignment.courseName
-                    }
-                }
-            }
-
-
-//            Log.d("FirebaseDB", "Found assignment: $courseList")
-            courseList.clear()
-            courseList.addAll(courseMap.map { Course(it.key, it.value) })
-            adapter.notifyDataSetChanged()
-        }.addOnFailureListener { e ->
-            Log.d("FirebaseDB", "Failed to load courses")
         }
     }
 
