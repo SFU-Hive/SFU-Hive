@@ -79,10 +79,8 @@ class GoogleCalendarHelper(
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val now = DateTime(System.currentTimeMillis())
                 val events = service.events().list("primary")
-                    .setMaxResults(50)
-                    .setTimeMin(now)
+                    .setMaxResults(2500) // Google Calendar limit
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .execute()
