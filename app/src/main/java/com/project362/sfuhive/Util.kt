@@ -18,6 +18,7 @@ import com.project362.sfuhive.database.File
 import com.project362.sfuhive.database.FileDatabase
 import com.project362.sfuhive.database.FirebaseRemoteDatabase
 import org.json.JSONArray
+import org.json.JSONObject
 import org.json.JSONTokener
 import java.net.HttpURLConnection
 import java.net.URL
@@ -71,6 +72,20 @@ object Util {
                 dataViewModel.deleteAllFiles()
 
                 val token = getToken(context)
+
+                // get students name
+                val userURL = URL("https://canvas.sfu.ca/api/v1/users/self")
+                val userObject = getJsonObjectFromURL(userURL, token)
+                val name = userObject.optString("name")
+
+                Log.d("CanvasAPI_name", "Name: $name")
+
+                // add name to prefs
+                val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
+                val editor = prefs.edit()
+                editor.putString("name", name)
+                editor.apply()
+
                 val coursesURL = URL("https://canvas.sfu.ca/api/v1/courses?enrollment_state=active")
 
                 val coursesArray = getJsonArrayFromURL(coursesURL, token)
@@ -306,12 +321,41 @@ object Util {
 
         // store response as tokened json array
         val tokener = JSONTokener(response)
-        val coursesArray = JSONArray(tokener)
+        val array = JSONArray(tokener)
 
         // log response
         //Log.d("CanvasResp", response)
 
-        return coursesArray
+        return array
+    }
+
+    private fun getJsonObjectFromURL(
+        coursesURL: URL,
+        token: String?
+    ): JSONObject {
+        // open connection request with token for course ids
+        val conn = coursesURL.openConnection() as HttpURLConnection
+        conn.requestMethod = "GET"
+        conn.setRequestProperty("Authorization", "Bearer $token")
+        conn.connectTimeout = 5000
+        conn.readTimeout = 5000
+
+        // read response and build string
+        conn.connect()
+
+        val reader = conn.inputStream.bufferedReader()
+        val sb = StringBuilder()
+        reader.forEachLine { sb.append(it) }
+        val response = sb.toString()
+
+        // store response as tokened json array
+        val tokener = JSONTokener(response)
+        val jsonObject = JSONObject(tokener)
+
+        // log response
+        //Log.d("CanvasResp", response)
+
+        return jsonObject
     }
 
     fun getViewModelFactory(context: Context): DataViewModelFactory {
