@@ -26,6 +26,10 @@ data class Assignment (
     @ColumnInfo(name = "points_possible_column")
     var pointsPossible: Double = 0.0,
 
+    @ColumnInfo(name = "assignment_group_weight_column")
+    var groupWeight: Double = 0.0,
+
+
     // need to get from students submissions which is a whole other thing
 //    @ColumnInfo(name = "points_awarded_column")
 //    var pointsAwarded: Double = 0.0,

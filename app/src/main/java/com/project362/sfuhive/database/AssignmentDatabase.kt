@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 // adapted from RoomDatabase demo
-@Database(entities = [Assignment::class], version = 3, exportSchema = false)
+@Database(entities = [Assignment::class], version = 5, exportSchema = false)
 abstract class AssignmentDatabase : RoomDatabase() {
     abstract val assignmentDatabaseDao: AssignmentDatabaseDao
 

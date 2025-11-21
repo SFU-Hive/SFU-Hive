@@ -100,23 +100,41 @@ object Util {
                         continue
                     }
 
+                    // get assignment group weights
+                    val groupsURL = URL("https://canvas.sfu.ca/api/v1/courses/$courseId/assignment_groups")
+                    val groupsArray = getJsonArrayFromURL(groupsURL, token)
+
+                    val groupWeightMap = mutableMapOf<Long, Double>()
+
+                    for (j in 0 until groupsArray.length()) {
+                        val group = groupsArray.getJSONObject(j)
+                        val groupId = group.optLong("id")
+                        val groupWeight = group.optDouble("group_weight", 0.0)
+
+                        // Populate the map
+                        groupWeightMap[groupId] = groupWeight
+                    }
 
                     // get assignments for each course
                     val assignmentsURL = URL("https://canvas.sfu.ca/api/v1/courses/$courseId/assignments")
                     val assignmentArray = getJsonArrayFromURL(assignmentsURL, token)
 
                     // read assignments
-                    for (i in 0 until assignmentArray.length()) {
+                    for (j in 0 until assignmentArray.length()) {
 
                         // get all relevant assignment info
-                        val canvasAssignment = assignmentArray.getJSONObject(i)
+                        val canvasAssignment = assignmentArray.getJSONObject(j)
                         val assignmentId = canvasAssignment.optLong("id")
                         val assnDue = canvasAssignment.optString("due_at", "")
                         val assnName = canvasAssignment.optString("name", "")
                         val assnPoints = canvasAssignment.optDouble("points_possible", 0.0)
+                        val assnGroupId = canvasAssignment.optLong("assignment_group_id")
+
+                        // map group id
+                        val groupWeight = groupWeightMap[assnGroupId] ?: 0.0
 
                         // use if u wanna log assignments
-                        Log.d("CanvasAPI", "Course Name: $courseName, Assignment Name: $assnName, Assignment Points: $assnPoints, Assignment Due: $assnDue")
+                        Log.d("CanvasAPI_assignments", "Course Name: $courseName, Assignment Name: $assnName, Assignment Points: $assnPoints, Assignment Due: $assnDue, Group Weight: $groupWeight")
 
                         val assignment = Assignment()
                         // manually setting id
@@ -125,6 +143,7 @@ object Util {
                         assignment.assignmentName = assnName
                         assignment.pointsPossible = assnPoints
                         assignment.dueAt = assnDue
+                        assignment.groupWeight = groupWeight
 
                         dataViewModel.insertAssignment(assignment)
                     }
@@ -136,8 +155,8 @@ object Util {
                     val tabsArray = getJsonArrayFromURL(tabsURL, token)
 
                     // search through tabs
-                    for (i in 0 until tabsArray.length()) {
-                        val tab = tabsArray.getJSONObject(i)
+                    for (j in 0 until tabsArray.length()) {
+                        val tab = tabsArray.getJSONObject(j)
                         val tabId = tab.optString("id")
                         val tabVisibility = tab.optString("visibility")
 
@@ -159,10 +178,10 @@ object Util {
                     val fileArray = getJsonArrayFromURL(filesURL, token)
 
                     // read files
-                    for (i in 0 until fileArray.length()) {
+                    for (j in 0 until fileArray.length()) {
 
                         // get all relevant file info
-                        val canvasFile = fileArray.getJSONObject(i)
+                        val canvasFile = fileArray.getJSONObject(j)
                         val fileId = canvasFile.optLong("id")
                         val fileName = canvasFile.optString("display_name", "")
                         val fileUrl = canvasFile.optString("url", "")
