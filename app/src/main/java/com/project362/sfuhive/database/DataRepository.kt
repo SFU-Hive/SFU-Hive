@@ -4,7 +4,6 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.project362.sfuhive.Assignments.RateSubmissionDialog
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,11 +16,12 @@ import kotlinx.coroutines.withContext
 
 // adapted from RoomDatabase demo
 class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
+                     private val fileDatabaseDao: FileDatabaseDao,
                      private val remoteDatabase: FirebaseRemoteDatabase) {
 
     val allAssignments: Flow<List<Assignment>> = assignmentDatabaseDao.getAllActivities()
 
-    fun insert(assignment: Assignment) {
+    fun insertAssignment(assignment: Assignment) {
         CoroutineScope(IO).launch {
             assignmentDatabaseDao.insertAssignment(assignment)
         }
@@ -33,11 +33,33 @@ class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
         }
     }
 
-    fun deleteAll() {
+    fun deleteAllAssignments() {
         CoroutineScope(IO).launch {
             assignmentDatabaseDao.deleteAll()
         }
     }
+
+    // Files section
+    val  allFiles: Flow<List<File>> = fileDatabaseDao.getAllFiles()
+
+    fun insertFile(file: File) {
+        CoroutineScope(IO).launch {
+            fileDatabaseDao.insertFile(file)
+        }
+    }
+
+    fun getFile(id: Long): File? {
+        return runBlocking(IO) {
+            fileDatabaseDao.getFile(id)
+        }
+    }
+
+    fun deleteAllFiles() {
+        CoroutineScope(IO).launch {
+            fileDatabaseDao.deleteAll()
+        }
+    }
+
 
     // This section for the remote database
     // Remote database MVVM refactor assisted by Gemini

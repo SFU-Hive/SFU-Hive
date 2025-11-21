@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
         loadButton.setOnClickListener {
             // put all assignments into database on start if not there
             Thread {
-                Util.getCanvasAssignments(this, this)
+                Util.getCanvasData(this, this)
             }.start()
 
             // open to dashboard
