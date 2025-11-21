@@ -9,6 +9,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.project362.sfuhive.Assignments.RateSubmissionDialog.RatedAssignment
 import com.project362.sfuhive.R
+import com.project362.sfuhive.Util.formatDoubleToText
 
 class DisplayRatedAssignmentActivity: AppCompatActivity() {
 
@@ -51,6 +52,6 @@ class DisplayRatedAssignmentActivity: AppCompatActivity() {
         courseNameView.text = "Course: $courseName"
         assignmentNameView.text = "Assignment: $assignmentName"
         difficultyBar.setRating(averageDifficulty.toFloat())
-        hoursView.text = averageHours.toString()
+        hoursView.text = formatDoubleToText(averageHours)
     }
 }
