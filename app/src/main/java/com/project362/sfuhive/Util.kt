@@ -36,6 +36,7 @@ object Util {
     const val COURSE_ID_KEY = "course_id"
     const val COURSE_NAME_KEY = "course_name"
     const val GRADE_KEY = "grade_key"
+    const val NAME_KEY = "name_key"
 
     private lateinit var database: AssignmentDatabase
     private lateinit var databaseDao: AssignmentDatabaseDao
@@ -83,7 +84,7 @@ object Util {
                 // add name to prefs
                 val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
                 val editor = prefs.edit()
-                editor.putString("name", name)
+                editor.putString(NAME_KEY, name)
                 editor.apply()
 
                 val coursesURL = URL("https://canvas.sfu.ca/api/v1/courses?enrollment_state=active")
