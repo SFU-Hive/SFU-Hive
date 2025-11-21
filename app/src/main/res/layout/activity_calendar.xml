@@ -123,27 +123,41 @@
             </LinearLayout>
         </FrameLayout>
 
-        <!-- Today’s Tasks -->
-        <TextView
-            android:id="@+id/tvSelectedDate"
+        <!-- Task Section (FIXED) -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Today's Tasks"
-            android:textColor="@android:color/black"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            card_view:cardElevation="0dp" />
+            android:orientation="vertical"
+            android:paddingTop="24dp"
+            android:paddingBottom="200dp">
 
-        <!-- Tasks List -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/tasksRecycler"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:overScrollMode="never"
-            android:nestedScrollingEnabled="false"
-            android:padding="3dp"
-            card_view:cardElevation="0dp" />
+            <!-- Selected Date -->
+            <TextView
+                android:id="@+id/tvSelectedDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="Today's Tasks"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <!-- Add Task button -->
+            <Button
+                android:id="@+id/addTaskButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:text="Add Task" />
+
+            <!-- Tasks List -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/tasksRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:padding="4dp" />
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>
