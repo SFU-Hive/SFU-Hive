@@ -88,7 +88,7 @@ class CalendarActivity : ComponentActivity() {
             updateCalendar()
         }
 
-        // NEW: Refresh button logic
+        // Refresh Google data
         findViewById<Button>(R.id.refreshButton)?.setOnClickListener {
             val account = GoogleSignIn.getLastSignedInAccount(this)
             if (account != null) {
@@ -102,21 +102,37 @@ class CalendarActivity : ComponentActivity() {
         updateCalendar()
     }
 
-    // Observe DB assignments and merge with Google events (in memory)
+    /** ---------- FLEXIBLE DATE PARSER FOR ALL SOURCES (Canvas, Firebase, Google) ---------- **/
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun parseDateFlexible(raw: String): LocalDate? {
+        return try {
+            // Example: 2025-11-22T23:59:00Z
+            LocalDate.parse(raw, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        } catch (_: Exception) {
+            try {
+                // Example: 2025-11-22
+                LocalDate.parse(raw.substring(0, 10))
+            } catch (_: Exception) {
+                null
+            }
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateCalendar() {
-        dataViewModel.allAssignmentsLiveData.observe(this) { assignments ->
-            val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
 
+        dataViewModel.allAssignmentsLiveData.observe(this) { assignments ->
             val prioritizedMap = mutableMapOf<LocalDate, List<String>>()
 
+            // Include Canvas + RatedAssignments
             for (assignment in assignments) {
-                val date = try { LocalDate.parse(assignment.dueAt, formatter) } catch (_: Exception) { null }
+                val date = parseDateFlexible(assignment.dueAt)
                 if (date != null) {
                     val diff = date.toEpochDay() - selectedDate.toEpochDay()
+
                     val priority = when (diff) {
-                        0L -> "high"    // due on selected date
-                        -1L, 1L -> "medium" // near selected date
+                        0L -> "high"
+                        -1L, 1L -> "medium"
                         else -> "low"
                     }
 
@@ -125,7 +141,7 @@ class CalendarActivity : ComponentActivity() {
                 }
             }
 
-            // Include Google Calendar events using same proximity logic
+            // Include Google Calendar events
             for ((date, events) in googleEventsByDate) {
                 val diff = date.toEpochDay() - selectedDate.toEpochDay()
                 val priority = when (diff) {
@@ -133,11 +149,11 @@ class CalendarActivity : ComponentActivity() {
                     -1L, 1L -> "medium"
                     else -> "low"
                 }
-
                 val existing = prioritizedMap[date] ?: listOf()
                 prioritizedMap[date] = existing + List(events.size) { priority }
             }
 
+            // Build days grid
             val yearMonth = YearMonth.from(selectedDate)
             val daysInMonth = yearMonth.lengthOfMonth()
             val firstDay = selectedDate.withDayOfMonth(1)
@@ -160,25 +176,21 @@ class CalendarActivity : ComponentActivity() {
 
             calendarRecycler.layoutManager = GridLayoutManager(this, 7)
             calendarRecycler.adapter = adapter
+
             showAssignmentsForDay(selectedDate)
         }
     }
 
-
-    // Display both Canvas and Google events (not saved)
     @RequiresApi(Build.VERSION_CODES.O)
     private fun showAssignmentsForDay(date: LocalDate) {
-        selectedDate = date
         selectedDateText.text = date.format(DateTimeFormatter.ofPattern("MMM dd"))
 
-        val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
-
-        // Canvas (from DB)
+        // Local + Firebase assignments
         val canvasAssignments = dataViewModel.allAssignmentsLiveData.value?.filter {
-            try { LocalDate.parse(it.dueAt, formatter) == date } catch (_: Exception) { false }
+            parseDateFlexible(it.dueAt) == date
         }.orEmpty()
 
-        // Google (in-memory, not stored)
+        // Google events → convert to "fake Assignments"
         val googleAssignments = googleEventsByDate[date]?.map { event ->
             Assignment(
                 assignmentId = 0L,
@@ -189,12 +201,10 @@ class CalendarActivity : ComponentActivity() {
             )
         }.orEmpty()
 
-        // Merge both (in memory only)
         val combined = canvasAssignments + googleAssignments
         taskAdapter.update(combined)
     }
 
-    // Handle Google sign-in results
     private val signInLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK && result.data != null) {
@@ -202,7 +212,6 @@ class CalendarActivity : ComponentActivity() {
             }
         }
 
-    // Called when Google events fetched (not persisted)
     @RequiresApi(Build.VERSION_CODES.O)
     private fun handleGoogleEvents(events: List<Event>) {
         googleEventsByDate.clear()

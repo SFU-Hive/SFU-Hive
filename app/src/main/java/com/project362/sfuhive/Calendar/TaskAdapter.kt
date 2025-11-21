@@ -7,9 +7,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
 import com.project362.sfuhive.database.Assignment
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 class TaskAdapter(private var items: List<Assignment>) :
     RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
@@ -31,19 +28,15 @@ class TaskAdapter(private var items: List<Assignment>) :
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         val task = items[position]
 
-        // Extract short code from "CMPT362 D100 Mobile Apps"
         val courseCode = task.courseName.split(" ").firstOrNull() ?: "Course"
-
-        // Display: CMPT362: Assignment title
         holder.tvTaskName.text = "$courseCode: ${task.assignmentName}"
 
-        // Format due date
         val date = task.dueAt.substringBefore("T")
         holder.tvDueDate.text = "Due: $date"
 
-        // Always High Priority (as requested)
-        holder.tvPriority.text = "High"
-        holder.tvPriority.setBackgroundResource(R.drawable.bg_priority_high)
+        // Default priority (until user sets custom)
+        holder.tvPriority.text = "No Priority"
+        holder.tvPriority.setBackgroundResource(R.drawable.bg_priority_default)
     }
 
     fun update(newList: List<Assignment>) {
