@@ -15,11 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.project362.sfuhive.R
 import com.project362.sfuhive.Util
 import com.project362.sfuhive.database.Assignment
-import com.project362.sfuhive.database.AssignmentViewModel
+import com.project362.sfuhive.database.DataViewModel
 import com.google.api.services.calendar.model.Event
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.project362.sfuhive.Calendar.CalendarAdapter
-import com.project362.sfuhive.Calendar.GoogleCalendarHelper
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -33,7 +31,7 @@ class CalendarActivity : ComponentActivity() {
     private lateinit var btnNext: ImageButton
     private lateinit var tasksRecycler: androidx.recyclerview.widget.RecyclerView
     private lateinit var taskAdapter: TaskAdapter
-    private lateinit var assignmentViewModel: AssignmentViewModel
+    private lateinit var dataViewModel: DataViewModel
     private lateinit var googleHelper: GoogleCalendarHelper
 
     // Keep Google events in memory only
@@ -48,9 +46,9 @@ class CalendarActivity : ComponentActivity() {
         setContentView(R.layout.activity_calendar)
 
         // ViewModel Setup
-        assignmentViewModel =
+        dataViewModel =
             ViewModelProvider(this, Util.getViewModelFactory(this))
-                .get(AssignmentViewModel::class.java)
+                .get(DataViewModel::class.java)
 
         // UI References
         monthYearText = findViewById(R.id.tvMonthYear)
@@ -107,7 +105,7 @@ class CalendarActivity : ComponentActivity() {
     // Observe DB assignments and merge with Google events (in memory)
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateCalendar() {
-        assignmentViewModel.allAssignmentsLiveData.observe(this) { assignments ->
+        dataViewModel.allAssignmentsLiveData.observe(this) { assignments ->
             val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
 
             val prioritizedMap = mutableMapOf<LocalDate, List<String>>()
@@ -176,7 +174,7 @@ class CalendarActivity : ComponentActivity() {
         val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
 
         // Canvas (from DB)
-        val canvasAssignments = assignmentViewModel.allAssignmentsLiveData.value?.filter {
+        val canvasAssignments = dataViewModel.allAssignmentsLiveData.value?.filter {
             try { LocalDate.parse(it.dueAt, formatter) == date } catch (_: Exception) { false }
         }.orEmpty()
 

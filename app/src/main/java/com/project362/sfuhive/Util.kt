@@ -12,8 +12,9 @@ import com.project362.sfuhive.database.Assignment
 import com.project362.sfuhive.database.AssignmentDatabase
 import com.project362.sfuhive.database.AssignmentDatabaseDao
 import com.project362.sfuhive.database.DataRepository
-import com.project362.sfuhive.database.AssignmentViewModel
-import com.project362.sfuhive.database.AssignmentViewModelFactory
+import com.project362.sfuhive.database.DataViewModel
+import com.project362.sfuhive.database.DataViewModelFactory
+import com.project362.sfuhive.database.FirebaseRemoteDatabase
 import org.json.JSONArray
 import org.json.JSONTokener
 import java.net.HttpURLConnection
@@ -36,9 +37,9 @@ object Util {
     private lateinit var database: AssignmentDatabase
     private lateinit var databaseDao: AssignmentDatabaseDao
     private lateinit var repository: DataRepository
-    private lateinit var viewModelFactory: AssignmentViewModelFactory
+    private lateinit var viewModelFactory: DataViewModelFactory
 
-    private lateinit var assignmentViewModel: AssignmentViewModel
+    private lateinit var dataViewModel: DataViewModel
 
     // data class for assignment submission
     data class SubmittedAssignment(
@@ -52,10 +53,10 @@ object Util {
     fun getCanvasAssignments(owner: ViewModelStoreOwner, context: Context) {
             try {
                 viewModelFactory = getViewModelFactory(context)
-                assignmentViewModel = ViewModelProvider(owner, viewModelFactory).get(AssignmentViewModel::class.java)
+                dataViewModel = ViewModelProvider(owner, viewModelFactory).get(DataViewModel::class.java)
 
                 // delete all before inserting for fresh restart
-                assignmentViewModel.deleteAll()
+                dataViewModel.deleteAll()
 
                 // get key from manifest and set URL
                 val ai: ApplicationInfo = context.packageManager
@@ -101,7 +102,7 @@ object Util {
                         assignment.pointsPossible = assnPoints
                         assignment.dueAt = assnDue
 
-                        assignmentViewModel.insert(assignment)
+                        dataViewModel.insert(assignment)
                     }
                 }
 
@@ -248,11 +249,12 @@ object Util {
         return coursesArray
     }
 
-    fun getViewModelFactory(context: Context): AssignmentViewModelFactory {
+    fun getViewModelFactory(context: Context): DataViewModelFactory {
         database = AssignmentDatabase.getInstance(context)
         databaseDao = database.assignmentDatabaseDao
-        repository = DataRepository(databaseDao)
-        viewModelFactory = AssignmentViewModelFactory(repository)
+        val remoteDatabase = FirebaseRemoteDatabase()
+        repository = DataRepository(databaseDao, remoteDatabase)
+        viewModelFactory = DataViewModelFactory(repository)
         return viewModelFactory
     }
 }

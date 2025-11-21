@@ -4,10 +4,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 
 // adapted from RoomDatabase demo
-class AssignmentViewModel(private val repository: DataRepository) : ViewModel() {
+class DataViewModel(private val repository: DataRepository) : ViewModel() {
 
     val allAssignmentsLiveData: LiveData<List<Assignment>> = repository.allAssignments.asLiveData()
 
@@ -22,12 +24,26 @@ class AssignmentViewModel(private val repository: DataRepository) : ViewModel() 
     fun deleteAll(){
         repository.deleteAll()
     }
+
+    // This section for remote database
+    // 💡 Expose the course data to the Fragment for the RecyclerView
+    val courseListLiveData = repository.courseFlow.asLiveData()
+
+    // You can expose all assignments as needed, or let the Fragment access the repo data
+    val allAssignmentsStateFlow = repository.allAssignmentsFlow.asLiveData()
+
+    // Function to trigger data loading
+    fun loadCourses() {
+        viewModelScope.launch {
+            repository.fetchAssignmentData()
+        }
+    }
 }
 
-class AssignmentViewModelFactory (private val repository: DataRepository) : ViewModelProvider.Factory {
+class DataViewModelFactory (private val repository: DataRepository) : ViewModelProvider.Factory {
     override fun<T: ViewModel> create(modelClass: Class<T>) : T{
-        if(modelClass.isAssignableFrom(AssignmentViewModel::class.java))
-            return AssignmentViewModel(repository) as T
+        if(modelClass.isAssignableFrom(DataViewModel::class.java))
+            return DataViewModel(repository) as T
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

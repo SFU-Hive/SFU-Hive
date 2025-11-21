@@ -11,7 +11,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.project362.sfuhive.Assignments.AssignmentFragment.Course
 import com.project362.sfuhive.R
 import com.project362.sfuhive.Assignments.RateSubmissionDialog.RatedAssignment
 import java.util.ArrayList

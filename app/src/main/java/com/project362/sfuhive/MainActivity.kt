@@ -19,13 +19,13 @@ import com.project362.sfuhive.Assignments.RateSubmissionDialog
 import com.project362.sfuhive.Util.LAST_SYNC_KEY
 import com.project362.sfuhive.Util.PREFS_KEY
 import com.project362.sfuhive.Util.SubmittedAssignment
-import com.project362.sfuhive.database.AssignmentViewModel
-import com.project362.sfuhive.database.AssignmentViewModelFactory
+import com.project362.sfuhive.database.DataViewModel
+import com.project362.sfuhive.database.DataViewModelFactory
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var viewModelFactory: AssignmentViewModelFactory
-    private lateinit var assignmentViewModel: AssignmentViewModel
+    private lateinit var viewModelFactory: DataViewModelFactory
+    private lateinit var dataViewModel: DataViewModel
     private lateinit var loadButton: Button
     private lateinit var auth: FirebaseAuth
     private var user: FirebaseUser? = null
@@ -59,11 +59,11 @@ class MainActivity : AppCompatActivity() {
         loadButton = findViewById(R.id.load)
 
         viewModelFactory = Util.getViewModelFactory(this)
-        assignmentViewModel =
-            ViewModelProvider(this, viewModelFactory).get(AssignmentViewModel::class.java)
+        dataViewModel =
+            ViewModelProvider(this, viewModelFactory).get(DataViewModel::class.java)
 
         // observe and log local database changes
-        assignmentViewModel.allAssignmentsLiveData.observe(this, Observer { it ->
+        dataViewModel.allAssignmentsLiveData.observe(this, Observer { it ->
             Log.d("DatabaseCheck", "Assignments count: ${it.size}")
         })
 
