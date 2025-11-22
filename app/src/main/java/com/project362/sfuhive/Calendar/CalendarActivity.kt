@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,7 +24,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
-class CalendarActivity : ComponentActivity() {
+class CalendarActivity : FragmentActivity() {
 
     private lateinit var monthYearText: TextView
     private lateinit var selectedDateText: TextView
@@ -35,7 +36,6 @@ class CalendarActivity : ComponentActivity() {
     private lateinit var dataViewModel: DataViewModel
     private lateinit var googleHelper: GoogleCalendarHelper
 
-    // Keep Google events in memory only
     private val googleEventsByDate = mutableMapOf<LocalDate, List<Event>>()
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -46,12 +46,10 @@ class CalendarActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_calendar)
 
-        // ViewModel Setup
         dataViewModel =
             ViewModelProvider(this, Util.getViewModelFactory(this))
                 .get(DataViewModel::class.java)
 
-        // UI References
         monthYearText = findViewById(R.id.tvMonthYear)
         selectedDateText = findViewById(R.id.tvSelectedDate)
         calendarRecycler = findViewById(R.id.calendarRecycler)
@@ -73,7 +71,6 @@ class CalendarActivity : ComponentActivity() {
             updateCalendar()
         }
 
-        // Google Calendar Setup
         googleHelper = GoogleCalendarHelper(this) { events ->
             handleGoogleEvents(events)
         }
@@ -89,7 +86,6 @@ class CalendarActivity : ComponentActivity() {
             updateCalendar()
         }
 
-        // Refresh Google data
         findViewById<Button>(R.id.refreshButton)?.setOnClickListener {
             val account = GoogleSignIn.getLastSignedInAccount(this)
             if (account != null) {
@@ -100,10 +96,39 @@ class CalendarActivity : ComponentActivity() {
             }
         }
 
+        /** ADD TASK BUTTON **/
+        findViewById<Button>(R.id.addTaskButton).setOnClickListener {
+            AddTaskDialog(
+                this,
+                supportFragmentManager     // now works because you changed Activity to FragmentActivity
+            ) { title, date, start, end ->
+                saveNewTask(title, date, start, end)
+            }.show()
+        }
+
         updateCalendar()
     }
 
-    /** ---------- FLEXIBLE DATE PARSER FOR ALL SOURCES ---------- **/
+    /** ---------- SAVE CUSTOM TASK ---------- **/
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun saveNewTask(title: String, date: String, start: String, end: String) {
+        val newAssignment = Assignment(
+            assignmentId = 0L,
+            courseName = "Custom Task",
+            assignmentName = title,
+            dueAt = "${date}T$start",
+            pointsPossible = 0.0
+        )
+
+        dataViewModel.insertAssignment(newAssignment)
+
+        Toast.makeText(this, "Task Added!", Toast.LENGTH_SHORT).show()
+
+        updateCalendar()
+        showAssignmentsForDay(LocalDate.parse(date))
+    }
+
+    /** ---------- FLEXIBLE DATE PARSER ---------- **/
     @RequiresApi(Build.VERSION_CODES.O)
     private fun parseDateFlexible(raw: String): LocalDate? {
         return try {
@@ -117,13 +142,14 @@ class CalendarActivity : ComponentActivity() {
         }
     }
 
+    /** ---------- UPDATE CALENDAR UI ---------- **/
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateCalendar() {
 
         dataViewModel.allAssignmentsLiveData.observe(this) { assignments ->
+
             val prioritizedMap = mutableMapOf<LocalDate, List<String>>()
 
-            // Include Canvas + RatedAssignments
             for (assignment in assignments) {
                 val date = parseDateFlexible(assignment.dueAt)
                 if (date != null) {
@@ -140,7 +166,6 @@ class CalendarActivity : ComponentActivity() {
                 }
             }
 
-            // Include Google Calendar events
             for ((date, events) in googleEventsByDate) {
                 val diff = date.toEpochDay() - selectedDate.toEpochDay()
                 val priority = when (diff) {
@@ -152,7 +177,6 @@ class CalendarActivity : ComponentActivity() {
                 prioritizedMap[date] = existing + List(events.size) { priority }
             }
 
-            // Build days grid
             val yearMonth = YearMonth.from(selectedDate)
             val daysInMonth = yearMonth.lengthOfMonth()
             val firstDay = selectedDate.withDayOfMonth(1)
@@ -161,7 +185,8 @@ class CalendarActivity : ComponentActivity() {
             val days = MutableList(shift) { null } +
                     (1..daysInMonth).map { selectedDate.withDayOfMonth(it) }
 
-            monthYearText.text = selectedDate.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
+            monthYearText.text =
+                selectedDate.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
 
             val adapter = CalendarAdapter(
                 days = days,
@@ -170,13 +195,12 @@ class CalendarActivity : ComponentActivity() {
             ) { date ->
 
                 if (date == selectedDate) {
-                    // ---------- SECOND TAP → OPEN DAY VIEW ----------
                     val intent = Intent(this, DayViewActivity::class.java)
                     intent.putExtra("selected_date", date.toString())
-                    GoogleEventCache.events[date.toString()] = googleEventsByDate[date] ?: listOf()
+                    GoogleEventCache.events[date.toString()] =
+                        googleEventsByDate[date] ?: listOf()
                     startActivity(intent)
                 } else {
-                    // ---------- FIRST TAP → NORMAL UPDATE ----------
                     selectedDate = date
                     (calendarRecycler.adapter as CalendarAdapter).updateSelectedDate(date)
                     showAssignmentsForDay(date)
@@ -190,6 +214,7 @@ class CalendarActivity : ComponentActivity() {
         }
     }
 
+    /** ---------- SHOW TASKS BELOW CALENDAR ---------- **/
     @RequiresApi(Build.VERSION_CODES.O)
     private fun showAssignmentsForDay(date: LocalDate) {
         selectedDateText.text = date.format(DateTimeFormatter.ofPattern("MMM dd"))
@@ -215,10 +240,14 @@ class CalendarActivity : ComponentActivity() {
     private val signInLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK && result.data != null) {
-                googleHelper.handleSignInResult(GoogleCalendarHelper.RC_SIGN_IN, result.data!!)
+                googleHelper.handleSignInResult(
+                    GoogleCalendarHelper.RC_SIGN_IN,
+                    result.data!!
+                )
             }
         }
 
+    /** ---------- GOOGLE EVENTS ---------- **/
     @RequiresApi(Build.VERSION_CODES.O)
     private fun handleGoogleEvents(events: List<Event>) {
         googleEventsByDate.clear()
