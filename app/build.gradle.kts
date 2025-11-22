@@ -103,6 +103,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     // AndroidX Fragment
     implementation("androidx.fragment:fragment-ktx:1.8.5")
+    implementation("androidx.annotation:annotation:1.8.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     implementation("androidx.cardview:cardview:1.0.0")

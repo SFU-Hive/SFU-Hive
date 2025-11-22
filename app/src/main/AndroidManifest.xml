@@ -29,6 +29,7 @@
         <activity android:name=".Assignments.ListAssignmentsActivity" />
         <activity android:name=".Assignments.DisplayRatedAssignmentActivity" />
         <activity android:name=".Calendar.CalendarActivity" />
+        <activity android:name=".Calendar.DayViewActivity" />
         <activity android:name=".Progress.Badges.BadgeActivity" />
         <activity android:name=".Progress.Streaks.StreakActivity" />
         <activity android:name=".Progress.Rewards.RewardActivity" />
