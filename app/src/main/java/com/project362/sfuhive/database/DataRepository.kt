@@ -3,6 +3,7 @@ package com.project362.sfuhive.database
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.project362.sfuhive.Assignments.RateSubmissionDialog
+import com.project362.sfuhive.database.Badge.BadgeDatabaseDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +18,9 @@ import kotlinx.coroutines.withContext
 // adapted from RoomDatabase demo
 class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
                      private val fileDatabaseDao: FileDatabaseDao,
-                     private val remoteDatabase: FirebaseRemoteDatabase) {
+                     private val remoteDatabase: FirebaseRemoteDatabase,
+                     private val badgeDatabaseDao: BadgeDatabaseDao
+) {
 
     val allAssignments: Flow<List<Assignment>> = assignmentDatabaseDao.getAllActivities()
 
@@ -59,6 +62,8 @@ class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
             fileDatabaseDao.deleteAll()
         }
     }
+
+
 
 
     // This section for the remote database

@@ -11,6 +11,8 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.project362.sfuhive.database.Assignment
 import com.project362.sfuhive.database.AssignmentDatabase
 import com.project362.sfuhive.database.AssignmentDatabaseDao
+import com.project362.sfuhive.database.Badge.BadgeDatabase
+import com.project362.sfuhive.database.Badge.BadgeDatabaseDao
 import com.project362.sfuhive.database.DataRepository
 import com.project362.sfuhive.database.DataViewModel
 import com.project362.sfuhive.database.DataViewModelFactory
@@ -377,7 +379,6 @@ object Util {
 
         return jsonObject
     }
-
     fun getViewModelFactory(context: Context): DataViewModelFactory {
         // assignment database
         database = AssignmentDatabase.getInstance(context)
@@ -389,7 +390,12 @@ object Util {
 
         // remote database
         val remoteDatabase = FirebaseRemoteDatabase()
-        repository = DataRepository(databaseDao, fileDatabaseDao, remoteDatabase)
+
+        // badge database
+        val badgeDatabase = BadgeDatabase.getInstance(context)
+        val badgeDatabaseDao = badgeDatabase.badgeDatabaseDao
+
+        repository = DataRepository(databaseDao, fileDatabaseDao, remoteDatabase,badgeDatabaseDao)
         viewModelFactory = DataViewModelFactory(repository)
         return viewModelFactory
     }

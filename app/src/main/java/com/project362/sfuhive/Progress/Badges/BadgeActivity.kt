@@ -13,10 +13,13 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
+import com.project362.sfuhive.Util
 
 class BadgeActivity : AppCompatActivity(){
 
+    // View Models
     private lateinit var badgeActivityVM : BadgeActivityViewModel
+    private var repoVM =  Util.getViewModelFactory(this)
     private var badgeFactory = BadgeFactory()
     private var tmpBadgesList = badgeFactory.getAllBadges()
 

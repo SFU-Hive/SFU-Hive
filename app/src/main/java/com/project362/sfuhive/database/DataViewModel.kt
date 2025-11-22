@@ -41,6 +41,8 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
     }
 
 
+    // fun
+
     // This section for remote database
     // 💡 Expose the course data to the Fragment for the RecyclerView
     val courseListLiveData = repository.courseFlow.asLiveData()

@@ -24,7 +24,7 @@
                 android:id ="@+id/currency_image"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:src="@drawable/image_not_found"
+                android:src="@drawable/coin"
                 android:layout_gravity="end"/>
 
                 <TextView

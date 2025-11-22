@@ -20,9 +20,12 @@ import com.project362.sfuhive.Progress.Badges.BadgeActivityViewModel
 import com.project362.sfuhive.Progress.Badges.BadgeAdapter
 import com.project362.sfuhive.Progress.Badges.BadgeFactory
 import com.project362.sfuhive.R
+import com.project362.sfuhive.Util
 
 class RewardActivity : AppCompatActivity() {
     private lateinit var rewardActivityVM : RewardActivityViewModel
+
+    private var repoVM =  Util.getViewModelFactory(this)
     private var rewardFactory = RewardFactory()
     private var tmpRewardList =rewardFactory.getAllRewards()
 
@@ -67,7 +70,7 @@ class RewardActivity : AppCompatActivity() {
         supportFragmentManager.setFragmentResultListener(REDEEM,this){ requestKey, bundle ->
             val text_data = bundle.getBundle(PurchaseDialog.DIALOG_RESULT)
             val user_confirmation = bundle.getString(PurchaseDialog.STRING_RESULT)
-            //val user_confirmation=text_data?.getString(PurchaseDialog.STRING_RESULT,"Error")
+
             println("inside dialog result data is: $user_confirmation")
 
             if(user_confirmation == "redeemed"){
@@ -75,6 +78,9 @@ class RewardActivity : AppCompatActivity() {
                 rewardActivityVM.subtractCost()
 
                 // TODO: add Reward to database
+                // TODO: check for badge update
+
+
 
             }
         }
