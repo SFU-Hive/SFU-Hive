@@ -1,13 +1,15 @@
 package com.project362.sfuhive.Wellness
 
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import android.graphics.Color
+import android.net.Uri
 import android.util.Log
+import android.widget.ImageView
 import com.project362.sfuhive.R
 import androidx.lifecycle.ViewModelProvider
 import com.github.mikephil.charting.charts.LineChart
@@ -17,15 +19,17 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.data.Entry;
 import java.text.SimpleDateFormat
 import java.util.Locale
+import com.bumptech.glide.Glide
+
 
 
 class EnergyMgmtActivity : AppCompatActivity() {
+    // energy
     private lateinit var energyBtn1: Button
     private lateinit var energyBtn2: Button
     private lateinit var energyBtn3: Button
     private lateinit var energyBtn4: Button
     private lateinit var energyBtn5: Button
-
     private lateinit var energyViewModel: EnergyViewModel
     private lateinit var lineChart: LineChart
 
@@ -51,6 +55,19 @@ class EnergyMgmtActivity : AppCompatActivity() {
         energyBtn4.tag = 4
         energyBtn5.tag = 5
 
+        val id1 = "inpok4MKVLM"
+        val id2 = "ZToicYcHIOU"
+        val id3 = "2OEL4P1Rz04"
+
+        // Find views
+        val video1 = findViewById<View>(R.id.videoTile1)
+        val video2 = findViewById<View>(R.id.videoTile2)
+        val video3 = findViewById<View>(R.id.videoTile3)
+
+        val thumb1 = findViewById<ImageView>(R.id.thumb1)
+        val thumb2 = findViewById<ImageView>(R.id.thumb2)
+        val thumb3 = findViewById<ImageView>(R.id.thumb3)
+
         // observer energy from view model
         energyViewModel.energies.observe(this) { list ->
             // Log.d("EnergyList", "Size = ${list.size}, data=$list")
@@ -74,9 +91,19 @@ class EnergyMgmtActivity : AppCompatActivity() {
         energyBtn3.setOnClickListener(clickListener)
         energyBtn4.setOnClickListener(clickListener)
         energyBtn5.setOnClickListener(clickListener)
+
+
+        // youtube stuff
+        loadThumbnail(thumb1, id1)
+        loadThumbnail(thumb2, id2)
+        loadThumbnail(thumb3, id3)
+
+        setYoutubeClick(video1, id1)
+        setYoutubeClick(video2, id2)
+        setYoutubeClick(video3, id3)
     }
 
-    // rendering chart =======================================
+    // rendering chart ==============================================================================
     private fun renderChart(energyList: List<Pair<String, Int>>) {
         if (energyList.isEmpty()) return
 
@@ -127,4 +154,26 @@ class EnergyMgmtActivity : AppCompatActivity() {
             dateString // fallback
         }
     }
+
+    // youtube media ==============================================================================
+    fun loadThumbnail(imageView: ImageView, videoId: String) {
+        val thumbnailUrl = "https://img.youtube.com/vi/$videoId/hqdefault.jpg"
+        Glide.with(this).load(thumbnailUrl).into(imageView)
+    }
+
+    private fun setYoutubeClick(view: View, videoId: String) {
+        view.setOnClickListener { openYouTube(videoId) }
+    }
+
+    private fun openYouTube(videoId: String) {
+        val appIntent = Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:$videoId"))
+        val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch?v=$videoId"))
+
+        try {
+            startActivity(appIntent)
+        } catch (e: Exception) {
+            startActivity(webIntent)
+        }
+    }
+
 }

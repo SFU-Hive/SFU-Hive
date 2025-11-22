@@ -114,4 +114,8 @@ dependencies {
     implementation("com.google.http-client:google-http-client-android:1.44.1")
     // NOTE: this version tag must have "-1.34.0" suffix — older tags don't resolve correctly
     implementation("com.google.apis:google-api-services-calendar:v3-rev411-1.25.0")
+
+    // youtube video player
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
 }

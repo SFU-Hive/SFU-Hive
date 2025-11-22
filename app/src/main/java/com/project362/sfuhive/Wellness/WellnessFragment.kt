@@ -1,18 +1,21 @@
 package com.project362.sfuhive.Wellness
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.project362.sfuhive.R
 
 class WellnessFragment : Fragment() {
@@ -62,6 +65,19 @@ class WellnessFragment : Fragment() {
         energyBtn4.tag = 4
         energyBtn5.tag = 5
 
+        val id1 = "inpok4MKVLM"
+        val id2 = "ZToicYcHIOU"
+        val id3 = "2OEL4P1Rz04"
+
+        // Find views
+        val video1 = view.findViewById<View>(R.id.videoTile1)
+        val video2 = view.findViewById<View>(R.id.videoTile2)
+        val video3 = view.findViewById<View>(R.id.videoTile3)
+
+        val thumb1 = view.findViewById<ImageView>(R.id.thumb1)
+        val thumb2 = view.findViewById<ImageView>(R.id.thumb2)
+        val thumb3 = view.findViewById<ImageView>(R.id.thumb3)
+
         val clickListener = View.OnClickListener { view ->
             val value = view.tag as Int
             // Log.d("wellness", "saving energy from wellness frag $value")
@@ -74,5 +90,37 @@ class WellnessFragment : Fragment() {
         energyBtn4.setOnClickListener(clickListener)
         energyBtn5.setOnClickListener(clickListener)
 
+        // youtube stuff
+        loadThumbnail(thumb1, id1)
+        loadThumbnail(thumb2, id2)
+        loadThumbnail(thumb3, id3)
+
+        setYoutubeClick(video1, id1)
+        setYoutubeClick(video2, id2)
+        setYoutubeClick(video3, id3)
+
     }
+
+    // youtube media ==============================================================================
+    fun loadThumbnail(imageView: ImageView, videoId: String) {
+        val thumbnailUrl = "https://img.youtube.com/vi/$videoId/hqdefault.jpg"
+        Glide.with(this).load(thumbnailUrl).into(imageView)
+    }
+
+    private fun setYoutubeClick(view: View, videoId: String) {
+        view.setOnClickListener { openYouTube(videoId) }
+    }
+
+    private fun openYouTube(videoId: String) {
+        val appIntent = Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:$videoId"))
+        val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch?v=$videoId"))
+
+        try {
+            startActivity(appIntent)
+        } catch (e: Exception) {
+            startActivity(webIntent)
+        }
+    }
+
+
 }

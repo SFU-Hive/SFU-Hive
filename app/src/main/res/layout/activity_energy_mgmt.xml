@@ -120,7 +120,7 @@
         android:id="@+id/chart_container"
         android:orientation="horizontal"
         android:layout_width="0dp"
-        android:layout_height="350dp"
+        android:layout_height="300dp"
         app:layout_constraintTop_toBottomOf="@id/energy_trend_label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -139,7 +139,7 @@
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/lineChart"
             android:layout_width="0dp"
-            android:layout_height="350dp"
+            android:layout_height="300dp"
             android:layout_weight="1"
             android:layout_marginStart="-35dp"
             android:visibility="gone"/>
@@ -167,31 +167,110 @@
         app:layout_constraintStart_toStartOf="@id/divider2"
         app:layout_constraintTop_toTopOf="@id/divider2" />
 
-    <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
-        android:id="@+id/youtube_player_view1"
-        android:layout_width="match_parent"
-        android:layout_height="75dp"
-        android:layout_marginTop="16dp"
-        app:autoPlay="false"
+
+    <!-- Video 1 -->
+    <TextView
+        android:id="@+id/meditation_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="5 Minute Meditation"
+        android:textSize="15sp"
         app:layout_constraintStart_toStartOf="@id/calm_label"
         app:layout_constraintTop_toBottomOf="@id/calm_label"/>
 
-    <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
-        android:id="@+id/youtube_player_view2"
+    <FrameLayout
+        android:id="@+id/videoTile1"
         android:layout_width="match_parent"
         android:layout_height="75dp"
-        android:layout_marginTop="16dp"
-        app:autoPlay="false"
-        app:layout_constraintStart_toStartOf="@id/youtube_player_view1"
-        app:layout_constraintTop_toBottomOf="@id/youtube_player_view1"/>
+        android:background="#000"
+        app:layout_constraintStart_toStartOf="@id/meditation_label"
+        app:layout_constraintTop_toBottomOf="@id/meditation_label">
 
-    <com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
-        android:id="@+id/youtube_player_view3"
+        <!-- Thumbnail -->
+        <ImageView
+            android:id="@+id/thumb1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+
+        <!-- Play Icon Overlay -->
+        <ImageView
+            android:id="@+id/playIcon1"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center"
+            android:src="@android:drawable/ic_media_play"
+            android:alpha="0.8"
+            app:tint="#FFFFFF" />
+    </FrameLayout>
+
+    <!-- Video 2 -->
+    <TextView
+        android:id="@+id/meditation_label2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="10 Minute Meditation"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="@id/videoTile1"
+        app:layout_constraintTop_toBottomOf="@id/videoTile1"/>
+
+    <FrameLayout
+        android:id="@+id/videoTile2"
         android:layout_width="match_parent"
         android:layout_height="75dp"
-        android:layout_marginTop="16dp"
-        app:autoPlay="false"
-        app:layout_constraintStart_toStartOf="@id/youtube_player_view2"
-        app:layout_constraintTop_toBottomOf="@id/youtube_player_view2"/>
+        android:background="#000"
+        app:layout_constraintStart_toStartOf="@id/meditation_label2"
+        app:layout_constraintTop_toBottomOf="@id/meditation_label2">
+
+        <ImageView
+            android:id="@+id/thumb2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+
+        <ImageView
+            android:id="@+id/playIcon2"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center"
+            android:src="@android:drawable/ic_media_play"
+            android:alpha="0.8"
+            app:tint="#FFFFFF" />
+    </FrameLayout>
+
+    <!-- Video 3 -->
+    <TextView
+        android:id="@+id/relaxation_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Relaxation Music"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="@id/videoTile2"
+        app:layout_constraintTop_toBottomOf="@id/videoTile2"/>
+
+    <FrameLayout
+        android:id="@+id/videoTile3"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:background="#000"
+        app:layout_constraintStart_toStartOf="@id/relaxation_label"
+        app:layout_constraintTop_toBottomOf="@id/relaxation_label">
+
+        <ImageView
+            android:id="@+id/thumb3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+
+        <ImageView
+            android:id="@+id/playIcon3"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center"
+            android:src="@android:drawable/ic_media_play"
+            android:alpha="0.8"
+            app:tint="#FFFFFF" />
+    </FrameLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
