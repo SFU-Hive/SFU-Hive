@@ -98,12 +98,8 @@ class CalendarActivity : FragmentActivity() {
 
         /** ADD TASK BUTTON **/
         findViewById<Button>(R.id.addTaskButton).setOnClickListener {
-            AddTaskDialog(
-                this,
-                supportFragmentManager     // now works because you changed Activity to FragmentActivity
-            ) { title, date, start, end ->
-                saveNewTask(title, date, start, end)
-            }.show()
+            val intent = Intent(this, TaskScanActivity::class.java)
+            startActivity(intent)
         }
 
         updateCalendar()
