@@ -1,5 +1,6 @@
 package com.project362.sfuhive.Calendar
 
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.widget.ImageButton
@@ -102,15 +103,13 @@ class CalendarActivity : ComponentActivity() {
         updateCalendar()
     }
 
-    /** ---------- FLEXIBLE DATE PARSER FOR ALL SOURCES (Canvas, Firebase, Google) ---------- **/
+    /** ---------- FLEXIBLE DATE PARSER FOR ALL SOURCES ---------- **/
     @RequiresApi(Build.VERSION_CODES.O)
     private fun parseDateFlexible(raw: String): LocalDate? {
         return try {
-            // Example: 2025-11-22T23:59:00Z
             LocalDate.parse(raw, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
         } catch (_: Exception) {
             try {
-                // Example: 2025-11-22
                 LocalDate.parse(raw.substring(0, 10))
             } catch (_: Exception) {
                 null
@@ -169,9 +168,19 @@ class CalendarActivity : ComponentActivity() {
                 assignmentsByDate = prioritizedMap,
                 selectedDate = selectedDate
             ) { date ->
-                selectedDate = date
-                (calendarRecycler.adapter as CalendarAdapter).updateSelectedDate(date)
-                showAssignmentsForDay(date)
+
+                if (date == selectedDate) {
+                    // ---------- SECOND TAP → OPEN DAY VIEW ----------
+                    val intent = Intent(this, DayViewActivity::class.java)
+                    intent.putExtra("selected_date", date.toString())
+                    GoogleEventCache.events[date.toString()] = googleEventsByDate[date] ?: listOf()
+                    startActivity(intent)
+                } else {
+                    // ---------- FIRST TAP → NORMAL UPDATE ----------
+                    selectedDate = date
+                    (calendarRecycler.adapter as CalendarAdapter).updateSelectedDate(date)
+                    showAssignmentsForDay(date)
+                }
             }
 
             calendarRecycler.layoutManager = GridLayoutManager(this, 7)
@@ -185,12 +194,10 @@ class CalendarActivity : ComponentActivity() {
     private fun showAssignmentsForDay(date: LocalDate) {
         selectedDateText.text = date.format(DateTimeFormatter.ofPattern("MMM dd"))
 
-        // Local + Firebase assignments
         val canvasAssignments = dataViewModel.allAssignmentsLiveData.value?.filter {
             parseDateFlexible(it.dueAt) == date
         }.orEmpty()
 
-        // Google events → convert to "fake Assignments"
         val googleAssignments = googleEventsByDate[date]?.map { event ->
             Assignment(
                 assignmentId = 0L,
