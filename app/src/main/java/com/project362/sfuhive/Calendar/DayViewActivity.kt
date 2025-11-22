@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
@@ -13,8 +14,6 @@ import com.project362.sfuhive.database.DataViewModel
 import com.project362.sfuhive.Util
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import com.project362.sfuhive.Calendar.TaskAdapter
-import com.project362.sfuhive.Calendar.GoogleEventCache
 
 class DayViewActivity : ComponentActivity() {
 
@@ -39,18 +38,23 @@ class DayViewActivity : ComponentActivity() {
             .let { androidx.lifecycle.ViewModelProvider(this, it) }
             .get(DataViewModel::class.java)
 
-        val dateStr = intent.getStringExtra("selected_date")
+        val dateStr = intent.getStringExtra("selected_date") ?: return
+        val date = LocalDate.parse(dateStr)
+
+        dateTitle.text = date.format(DateTimeFormatter.ofPattern("EEEE, MMM dd"))
+
         val googleEvents = GoogleEventCache.events[dateStr] ?: listOf()
 
-        if (dateStr != null) {
-            val date = LocalDate.parse(dateStr)
-            dateTitle.text = date.format(DateTimeFormatter.ofPattern("EEEE, MMM dd"))
+        /** ⭐ FIX: Observe LiveData instead of using .value */
+        dataViewModel.allAssignmentsLiveData.observe(this, Observer { allAssignments ->
 
-            val canvasAssignments = dataViewModel.allAssignmentsLiveData.value?.filter {
+            // Canvas + custom tasks
+            val roomTasksForDate = allAssignments.filter {
                 it.dueAt.startsWith(dateStr)
-            }.orEmpty()
+            }
 
-            val googleAssignments = googleEvents.map {
+            // Google events mapped to assignments
+            val googleAsAssignments = googleEvents.map {
                 Assignment(
                     assignmentId = 0L,
                     courseName = "Google Calendar",
@@ -60,7 +64,10 @@ class DayViewActivity : ComponentActivity() {
                 )
             }
 
-            adapter.update(canvasAssignments + googleAssignments)
-        }
+            // Combine all 3 sources
+            val combined = roomTasksForDate + googleAsAssignments
+
+            adapter.update(combined)
+        })
     }
 }
