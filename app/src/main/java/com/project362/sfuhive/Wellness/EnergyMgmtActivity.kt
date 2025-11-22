@@ -53,7 +53,7 @@ class EnergyMgmtActivity : AppCompatActivity() {
 
         // observer energy from view model
         energyViewModel.energies.observe(this) { list ->
-            Log.d("EnergyList", "Size = ${list.size}, data=$list")
+            // Log.d("EnergyList", "Size = ${list.size}, data=$list")
 
             if (!list.isNullOrEmpty()) {
                 renderChart(list)
@@ -66,6 +66,7 @@ class EnergyMgmtActivity : AppCompatActivity() {
 
         val clickListener = View.OnClickListener { view ->
             val value = view.tag as Int
+            Toast.makeText(this, "Your energy is saved", Toast.LENGTH_SHORT).show()
             energyViewModel.addEnergies(this, value)
         }
         energyBtn1.setOnClickListener(clickListener)
@@ -111,7 +112,7 @@ class EnergyMgmtActivity : AppCompatActivity() {
             animateX(700)
             description.isEnabled = false
         }
-        
+
         lineChart.invalidate() // refresh
     }
 

@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -34,10 +35,10 @@ class WellnessFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val energyLabel = view.findViewById<TextView>(R.id.energy_label)
+        val chartBtn = view.findViewById<Button>(R.id.viewChart)
         val goalsLabel = view.findViewById<TextView>(R.id.goals_label)
 
-        energyLabel.setOnClickListener {
+        chartBtn.setOnClickListener {
             val intent = Intent(requireContext(), EnergyMgmtActivity::class.java)
             startActivity(intent)
         }
@@ -65,6 +66,7 @@ class WellnessFragment : Fragment() {
             val value = view.tag as Int
             // Log.d("wellness", "saving energy from wellness frag $value")
             energyViewModel.addEnergies(requireContext(), value)
+            Toast.makeText(requireActivity(), "Your energy is saved", Toast.LENGTH_SHORT).show()
         }
         energyBtn1.setOnClickListener(clickListener)
         energyBtn2.setOnClickListener(clickListener)
