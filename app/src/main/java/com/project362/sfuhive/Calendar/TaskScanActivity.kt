@@ -1,8 +1,11 @@
 package com.project362.sfuhive.Calendar
 
 import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.graphics.Matrix
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -13,16 +16,18 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.project362.sfuhive.R
 import com.project362.sfuhive.Util
 import com.project362.sfuhive.database.Assignment
 import com.project362.sfuhive.database.DataViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.util.*
+import java.util.Locale
+import java.util.Date
 
 class TaskScanActivity : FragmentActivity() {
 
@@ -40,21 +45,34 @@ class TaskScanActivity : FragmentActivity() {
 
     private var selectedType: String? = null
 
-    private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-
+    // Gallery picker
     private val galleryPicker =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             uri?.let {
-                val image = InputImage.fromFilePath(this, it)
-                runOcr(image)
+                try {
+                    GlobalScope.launch(Dispatchers.IO) {
+                        val source = ImageDecoder.createSource(contentResolver, it)
+                        val bmp = ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                            decoder.isMutableRequired = true
+                        }
+
+                        withContext(Dispatchers.Main) {
+                            runAzureRead(bmp)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Failed to load image.", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
+    // Camera picker
     private val cameraLauncher =
         registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
             if (bitmap != null) {
-                val img = InputImage.fromBitmap(bitmap, 0)
-                runOcr(img)
+                runAzureRead(bitmap)
+            } else {
+                Toast.makeText(this, "No photo captured.", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -87,9 +105,9 @@ class TaskScanActivity : FragmentActivity() {
 
         etDate.setOnClickListener {
             val picker = MaterialDatePicker.Builder.datePicker().build()
-            picker.addOnPositiveButtonClickListener {
+            picker.addOnPositiveButtonClickListener { millis ->
                 val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-                etDate.setText(fmt.format(Date(it)))
+                etDate.setText(fmt.format(Date(millis)))
             }
             picker.show(supportFragmentManager, "date_picker")
         }
@@ -97,8 +115,9 @@ class TaskScanActivity : FragmentActivity() {
         etTime.setOnClickListener {
             val picker = MaterialTimePicker.Builder()
                 .setTimeFormat(TimeFormat.CLOCK_24H)
-                .setHour(12)
-                .setMinute(0)
+                .setHour(23)
+                .setMinute(59)
+                .setTitleText("Select time")
                 .build()
 
             picker.addOnPositiveButtonClickListener {
@@ -113,7 +132,11 @@ class TaskScanActivity : FragmentActivity() {
         btnDiscussion.setOnClickListener { chooseType("Discussion", btnDiscussion) }
 
         findViewById<Button>(R.id.btnSubmitTask).setOnClickListener {
-            saveTask()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                saveTask()
+            } else {
+                Toast.makeText(this, "Requires Android O+", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -124,104 +147,142 @@ class TaskScanActivity : FragmentActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun runOcr(image: InputImage) {
-        recognizer.process(image)
-            .addOnSuccessListener { result ->
-                val text = result.text
-                if (text.isBlank()) {
-                    Toast.makeText(this, "No text detected.", Toast.LENGTH_SHORT).show()
-                    return@addOnSuccessListener
-                }
+    /** Rotate vertical photos so handwriting becomes horizontal */
+    private fun rotateIfNeeded(bitmap: Bitmap): Bitmap {
+        return if (bitmap.height > bitmap.width) {
+            val matrix = Matrix()
+            matrix.postRotate(90f)
+            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+        } else {
+            bitmap
+        }
+    }
 
-                val parsed = parseText(text)
+    /** Call Azure READ API on a background thread */
+    private fun runAzureRead(originalBitmap: Bitmap) {
+        Toast.makeText(this, "Analyzing with Azure (Read API)...", Toast.LENGTH_SHORT).show()
 
-                if (etTitle.text.isBlank() && parsed.title != null) etTitle.setText(parsed.title)
-                if (etCourse.text.isBlank() && parsed.course != null) etCourse.setText(parsed.course)
-                if (etDate.text.isBlank() && parsed.date != null) etDate.setText(parsed.date)
-                if (etTime.text.isBlank() && parsed.time != null) etTime.setText(parsed.time)
+        val fixedBitmap = rotateIfNeeded(originalBitmap)
 
-                parsed.type?.let {
-                    when (it) {
-                        "Assignment" -> btnAssignment.performClick()
-                        "Lab" -> btnLab.performClick()
-                        "Midterm" -> btnMidterm.performClick()
-                        "Discussion" -> btnDiscussion.performClick()
+        GlobalScope.launch(Dispatchers.IO) {
+            val text = AzureOcrHelper.analyzeHandwriting(fixedBitmap)
+
+            withContext(Dispatchers.Main) {
+                if (text.isNullOrBlank()) {
+                    Toast.makeText(
+                        this@TaskScanActivity,
+                        "Could not extract text from image.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        fillFieldsWithParsedText(text)
+                    } else {
+                        Toast.makeText(
+                            this@TaskScanActivity,
+                            "Parsed, but Android O+ needed.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
-            .addOnFailureListener {
-                Toast.makeText(this, "Failed to analyze image.", Toast.LENGTH_SHORT).show()
-            }
+        }
     }
 
-    data class Parsed(val title: String?, val course: String?, val date: String?, val time: String?, val type: String?)
-
+    /** Parse text into title / course / date / time / type and fill only empty fields */
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun parseText(text: String): Parsed {
+    private fun fillFieldsWithParsedText(text: String) {
         val lines = text.lines().map { it.trim() }.filter { it.isNotEmpty() }
-        val raw = text.replace("\n", " ")
+        val lower = text.lowercase(Locale.US)
 
-        val title = lines.firstOrNull()
+        // Title: preferred line contains "assignment" / "lab" / "midterm", else first line
+        val titleLine = lines.firstOrNull { it.lowercase(Locale.US).contains("assignment") }
+            ?: lines.firstOrNull()
+        if (!titleLine.isNullOrBlank() && etTitle.text.isBlank()) {
+            etTitle.setText(titleLine)
+        }
 
+        // Course: CMPT 362 style
         val courseRegex = Regex("""\b([A-Z]{3,4}\s?\d{3})\b""")
-        val course = courseRegex.find(raw)?.value
-
-        val type = when {
-            "midterm" in raw.lowercase() -> "Midterm"
-            "lab" in raw.lowercase() -> "Lab"
-            "assignment" in raw.lowercase() -> "Assignment"
-            "discussion" in raw.lowercase() -> "Discussion"
-            else -> null
+        val courseMatch = courseRegex.find(text)
+        if (courseMatch != null && etCourse.text.isBlank()) {
+            etCourse.setText(courseMatch.value)
         }
 
-        val isoRegex = Regex("""\b\d{4}-\d{2}-\d{2}\b""")
-        val isoDate = isoRegex.find(raw)?.value
+        // Date: e.g. 26 Nov 2025
+        val dateRegex = Regex("""\b(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})\b""")
+        val dateMatch = dateRegex.find(text)
+        if (dateMatch != null && etDate.text.isBlank()) {
+            val day = dateMatch.groupValues[1].toInt()
+            val monthStr = dateMatch.groupValues[2].lowercase(Locale.US).take(3)
+            val year = dateMatch.groupValues[3].toInt()
 
-        val monthNames = listOf("Jan","January","Feb","February","Mar","March","Apr","April","May","Jun","June","Jul","July","Aug","August","Sep","Sept","September","Oct","October","Nov","November","Dec","December")
-        val monthRegex = Regex("""(${monthNames.joinToString("|")})\s+(\d{1,2})""", RegexOption.IGNORE_CASE)
-        val mm = monthRegex.find(raw)
-        val detectedDate = isoDate ?: run {
-            if (mm != null) {
-                val mStr = mm.groupValues[1]
-                val d = mm.groupValues[2]
-                val mIndex = monthNames
-                    .chunked(2)
-                    .indexOfFirst { it[0].equals(mStr, true) || it.getOrNull(1)?.equals(mStr, true) == true } + 1
-                if (mIndex > 0) "%04d-%02d-%02d".format(LocalDate.now().year, mIndex, d.toInt()) else null
-            } else null
+            val months = listOf(
+                "jan","feb","mar","apr","may","jun",
+                "jul","aug","sep","oct","nov","dec"
+            )
+            val monthIndex = months.indexOf(monthStr) + 1
+            if (monthIndex > 0) {
+                val formatted = "%04d-%02d-%02d".format(year, monthIndex, day)
+                etDate.setText(formatted)
+            }
         }
 
-        val timeRegex = Regex("""\b\d{1,2}:\d{2}\b""")
-        val time = timeRegex.find(raw)?.value
+        // Time: 23:59 or 11:59 PM
+        val timeRegex = Regex("""\b(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)?\b""")
+        val timeMatch = timeRegex.find(text)
+        if (timeMatch != null && etTime.text.isBlank()) {
+            var hour = timeMatch.groupValues[1].toInt()
+            val minute = timeMatch.groupValues[2].toInt()
+            val ampm = timeMatch.groupValues.getOrNull(3)?.lowercase(Locale.US)
 
-        return Parsed(title, course, detectedDate, time, type)
+            if (ampm == "pm" && hour in 1..11) hour += 12
+            if (ampm == "am" && hour == 12) hour = 0
+
+            val formatted = "%02d:%02d".format(hour, minute)
+            etTime.setText(formatted)
+        }
+
+        // Type detection
+        when {
+            "midterm" in lower -> btnMidterm.performClick()
+            "lab" in lower -> btnLab.performClick()
+            "discussion" in lower -> btnDiscussion.performClick()
+            "assignment" in lower || "hw" in lower || "homework" in lower -> btnAssignment.performClick()
+        }
     }
 
+    /** Save the task into your existing Assignment table */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun saveTask() {
-        val title = etTitle.text.toString()
+        val title = etTitle.text.toString().trim()
         val course = etCourse.text.toString().ifBlank { "Custom Task" }
-        val date = etDate.text.toString()
-        val time = etTime.text.toString()
+        val date = etDate.text.toString().trim()
+        val time = etTime.text.toString().trim()
 
         if (title.isBlank() || date.isBlank()) {
-            Toast.makeText(this, "Please fill at least title and due date.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Please fill at least title and date.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val name = if (selectedType != null) "$title (${selectedType})" else title
+        val name = if (!selectedType.isNullOrBlank()) "$title (${selectedType})" else title
+
+        val dueAt = if (time.isBlank()) {
+            "${date}T00:00"
+        } else {
+            "${date}T$time"
+        }
 
         val assignment = Assignment(
             assignmentId = 0L,
             courseName = course,
             assignmentName = name,
-            dueAt = if (time.isBlank()) "${date}T00:00" else "${date}T$time",
+            dueAt = dueAt,
             pointsPossible = 0.0
         )
 
         dataViewModel.insertAssignment(assignment)
-        Toast.makeText(this, "Task Created!", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Task created!", Toast.LENGTH_LONG).show()
         finish()
     }
 }
