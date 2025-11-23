@@ -40,6 +40,8 @@ object Util {
     const val GRADE_KEY = "grade_key"
     const val NAME_KEY = "name_key"
 
+    const val COIN_KEY = "coin_key"
+
     private lateinit var database: AssignmentDatabase
     private lateinit var databaseDao: AssignmentDatabaseDao
     private lateinit var repository: DataRepository
@@ -398,5 +400,20 @@ object Util {
         repository = DataRepository(databaseDao, fileDatabaseDao, remoteDatabase,badgeDatabaseDao)
         viewModelFactory = DataViewModelFactory(repository)
         return viewModelFactory
+    }
+
+    fun updateCoinTotal(context :Context, newTotal : Long?){
+        // add name to prefs
+        val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+        editor.putLong(COIN_KEY, newTotal!!)
+        editor.apply()
+    }
+
+    fun getCoinTotal(context: Context): Long?{
+        val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
+        val total=prefs.getLong(COIN_KEY, 0)
+
+        return total
     }
 }

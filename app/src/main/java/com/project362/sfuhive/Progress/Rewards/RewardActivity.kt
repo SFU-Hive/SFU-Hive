@@ -50,6 +50,10 @@ class RewardActivity : AppCompatActivity() {
         setContentView(R.layout.fragment_rewards)
 
         rewardActivityVM=RewardActivityViewModel(tmpRewardList)
+
+        // set coin total based on shared prefs total
+        rewardActivityVM.setCurrencyCount(Util.getCoinTotal(this))
+
         val rewardSelectView = findViewById<RecyclerView>(R.id.badge_selection)
         val rewardAdapter = RewardAdapter(this, tmpRewardList,rewardActivityVM )
         rewardSelectView.adapter= rewardAdapter

@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.project362.sfuhive.Assignments.RateSubmissionDialog
 import com.project362.sfuhive.database.Badge.BadgeDatabaseDao
+import com.project362.sfuhive.database.Badge.BadgeEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.Flow
@@ -63,6 +64,24 @@ class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
         }
     }
 
+    // badge section
+    fun getBadge(id: Long): BadgeEntity?{
+        return runBlocking(IO) {
+            badgeDatabaseDao.getBadge(id)
+        }
+    }
+
+    fun lockBadge(id: Long){
+        return runBlocking(IO) {
+            badgeDatabaseDao.updateIsLocked(id, true)
+        }
+    }
+
+    fun unlockBadge(id: Long){
+        return runBlocking(IO) {
+            badgeDatabaseDao.updateIsLocked(id, false)
+        }
+    }
 
 
 

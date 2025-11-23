@@ -9,16 +9,14 @@ data class Badge(
     private val iconLocked :  Int, // this is the id Int of the R.drawable.lockedBadgeIcon
     private val description :  String) {
 
-    private var isComplete: Boolean = false
+    private var isLocked: Boolean = true
 
-
-    // UPDATE PROGRESS should be overridden in "BadgeFactory" and used as dependency injection
     private fun updateProgress(){
 
     }
 
     public fun getIconId(): Int{
-        if(isComplete == false){
+        if(isLocked == true){
             return iconLocked
         }
         return iconComplete
@@ -32,7 +30,7 @@ data class Badge(
 
     public fun isCompleteStatus():Boolean{
 
-        return isComplete
+        return !isLocked
     }
 
     // Call this function to run
@@ -52,4 +50,16 @@ data class Badge(
             return status
     }
 
+    public fun getId() : Long{
+
+        return id
+    }
+
+    public fun setIsLocked(newState: Boolean?){
+        if(newState != null){
+            isLocked=newState
+        }else{
+            println("ERROR: new state is null!")
+        }
+    }
 }
