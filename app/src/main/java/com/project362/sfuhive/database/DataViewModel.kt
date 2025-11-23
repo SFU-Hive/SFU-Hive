@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.project362.sfuhive.database.Badge.BadgeEntity
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 
@@ -38,6 +39,22 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
 
     fun deleteAllFiles(){
         repository.deleteAllFiles()
+    }
+
+
+    // Badge Section
+    fun isBadgeLocked(id: Long): Boolean? {
+        val badge=repository.getBadge(id)
+        return badge?.isLocked
+
+    }
+
+    fun lockBadge(id: Long) {
+        repository.lockBadge(id)
+    }
+
+    fun unlockBadge(id: Long) {
+        repository.unlockBadge(id)
     }
 
 

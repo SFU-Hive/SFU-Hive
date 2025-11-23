@@ -21,7 +21,9 @@ class BadgeAdapter(
         viewType: Int
     ): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.badge_view, parent, false)
+        
         val viewHolder=ViewHolder(view)
+
 
         return viewHolder
     }
@@ -35,6 +37,7 @@ class BadgeAdapter(
         holder.view.setOnClickListener {
             println("setting featured badge to {${badges.get(position).getTitle()}}")
             viewModel.setFeaturedBadge(badges.get(position))
+            //Change theme here
         }
     }
 
