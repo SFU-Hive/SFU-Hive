@@ -126,4 +126,7 @@ dependencies {
     implementation("com.squareup.okio:okio:3.2.0")
     implementation("org.json:json:20210307")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    implementation("com.google.firebase:firebase-config")
+
 }

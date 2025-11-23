@@ -28,6 +28,9 @@ import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.Locale
 import java.util.Date
+import com.google.firebase.Firebase
+import com.google.firebase.remoteconfig.remoteConfig
+import com.google.firebase.remoteconfig.remoteConfigSettings
 
 class TaskScanActivity : FragmentActivity() {
 
@@ -80,6 +83,7 @@ class TaskScanActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_scan)
+        loadAzureKeysFromFirebase()
 
         dataViewModel =
             ViewModelProvider(this, Util.getViewModelFactory(this))
@@ -155,6 +159,23 @@ class TaskScanActivity : FragmentActivity() {
             Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
         } else {
             bitmap
+        }
+    }
+
+    private fun loadAzureKeysFromFirebase() {
+        val rc = Firebase.remoteConfig
+        val settings = remoteConfigSettings {
+            minimumFetchIntervalInSeconds = 0
+        }
+        rc.setConfigSettingsAsync(settings)
+
+        rc.fetchAndActivate().addOnCompleteListener {
+            val endpoint = rc.getString("AZURE_OCR_ENDPOINT")
+            val key = rc.getString("AZURE_OCR_KEY")
+
+            if (endpoint.isNotBlank() && key.isNotBlank()) {
+                AzureOcrHelper.initialize(endpoint, key)
+            }
         }
     }
 
