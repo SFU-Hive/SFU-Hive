@@ -47,7 +47,7 @@ class CalendarAdapter(
         if (date != null) {
             holder.dayText.text = date.dayOfMonth.toString()
 
-            // Highlight selected date
+            // Selected date highlight
             if (date == selectedDate) {
                 holder.bgHighlight.visibility = View.VISIBLE
                 holder.bgHighlight.setBackgroundResource(R.drawable.bg_day_selected)
@@ -59,15 +59,22 @@ class CalendarAdapter(
                 holder.dayText.setTextColor(
                     ContextCompat.getColor(holder.itemView.context, android.R.color.black)
                 )
+
+                val today = LocalDate.now()
+                if (date == today) {
+                    holder.bgHighlight.visibility = View.VISIBLE
+                    holder.bgHighlight.setBackgroundResource(R.drawable.bg_day_today)
+                    holder.dayText.setTextColor(
+                        ContextCompat.getColor(holder.itemView.context, android.R.color.white)
+                    )
+                }
             }
 
-            // Handle events for this day
+            // Show up to 3 event dots
             val tasks = assignmentsByDate[date].orEmpty()
             if (tasks.isNotEmpty()) {
                 holder.dotContainer.visibility = View.VISIBLE
-
-                val visibleEvents = tasks.take(3)
-                visibleEvents.forEachIndexed { index, task ->
+                tasks.take(3).forEachIndexed { index, task ->
                     val dot = holder.dots[index]
                     dot.visibility = View.VISIBLE
 
