@@ -9,7 +9,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Upload Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -18,55 +17,44 @@
             android:padding="20dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="📷"
-                android:textSize="36sp"
-                android:layout_gravity="center_horizontal" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Upload Task Photo"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:layout_marginTop="8dp"
-                android:layout_gravity="center_horizontal" />
+                android:text="📸"
+                android:textSize="40sp"
+                android:gravity="center" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Take a photo or upload a screenshot of your assignment details. We'll automatically extract the task info!"
-                android:textSize="14sp"
+                android:text="Upload Task Photo"
+                android:textSize="18sp"
+                android:textStyle="bold"
                 android:gravity="center"
-                android:layout_marginTop="6dp" />
+                android:layout_marginTop="8dp" />
 
             <Button
                 android:id="@+id/btnTakePhoto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Take Photo" />
+                android:text="Take Photo"
+                android:layout_marginTop="16dp" />
 
             <Button
                 android:id="@+id/btnUploadFromGallery"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Upload From Gallery" />
+                android:text="Upload From Gallery"
+                android:layout_marginTop="8dp" />
         </LinearLayout>
 
-        <!-- OR -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="OR\nEnter Manually"
-            android:gravity="center"
             android:textSize="14sp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp" />
+            android:gravity="center"
+            android:layout_marginVertical="16dp" />
 
-        <!-- Manual form -->
         <EditText
             android:id="@+id/etTaskTitle"
             android:layout_width="match_parent"
@@ -74,84 +62,20 @@
             android:hint="Task Title" />
 
         <EditText
-            android:id="@+id/etCourse"
+            android:id="@+id/etDueDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Course" />
+            android:hint="Due Date (yyyy-MM-dd)"
+            android:focusable="false"
+            android:layout_marginTop="12dp" />
 
-        <!-- Date + Time Row -->
-        <LinearLayout
+        <EditText
+            android:id="@+id/etTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="12dp">
-
-            <EditText
-                android:id="@+id/etDueDate"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Due Date"
-                android:focusable="false"
-                android:clickable="true" />
-
-            <View
-                android:layout_width="12dp"
-                android:layout_height="match_parent" />
-
-            <EditText
-                android:id="@+id/etTime"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="Time"
-                android:focusable="false"
-                android:clickable="true" />
-        </LinearLayout>
-
-        <!-- Type -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Task Type"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp">
-
-            <Button
-                android:id="@+id/btnTypeAssignment"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Assignment" />
-
-            <Button
-                android:id="@+id/btnTypeLab"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Lab" />
-
-            <Button
-                android:id="@+id/btnTypeMidterm"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Midterm" />
-
-            <Button
-                android:id="@+id/btnTypeDiscussion"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Discussion" />
-        </LinearLayout>
+            android:hint="Time (HH:mm)"
+            android:focusable="false"
+            android:layout_marginTop="12dp" />
 
         <Button
             android:id="@+id/btnSubmitTask"
@@ -159,6 +83,6 @@
             android:layout_height="wrap_content"
             android:text="Submit"
             android:layout_marginTop="24dp" />
-
     </LinearLayout>
+
 </ScrollView>

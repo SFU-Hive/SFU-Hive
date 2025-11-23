@@ -1,309 +1,213 @@
 package com.project362.sfuhive.Calendar
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
-import android.graphics.Matrix
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.format.DateFormat
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
-import androidx.fragment.app.FragmentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.project362.sfuhive.Calendar.AzureOcrHelper   // ✅ FIXED IMPORT
 import com.project362.sfuhive.R
 import com.project362.sfuhive.Util
 import com.project362.sfuhive.database.Assignment
 import com.project362.sfuhive.database.DataViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
-import java.time.LocalDate
+import java.util.Calendar
 import java.util.Locale
-import java.util.Date
-import com.google.firebase.Firebase
-import com.google.firebase.remoteconfig.remoteConfig
-import com.google.firebase.remoteconfig.remoteConfigSettings
 
-class TaskScanActivity : FragmentActivity() {
-
-    private lateinit var dataViewModel: DataViewModel
+class TaskScanActivity : AppCompatActivity() {
 
     private lateinit var etTitle: EditText
-    private lateinit var etCourse: EditText
     private lateinit var etDate: EditText
     private lateinit var etTime: EditText
 
-    private lateinit var btnAssignment: Button
-    private lateinit var btnLab: Button
-    private lateinit var btnMidterm: Button
-    private lateinit var btnDiscussion: Button
+    private lateinit var dataViewModel: DataViewModel
+    private lateinit var remoteConfig: FirebaseRemoteConfig
 
-    private var selectedType: String? = null
+    private var selectedBytes: ByteArray? = null
 
-    // Gallery picker
-    private val galleryPicker =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            uri?.let {
-                try {
-                    GlobalScope.launch(Dispatchers.IO) {
-                        val source = ImageDecoder.createSource(contentResolver, it)
-                        val bmp = ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
-                            decoder.isMutableRequired = true
-                        }
-
-                        withContext(Dispatchers.Main) {
-                            runAzureRead(bmp)
-                        }
-                    }
-                } catch (e: Exception) {
-                    Toast.makeText(this, "Failed to load image.", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-    // Camera picker
     private val cameraLauncher =
-        registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-            if (bitmap != null) {
-                runAzureRead(bitmap)
-            } else {
-                Toast.makeText(this, "No photo captured.", Toast.LENGTH_SHORT).show()
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            val bmp = it.data?.extras?.get("data") as? Bitmap
+            if (bmp != null) {
+                val stream = ByteArrayOutputStream()
+                bmp.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+                selectedBytes = stream.toByteArray()
+                runOCR(selectedBytes!!)
             }
         }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    private val galleryLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let { loadGalleryImage(it) }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_scan)
-        loadAzureKeysFromFirebase()
 
-        dataViewModel =
-            ViewModelProvider(this, Util.getViewModelFactory(this))
-                .get(DataViewModel::class.java)
+        // ✅ FIXED ViewModel initialization
+        dataViewModel = ViewModelProvider(
+            this,
+            Util.getViewModelFactory(this)
+        ).get(DataViewModel::class.java)
+
+        remoteConfig = FirebaseRemoteConfig.getInstance()
 
         etTitle = findViewById(R.id.etTaskTitle)
-        etCourse = findViewById(R.id.etCourse)
         etDate = findViewById(R.id.etDueDate)
         etTime = findViewById(R.id.etTime)
 
-        btnAssignment = findViewById(R.id.btnTypeAssignment)
-        btnLab = findViewById(R.id.btnTypeLab)
-        btnMidterm = findViewById(R.id.btnTypeMidterm)
-        btnDiscussion = findViewById(R.id.btnTypeDiscussion)
-
-        findViewById<Button>(R.id.btnTakePhoto).setOnClickListener {
-            cameraLauncher.launch(null)
-        }
-
+        findViewById<Button>(R.id.btnTakePhoto).setOnClickListener { openCamera() }
         findViewById<Button>(R.id.btnUploadFromGallery).setOnClickListener {
-            galleryPicker.launch("image/*")
+            galleryLauncher.launch("image/*")
         }
 
-        etDate.setOnClickListener {
-            val picker = MaterialDatePicker.Builder.datePicker().build()
-            picker.addOnPositiveButtonClickListener { millis ->
-                val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-                etDate.setText(fmt.format(Date(millis)))
-            }
-            picker.show(supportFragmentManager, "date_picker")
-        }
+        etDate.setOnClickListener { openDatePicker() }
+        etTime.setOnClickListener { openTimePicker() }
 
-        etTime.setOnClickListener {
-            val picker = MaterialTimePicker.Builder()
-                .setTimeFormat(TimeFormat.CLOCK_24H)
-                .setHour(23)
-                .setMinute(59)
-                .setTitleText("Select time")
-                .build()
+        findViewById<Button>(R.id.btnSubmitTask).setOnClickListener { saveTask() }
+    }
 
-            picker.addOnPositiveButtonClickListener {
-                etTime.setText("%02d:%02d".format(picker.hour, picker.minute))
-            }
-            picker.show(supportFragmentManager, "time_picker")
-        }
+    private fun openCamera() {
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        cameraLauncher.launch(intent)
+    }
 
-        btnAssignment.setOnClickListener { chooseType("Assignment", btnAssignment) }
-        btnLab.setOnClickListener { chooseType("Lab", btnLab) }
-        btnMidterm.setOnClickListener { chooseType("Midterm", btnMidterm) }
-        btnDiscussion.setOnClickListener { chooseType("Discussion", btnDiscussion) }
+    private fun loadGalleryImage(uri: Uri) {
+        try {
+            val source = ImageDecoder.createSource(contentResolver, uri)
+            val bmp = ImageDecoder.decodeBitmap(source)
 
-        findViewById<Button>(R.id.btnSubmitTask).setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                saveTask()
-            } else {
-                Toast.makeText(this, "Requires Android O+", Toast.LENGTH_SHORT).show()
-            }
+            val stream = ByteArrayOutputStream()
+            bmp.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+            selectedBytes = stream.toByteArray()
+
+            runOCR(selectedBytes!!)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Failed to load image!", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun chooseType(type: String, btn: Button) {
-        selectedType = type
-        listOf(btnAssignment, btnLab, btnMidterm, btnDiscussion).forEach {
-            it.alpha = if (it == btn) 1f else 0.4f
+    private fun runOCR(bytes: ByteArray) {
+        val key = remoteConfig.getString("AZURE_OCR_KEY")
+        val endpoint = remoteConfig.getString("AZURE_OCR_ENDPOINT")
+
+        if (key.isBlank() || endpoint.isBlank()) {
+            Toast.makeText(this, "OCR config missing!", Toast.LENGTH_SHORT).show()
+            return
         }
+
+        // ✅ FIXED AzureOcrHelper usage
+        val helper = AzureOcrHelper(
+            activity = this,
+            subscriptionKey = key,
+            endpoint = endpoint
+        ) { resultText ->
+            processOCR(resultText)
+        }
+
+        helper.run(bytes)
     }
 
-    /** Rotate vertical photos so handwriting becomes horizontal */
-    private fun rotateIfNeeded(bitmap: Bitmap): Bitmap {
-        return if (bitmap.height > bitmap.width) {
-            val matrix = Matrix()
-            matrix.postRotate(90f)
-            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-        } else {
-            bitmap
-        }
+    private fun processOCR(raw: String) {
+        val lines = raw.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
+
+        // Title = first meaningful line
+        if (lines.isNotEmpty()) etTitle.setText(lines[0])
+
+        fillDateAndTime(raw)
+
+        Toast.makeText(this, "OCR done!", Toast.LENGTH_SHORT).show()
     }
 
-    private fun loadAzureKeysFromFirebase() {
-        val rc = Firebase.remoteConfig
-        val settings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = 0
-        }
-        rc.setConfigSettingsAsync(settings)
+    private fun fillDateAndTime(text: String) {
+        // DATE
+        val dateRegex = Regex("""\b(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4})\b""")
+        val match = dateRegex.find(text)
 
-        rc.fetchAndActivate().addOnCompleteListener {
-            val endpoint = rc.getString("AZURE_OCR_ENDPOINT")
-            val key = rc.getString("AZURE_OCR_KEY")
-
-            if (endpoint.isNotBlank() && key.isNotBlank()) {
-                AzureOcrHelper.initialize(endpoint, key)
-            }
-        }
-    }
-
-    /** Call Azure READ API on a background thread */
-    private fun runAzureRead(originalBitmap: Bitmap) {
-        Toast.makeText(this, "Analyzing with Azure (Read API)...", Toast.LENGTH_SHORT).show()
-
-        val fixedBitmap = rotateIfNeeded(originalBitmap)
-
-        GlobalScope.launch(Dispatchers.IO) {
-            val text = AzureOcrHelper.analyzeHandwriting(fixedBitmap)
-
-            withContext(Dispatchers.Main) {
-                if (text.isNullOrBlank()) {
-                    Toast.makeText(
-                        this@TaskScanActivity,
-                        "Could not extract text from image.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        fillFieldsWithParsedText(text)
-                    } else {
-                        Toast.makeText(
-                            this@TaskScanActivity,
-                            "Parsed, but Android O+ needed.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            }
-        }
-    }
-
-    /** Parse text into title / course / date / time / type and fill only empty fields */
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun fillFieldsWithParsedText(text: String) {
-        val lines = text.lines().map { it.trim() }.filter { it.isNotEmpty() }
-        val lower = text.lowercase(Locale.US)
-
-        // Title: preferred line contains "assignment" / "lab" / "midterm", else first line
-        val titleLine = lines.firstOrNull { it.lowercase(Locale.US).contains("assignment") }
-            ?: lines.firstOrNull()
-        if (!titleLine.isNullOrBlank() && etTitle.text.isBlank()) {
-            etTitle.setText(titleLine)
+        match?.let {
+            try {
+                val inputFmt = SimpleDateFormat("d MMM yyyy", Locale.US)
+                val outputFmt = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                val parsed = inputFmt.parse(it.value)
+                etDate.setText(outputFmt.format(parsed!!))
+            } catch (_: Exception) {}
         }
 
-        // Course: CMPT 362 style
-        val courseRegex = Regex("""\b([A-Z]{3,4}\s?\d{3})\b""")
-        val courseMatch = courseRegex.find(text)
-        if (courseMatch != null && etCourse.text.isBlank()) {
-            etCourse.setText(courseMatch.value)
-        }
-
-        // Date: e.g. 26 Nov 2025
-        val dateRegex = Regex("""\b(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})\b""")
-        val dateMatch = dateRegex.find(text)
-        if (dateMatch != null && etDate.text.isBlank()) {
-            val day = dateMatch.groupValues[1].toInt()
-            val monthStr = dateMatch.groupValues[2].lowercase(Locale.US).take(3)
-            val year = dateMatch.groupValues[3].toInt()
-
-            val months = listOf(
-                "jan","feb","mar","apr","may","jun",
-                "jul","aug","sep","oct","nov","dec"
-            )
-            val monthIndex = months.indexOf(monthStr) + 1
-            if (monthIndex > 0) {
-                val formatted = "%04d-%02d-%02d".format(year, monthIndex, day)
-                etDate.setText(formatted)
-            }
-        }
-
-        // Time: 23:59 or 11:59 PM
-        val timeRegex = Regex("""\b(\d{1,2}):(\d{2})\s*(AM|PM|am|pm)?\b""")
+        // TIME
+        val timeRegex = Regex("""\b(\d{1,2}:\d{2}\s*(AM|PM|am|pm))\b""")
         val timeMatch = timeRegex.find(text)
-        if (timeMatch != null && etTime.text.isBlank()) {
-            var hour = timeMatch.groupValues[1].toInt()
-            val minute = timeMatch.groupValues[2].toInt()
-            val ampm = timeMatch.groupValues.getOrNull(3)?.lowercase(Locale.US)
 
-            if (ampm == "pm" && hour in 1..11) hour += 12
-            if (ampm == "am" && hour == 12) hour = 0
-
-            val formatted = "%02d:%02d".format(hour, minute)
-            etTime.setText(formatted)
-        }
-
-        // Type detection
-        when {
-            "midterm" in lower -> btnMidterm.performClick()
-            "lab" in lower -> btnLab.performClick()
-            "discussion" in lower -> btnDiscussion.performClick()
-            "assignment" in lower || "hw" in lower || "homework" in lower -> btnAssignment.performClick()
+        timeMatch?.let {
+            try {
+                val inputFmt = SimpleDateFormat("h:mm a", Locale.US)
+                val outputFmt = SimpleDateFormat("HH:mm", Locale.US)
+                val parsed = inputFmt.parse(it.value)
+                etTime.setText(outputFmt.format(parsed!!))
+            } catch (_: Exception) {}
         }
     }
 
-    /** Save the task into your existing Assignment table */
-    @RequiresApi(Build.VERSION_CODES.O)
+    private fun openDatePicker() {
+        val cal = Calendar.getInstance()
+        val dlg = DatePickerDialog(
+            this,
+            { _, y, m, d -> etDate.setText("$y-${m + 1}-$d") },
+            cal.get(Calendar.YEAR),
+            cal.get(Calendar.MONTH),
+            cal.get(Calendar.DAY_OF_MONTH)
+        )
+        dlg.show()
+    }
+
+    private fun openTimePicker() {
+        val cal = Calendar.getInstance()
+        val dlg = TimePickerDialog(
+            this,
+            { _, h, min -> etTime.setText(String.format(Locale.US, "%02d:%02d", h, min)) },
+            cal.get(Calendar.HOUR_OF_DAY),
+            cal.get(Calendar.MINUTE),
+            DateFormat.is24HourFormat(this)
+        )
+        dlg.show()
+    }
+
     private fun saveTask() {
         val title = etTitle.text.toString().trim()
-        val course = etCourse.text.toString().ifBlank { "Custom Task" }
         val date = etDate.text.toString().trim()
         val time = etTime.text.toString().trim()
 
         if (title.isBlank() || date.isBlank()) {
-            Toast.makeText(this, "Please fill at least title and date.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Enter title & date!", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val name = if (!selectedType.isNullOrBlank()) "$title (${selectedType})" else title
-
-        val dueAt = if (time.isBlank()) {
-            "${date}T00:00"
-        } else {
-            "${date}T$time"
-        }
+        val dueAt = if (time.isBlank()) "${date}T00:00" else "${date}T$time"
 
         val assignment = Assignment(
             assignmentId = 0L,
-            courseName = course,
-            assignmentName = name,
+            courseName = "Task",
+            assignmentName = title,
             dueAt = dueAt,
             pointsPossible = 0.0
         )
 
         dataViewModel.insertAssignment(assignment)
-        Toast.makeText(this, "Task created!", Toast.LENGTH_LONG).show()
+
+        Toast.makeText(this, "Task saved!", Toast.LENGTH_SHORT).show()
         finish()
     }
 }
