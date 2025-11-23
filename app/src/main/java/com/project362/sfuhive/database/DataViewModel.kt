@@ -1,11 +1,19 @@
 package com.project362.sfuhive.database
 
+import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.project362.sfuhive.Wellness.GoalDatabase
+import com.project362.sfuhive.database.Badge.BadgeDatabase
 import com.project362.sfuhive.database.Badge.BadgeEntity
+import com.project362.sfuhive.database.Wellness.Goal
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 
@@ -71,6 +79,97 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
             repository.fetchAssignmentData()
         }
     }
+
+    // goals section
+    fun initializeGoals(context: Context) {
+        viewModelScope.launch {
+            Log.d("ViewModel", "Starting goal initialization...")
+
+            // Ensure badges exist
+            val badgeDb = BadgeDatabase.getInstance(context)
+            for (id in 1..3L) {
+                val badge = badgeDb.badgeDatabaseDao.getBadge(id)
+                Log.d("ViewModel", "Badge $id exists: ${badge != null}")
+            }
+
+            // Initialize goals via GoalDatabase function
+            val goalDb = GoalDatabase.getInstance(context)
+            goalDb.initializeDefaultGoals()  // THIS will insert goals if none exist
+
+            // Collect goals
+            goalDb.goalDatabaseDao().getAllGoals().collect { goals ->
+                Log.d("ViewModel", "All goals in DB:")
+                goals.forEach { goal ->
+                    Log.d("ViewModel", "Goal id=${goal.id}, badgeId=${goal.badgeId}, completionCount=${goal.completionCount}")
+                }
+            }
+        }
+    }
+
+    val allGoals: LiveData<List<Goal>> = repository.getAllGoals().asLiveData()
+
+    fun getAllGoals(): Flow<List<Goal>> {
+        return repository.getAllGoals()
+    }
+
+    fun getGoalById(goalId: Long): Flow<Goal> {
+        return repository.getGoalById(goalId)
+    }
+
+    fun updateGoalName(goalId: Long, name: String) {
+        viewModelScope.launch {
+            repository.updateGoal(goalId, name)
+        }
+    }
+
+    fun incrementCompletion(goalId: Long) {
+        viewModelScope.launch {
+            // update count
+            repository.incrementCompleteCount(goalId)
+            // get today's date and also update the completion date
+            val today = System.currentTimeMillis()
+            repository.updateLastCompletionDate(goalId, today)
+
+            // check if completion count is 10
+            val goal = repository.getGoalById(goalId).first()
+
+            // compute new count (Room hasn't reloaded yet)
+            val newCount = goal.completionCount + 1
+
+            // check against default
+            if (goal.completionCount + 1 >= 10) {
+                goal.badgeId?.let { badgeId ->
+                    repository.unlockBadge(badgeId)
+                }
+            }
+        }
+    }
+
+    fun updateNfcTag(goalId: Long, tag: String?) {
+        viewModelScope.launch {
+            repository.updateNfcTag(goalId, tag)
+        }
+    }
+
+    // to compute streak
+    fun computeStreak(lastDate: Long, completionCount: Int): Int {
+        if (lastDate == 0L) return 0
+
+        val today = System.currentTimeMillis()
+        val oneDay = 24 * 60 * 60 * 1000
+
+        val diff = ((today - lastDate) / oneDay).toInt()
+
+        return if (diff == 1) completionCount else 0
+    }
+
+    // progress bar
+    fun computeProgress(count: Int): Int {
+        val max = 10f // unlock badge at 10 completions
+        return ((count / max) * 100).toInt().coerceIn(0, 100)
+    }
+
+
 }
 
 class DataViewModelFactory (private val repository: DataRepository) : ViewModelProvider.Factory {
