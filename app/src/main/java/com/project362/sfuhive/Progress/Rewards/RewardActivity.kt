@@ -14,18 +14,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.Progress.Badges.BadgeActivityViewModel
 import com.project362.sfuhive.Progress.Badges.BadgeAdapter
 import com.project362.sfuhive.Progress.Badges.BadgeFactory
+import com.project362.sfuhive.Progress.Badges.BadgeFactory.Companion.BANK_BREAKER
 import com.project362.sfuhive.R
 import com.project362.sfuhive.Util
+import com.project362.sfuhive.database.DataViewModel
 
 class RewardActivity : AppCompatActivity() {
     private lateinit var rewardActivityVM : RewardActivityViewModel
-
-    private var repoVM =  Util.getViewModelFactory(this)
+    private lateinit var repoVM : DataViewModel
     private var rewardFactory = RewardFactory()
     private var tmpRewardList =rewardFactory.getAllRewards()
 
@@ -50,9 +52,11 @@ class RewardActivity : AppCompatActivity() {
         setContentView(R.layout.fragment_rewards)
 
         rewardActivityVM=RewardActivityViewModel(tmpRewardList)
+        var factory =  Util.getViewModelFactory(this)
+        repoVM =ViewModelProvider(this, factory).get(DataViewModel::class.java)
 
         // set coin total based on shared prefs total
-        rewardActivityVM.setCurrencyCount(Util.getCoinTotal(this))
+        rewardActivityVM.setCurrencyCount(100)//Util.getCoinTotal(this))
 
         val rewardSelectView = findViewById<RecyclerView>(R.id.badge_selection)
         val rewardAdapter = RewardAdapter(this, tmpRewardList,rewardActivityVM )
@@ -80,7 +84,12 @@ class RewardActivity : AppCompatActivity() {
             if(user_confirmation == "redeemed"){
                 //subtract cost of the featured reward
                 rewardActivityVM.subtractCost()
+                if(rewardActivityVM.getCurrencyCount()==0L){
+                    if(repoVM.isBadgeLocked(BANK_BREAKER)==true){
+                        repoVM.unlockBadge(BANK_BREAKER)
+                    }
 
+                }
                 // TODO: add Reward to database
                 // TODO: check for badge update
 

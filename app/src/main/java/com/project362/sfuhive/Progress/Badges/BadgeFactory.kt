@@ -4,6 +4,11 @@ import com.project362.sfuhive.R
 
 class BadgeFactory( ){
 
+    companion object{
+        //holds all ids for each badge
+        val BANK_BREAKER = 4L
+
+    }
     private var allBadges = listOf<Badge>(
         Badge(
             1,
@@ -24,11 +29,12 @@ class BadgeFactory( ){
             R.drawable.badge_locked,
             "This is Pinned Badge 3"),
         Badge(
-            4,
-            "Badge4",
-            R.drawable.badge2_place_holder,
+            // Unlocks when the user spends all their money
+            BANK_BREAKER,
+            "Bank Breaker",
+            R.drawable.bank_breaker_badge,
             R.drawable.badge_locked,
-            "This is Pinned Badge 4")
+            "Try breaking the bank!")
 
     )
 
