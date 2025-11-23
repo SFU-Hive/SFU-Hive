@@ -103,6 +103,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     // AndroidX Fragment
     implementation("androidx.fragment:fragment-ktx:1.8.5")
+    implementation("androidx.annotation:annotation:1.8.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     implementation("androidx.cardview:cardview:1.0.0")
@@ -118,4 +119,14 @@ dependencies {
     // youtube video player
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("com.google.mlkit:text-recognition:16.0.0")
+
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("com.squareup.okio:okio:3.2.0")
+    implementation("org.json:json:20210307")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    implementation("com.google.firebase:firebase-config")
+
 }
