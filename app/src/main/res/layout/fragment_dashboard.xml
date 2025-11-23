@@ -141,18 +141,17 @@
         android:id="@+id/more_files_arrow"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:src="@drawable/ic_arrow_forward"
-        android:contentDescription="@string/see_more_files"
-        android:clickable="true"
-        android:focusable="true"
         android:background="?attr/selectableItemBackgroundBorderless"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintVertical_bias="0.25"
-        app:layout_constraintHorizontal_bias="0.125"
-        app:layout_constraintTop_toTopOf="@id/file"
+        android:clickable="true"
+        android:contentDescription="@string/see_more_files"
+        android:focusable="true"
+        android:src="@drawable/ic_arrow_forward"
         app:layout_constraintBottom_toBottomOf="@id/file"
-        />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.129"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/file"
+        app:layout_constraintVertical_bias="0.666" />
 
     <TextView
         android:id="@+id/recent_subtitle"

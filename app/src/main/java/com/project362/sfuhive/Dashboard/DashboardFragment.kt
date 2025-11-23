@@ -28,6 +28,12 @@ class DashboardFragment : Fragment() {
         val size: String
     )
 
+    data class StreakInfo(
+        val date: String,
+        val isComplete: Boolean
+    )
+
+
     private lateinit var datesData: List<ImportantDate>
     private lateinit var recentFilesData: List<RecentFile>
     private lateinit var adapter: ImportantDateAdapter
