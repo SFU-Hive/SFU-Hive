@@ -59,6 +59,15 @@ class CalendarAdapter(
                 holder.dayText.setTextColor(
                     ContextCompat.getColor(holder.itemView.context, android.R.color.black)
                 )
+
+                val today = LocalDate.now()
+                if (date == today) {
+                    holder.bgHighlight.visibility = View.VISIBLE
+                    holder.bgHighlight.setBackgroundResource(R.drawable.bg_day_today)
+                    holder.dayText.setTextColor(
+                        ContextCompat.getColor(holder.itemView.context, android.R.color.white)
+                    )
+                }
             }
 
             // Show up to 3 event dots
