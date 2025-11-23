@@ -8,11 +8,13 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import com.project362.sfuhive.Wellness.GoalDatabase
 import com.project362.sfuhive.database.Assignment
 import com.project362.sfuhive.database.AssignmentDatabase
 import com.project362.sfuhive.database.AssignmentDatabaseDao
 import com.project362.sfuhive.database.Badge.BadgeDatabase
 import com.project362.sfuhive.database.Badge.BadgeDatabaseDao
+import com.project362.sfuhive.database.Wellness.GoalDatabaseDao
 import com.project362.sfuhive.database.DataRepository
 import com.project362.sfuhive.database.DataViewModel
 import com.project362.sfuhive.database.DataViewModelFactory
@@ -398,7 +400,11 @@ object Util {
         val badgeDatabase = BadgeDatabase.getInstance(context)
         val badgeDatabaseDao = badgeDatabase.badgeDatabaseDao
 
-        repository = DataRepository(databaseDao, fileDatabaseDao, remoteDatabase,badgeDatabaseDao)
+        // goal database
+        val goalDatabase = GoalDatabase.getInstance(context)
+        val goalDatabaseDao = goalDatabase.goalDatabaseDao()
+
+        repository = DataRepository(databaseDao, fileDatabaseDao, remoteDatabase,badgeDatabaseDao, goalDatabaseDao)
         viewModelFactory = DataViewModelFactory(repository)
         return viewModelFactory
     }
