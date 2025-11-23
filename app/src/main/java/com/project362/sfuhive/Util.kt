@@ -11,8 +11,6 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.project362.sfuhive.database.Assignment
 import com.project362.sfuhive.database.AssignmentDatabase
 import com.project362.sfuhive.database.AssignmentDatabaseDao
-import com.project362.sfuhive.database.Badge.BadgeDatabase
-import com.project362.sfuhive.database.Badge.BadgeDatabaseDao
 import com.project362.sfuhive.database.DataRepository
 import com.project362.sfuhive.database.DataViewModel
 import com.project362.sfuhive.database.DataViewModelFactory
@@ -39,8 +37,6 @@ object Util {
     const val COURSE_NAME_KEY = "course_name"
     const val GRADE_KEY = "grade_key"
     const val NAME_KEY = "name_key"
-
-    const val COIN_KEY = "coin_key"
 
     private lateinit var database: AssignmentDatabase
     private lateinit var databaseDao: AssignmentDatabaseDao
@@ -381,6 +377,7 @@ object Util {
 
         return jsonObject
     }
+
     fun getViewModelFactory(context: Context): DataViewModelFactory {
         // assignment database
         database = AssignmentDatabase.getInstance(context)
@@ -392,28 +389,12 @@ object Util {
 
         // remote database
         val remoteDatabase = FirebaseRemoteDatabase()
-
-        // badge database
-        val badgeDatabase = BadgeDatabase.getInstance(context)
-        val badgeDatabaseDao = badgeDatabase.badgeDatabaseDao
-
-        repository = DataRepository(databaseDao, fileDatabaseDao, remoteDatabase,badgeDatabaseDao)
+        repository = DataRepository(databaseDao, fileDatabaseDao, remoteDatabase)
         viewModelFactory = DataViewModelFactory(repository)
         return viewModelFactory
     }
 
-    fun updateCoinTotal(context :Context, newTotal : Long?){
-        // add name to prefs
-        val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
-        val editor = prefs.edit()
-        editor.putLong(COIN_KEY, newTotal!!)
-        editor.apply()
-    }
-
-    fun getCoinTotal(context: Context): Long?{
-        val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
-        val total=prefs.getLong(COIN_KEY, 0)
-
-        return total
+    fun formatDoubleToText(value: Double): String {
+        return String.format("%.1f", value)
     }
 }

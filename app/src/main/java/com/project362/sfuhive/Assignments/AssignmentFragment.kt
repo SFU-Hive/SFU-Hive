@@ -98,10 +98,8 @@ class AssignmentFragment : Fragment() {
         val filtered = ArrayList<Course>()
 
         for (item in courseList) {
-            // checking if the entered string matched with any item of our recycler view.
+            // perform search
             if (item.name.lowercase().contains(text.lowercase(Locale.getDefault()))) {
-                // if the item is matched we are
-                // adding it to our filtered list.
                 filtered.add(item)
             }
             adapter.filterList(filtered)

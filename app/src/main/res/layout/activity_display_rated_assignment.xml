@@ -31,16 +31,16 @@
             android:layout_height="wrap_content"
             android:text="@string/average_difficulty"
             android:textStyle="bold"
-            android:layout_weight="1"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Hello World!"
-            android:id="@+id/diff"
-            android:layout_weight="4"
-            android:gravity="center"
+            android:layout_marginEnd="20dp"
             android:layout_gravity="center_vertical"/>
+
+
+        <RatingBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/difficulty"
+            android:numStars="5"
+            android:isIndicator="true"/>
 
     </LinearLayout>
 
@@ -64,6 +64,7 @@
             android:id="@+id/hours"
             android:layout_weight="2"
             android:gravity="center"
+            android:textSize="32sp"
             android:layout_gravity="center_vertical"/>
 
     </LinearLayout>
