@@ -8,8 +8,6 @@ import android.widget.BaseAdapter
 import android.widget.CheckBox
 import android.widget.TextView
 import com.project362.sfuhive.R
-import com.project362.sfuhive.Dashboard.DashboardFragment.ImportantDate
-
 
 
 class ImportantDateAdapter(
@@ -43,7 +41,7 @@ class ImportantDateAdapter(
         val dateText = rowView.findViewById<TextView>(R.id.date_text)
         val checkbox = rowView.findViewById<CheckBox>(R.id.checkbox)
 
-        val importantDate = getItem(pos) as DashboardFragment.ImportantDate
+        val importantDate = getItem(pos) as ImportantDate
 
         courseNameTask.text = importantDate.name + " " + importantDate.task
         dateText.text = importantDate.date
