@@ -21,6 +21,8 @@ import com.project362.sfuhive.Progress.Badges.BadgeActivityViewModel
 import com.project362.sfuhive.Progress.Badges.BadgeAdapter
 import com.project362.sfuhive.Progress.Badges.BadgeFactory
 import com.project362.sfuhive.Progress.Badges.BadgeFactory.Companion.BANK_BREAKER
+import com.project362.sfuhive.Progress.Badges.BadgeUtils
+import com.project362.sfuhive.Progress.Badges.UnlockedDialog
 import com.project362.sfuhive.R
 import com.project362.sfuhive.Util
 import com.project362.sfuhive.database.DataViewModel
@@ -87,6 +89,12 @@ class RewardActivity : AppCompatActivity() {
                 if(rewardActivityVM.getCurrencyCount()==0L){
                     if(repoVM.isBadgeLocked(BANK_BREAKER)==true){
                         repoVM.unlockBadge(BANK_BREAKER)
+                        val badge = BadgeUtils.getBadge(BANK_BREAKER)
+                        if(badge!=null){
+                            val dialog=UnlockedDialog(BadgeUtils.getBadge(BANK_BREAKER)!!)
+                            dialog.show(supportFragmentManager, BANK_BREAKER.toString())
+                        }
+
                     }
 
                 }
