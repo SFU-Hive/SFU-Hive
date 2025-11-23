@@ -1,13 +1,14 @@
 package com.project362.sfuhive.Calendar
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageButton
+import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.api.services.calendar.model.Event
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.project362.sfuhive.R
 import com.project362.sfuhive.Util
 import com.project362.sfuhive.database.Assignment
@@ -25,23 +27,26 @@ import com.project362.sfuhive.database.DataViewModel
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import android.app.Activity
 
+@Suppress("NewApi") // suppress LocalDate API 26 warnings for minSdk 24
 class CalendarFragment : Fragment() {
 
     private lateinit var monthYearText: TextView
     private lateinit var selectedDateText: TextView
     private lateinit var calendarRecycler: androidx.recyclerview.widget.RecyclerView
-    private lateinit var btnPrev: ImageButton
-    private lateinit var btnNext: ImageButton
     private lateinit var tasksRecycler: androidx.recyclerview.widget.RecyclerView
     private lateinit var taskAdapter: TaskAdapter
+
+    private lateinit var btnPrev: ImageButton
+    private lateinit var btnNext: ImageButton
+    private lateinit var btnOverflow: ImageButton
+    private lateinit var fabAddEvent: FloatingActionButton
+
     private lateinit var dataViewModel: DataViewModel
     private lateinit var googleHelper: GoogleCalendarHelper
 
     private val googleEventsByDate = mutableMapOf<LocalDate, List<Event>>()
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private var selectedDate: LocalDate = LocalDate.now()
 
     private val signInLauncher =
@@ -66,22 +71,28 @@ class CalendarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        /** ViewModel **/
         dataViewModel =
             ViewModelProvider(requireActivity(), Util.getViewModelFactory(requireContext()))
                 .get(DataViewModel::class.java)
 
+        /** UI refs **/
         monthYearText = view.findViewById(R.id.tvMonthYear)
         selectedDateText = view.findViewById(R.id.tvSelectedDate)
         calendarRecycler = view.findViewById(R.id.calendarRecycler)
         tasksRecycler = view.findViewById(R.id.tasksRecycler)
+
         btnPrev = view.findViewById(R.id.btnPrevMonth)
         btnNext = view.findViewById(R.id.btnNextMonth)
+        btnOverflow = view.findViewById(R.id.btnOverflow)
+        fabAddEvent = view.findViewById(R.id.fabAddEvent)
 
-        tasksRecycler.layoutManager =
-            LinearLayoutManager(requireContext())
+        /** Recycler setup **/
+        tasksRecycler.layoutManager = LinearLayoutManager(requireContext())
         taskAdapter = TaskAdapter(listOf())
         tasksRecycler.adapter = taskAdapter
 
+        /** Month Navigation **/
         btnPrev.setOnClickListener {
             selectedDate = selectedDate.minusMonths(1)
             updateCalendar()
@@ -92,37 +103,56 @@ class CalendarFragment : Fragment() {
             updateCalendar()
         }
 
-        /** GOOGLE SIGN IN + REFRESH **/
+        /** GOOGLE SIGN-IN + REFRESH **/
         googleHelper = GoogleCalendarHelper(requireActivity()) { events ->
             handleGoogleEvents(events)
         }
         googleHelper.setupGoogleSignIn()
 
-        view.findViewById<Button>(R.id.signInButton).setOnClickListener {
-            signInLauncher.launch(googleHelper.getSignInIntent())
-        }
+        /** OVERFLOW MENU (Sign-in, Refresh, Sign-out) **/
+        btnOverflow.setOnClickListener {
+            val popup = PopupMenu(requireContext(), btnOverflow)
+            popup.menuInflater.inflate(R.menu.calendar_menu, popup.menu)
 
-        view.findViewById<Button>(R.id.signOutButton).setOnClickListener {
-            googleHelper.signOut()
-            googleEventsByDate.clear()
-            updateCalendar()
-        }
-
-        view.findViewById<Button>(R.id.refreshButton)?.setOnClickListener {
+            // NEW: Dynamic visibility
             val account = GoogleSignIn.getLastSignedInAccount(requireContext())
-            if (account != null) {
-                Toast.makeText(requireContext(), "Refreshing Google Calendar...", Toast.LENGTH_SHORT).show()
-                googleHelper.fetchCalendarEvents(account)
-            } else {
-                Toast.makeText(requireContext(), "Please sign in with Google first.", Toast.LENGTH_SHORT).show()
+            popup.menu.findItem(R.id.menu_sign_in).isVisible = (account == null)
+            popup.menu.findItem(R.id.menu_sign_out).isVisible = (account != null)
+
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+
+                    R.id.menu_sign_in -> {
+                        signInLauncher.launch(googleHelper.getSignInIntent())
+                    }
+
+                    R.id.menu_refresh -> {
+                        val acc = GoogleSignIn.getLastSignedInAccount(requireContext())
+                        if (acc != null) {
+                            googleHelper.fetchCalendarEvents(acc)
+                        } else {
+                            Toast.makeText(requireContext(), "Please sign in first.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    R.id.menu_sign_out -> {
+                        googleHelper.signOut()
+                        googleEventsByDate.clear()
+                        updateCalendar()
+                        Toast.makeText(requireContext(), "Signed out.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                true
             }
+            popup.show()
         }
 
-        /** ADD TASK **/
-        view.findViewById<Button>(R.id.addTaskButton).setOnClickListener {
+        /** FAB: Add Canvas Task **/
+        fabAddEvent.setOnClickListener {
             startActivity(Intent(requireContext(), TaskScanActivity::class.java))
         }
 
+        /** Draw initial calendar **/
         updateCalendar()
     }
 
@@ -152,6 +182,7 @@ class CalendarFragment : Fragment() {
             }
         }
 
+        /** Canvas tasks **/
         for (assignment in assignments) {
             val date = parseDateFlexible(assignment.dueAt)
             if (date != null) {
@@ -161,11 +192,12 @@ class CalendarFragment : Fragment() {
                     -1L, 1L -> "medium"
                     else -> "low"
                 }
-                val existing = prioritizedMap[date] ?: listOf()
-                prioritizedMap[date] = existing + priority
+                val current = prioritizedMap[date] ?: listOf()
+                prioritizedMap[date] = current + priority
             }
         }
 
+        /** Google Events **/
         for ((date, events) in googleEventsByDate) {
             val diff = date.toEpochDay() - selectedDate.toEpochDay()
             val priority = when (diff) {
@@ -173,10 +205,11 @@ class CalendarFragment : Fragment() {
                 -1L, 1L -> "medium"
                 else -> "low"
             }
-            val existing = prioritizedMap[date] ?: listOf()
-            prioritizedMap[date] = existing + List(events.size) { priority }
+            val current = prioritizedMap[date] ?: listOf()
+            prioritizedMap[date] = current + List(events.size) { priority }
         }
 
+        /** Build Month Grid **/
         val yearMonth = YearMonth.from(selectedDate)
         val daysInMonth = yearMonth.lengthOfMonth()
         val firstDay = selectedDate.withDayOfMonth(1)
@@ -185,8 +218,7 @@ class CalendarFragment : Fragment() {
         val days = MutableList(shift) { null } +
                 (1..daysInMonth).map { selectedDate.withDayOfMonth(it) }
 
-        monthYearText.text =
-            selectedDate.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
+        monthYearText.text = selectedDate.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
 
         val adapter = CalendarAdapter(
             days = days,
@@ -225,11 +257,11 @@ class CalendarFragment : Fragment() {
 
         val googleAssignments = googleEventsByDate[date]?.map {
             Assignment(
-                0L,
-                "Google Calendar",
-                it.summary ?: "Untitled Event",
-                date.toString(),
-                0.0
+                assignmentId = 0L,
+                courseName = "Google Calendar",
+                assignmentName = it.summary ?: "Untitled Event",
+                dueAt = date.toString(),
+                pointsPossible = 0.0
             )
         }.orEmpty()
 
