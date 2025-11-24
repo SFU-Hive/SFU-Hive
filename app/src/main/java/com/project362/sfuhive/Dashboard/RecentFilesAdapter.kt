@@ -9,7 +9,7 @@ import android.widget.TextView
 import com.project362.sfuhive.R
 
 
-class RecentFilesAdaptar(
+class RecentFilesAdapter(
     private val context: Context,
     private val recentFiles: List<RecentFile>
 ) : BaseAdapter() {

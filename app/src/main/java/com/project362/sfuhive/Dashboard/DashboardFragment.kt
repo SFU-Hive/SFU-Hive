@@ -11,9 +11,6 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.project362.sfuhive.R
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class DashboardFragment : Fragment() {
 
@@ -52,7 +49,7 @@ class DashboardFragment : Fragment() {
         }
 
         viewModel.recentFiles.observe(viewLifecycleOwner) { files ->
-            recentFilesGridView.adapter = RecentFilesAdaptar(requireContext(), files)
+            recentFilesGridView.adapter = RecentFilesAdapter(requireContext(), files)
         }
 
 
