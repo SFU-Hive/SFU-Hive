@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -39,14 +40,14 @@ class WellnessFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val chartBtn = view.findViewById<Button>(R.id.viewChart)
-        val goalsLabel = view.findViewById<TextView>(R.id.goals_label)
+        val goalsBtn = view.findViewById<TextView>(R.id.viewGoals)
 
         chartBtn.setOnClickListener {
             val intent = Intent(requireContext(), EnergyMgmtActivity::class.java)
             startActivity(intent)
         }
 
-        goalsLabel.setOnClickListener {
+        goalsBtn.setOnClickListener {
             val intent = Intent(requireContext(), GoalsActivity::class.java)
             startActivity(intent)
         }
@@ -99,6 +100,22 @@ class WellnessFragment : Fragment() {
         setYoutubeClick(video2, id2)
         setYoutubeClick(video3, id3)
 
+        // goals functionality
+        attachCheckboxGuard(
+            view.findViewById<CheckBox>(R.id.goal1_cb),
+            view.findViewById(R.id.goal1_title)
+        )
+
+        attachCheckboxGuard(
+            view.findViewById(R.id.goal2_cb),
+            view.findViewById(R.id.goal2_title)
+        )
+
+        attachCheckboxGuard(
+            view.findViewById(R.id.goal3_cb),
+            view.findViewById(R.id.goal3_title)
+        )
+
     }
 
     // youtube media ==============================================================================
@@ -122,5 +139,25 @@ class WellnessFragment : Fragment() {
         }
     }
 
+    private fun attachCheckboxGuard(
+        checkBox: CheckBox,
+        titleView: TextView
+    ) {
+        checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
+
+            val title = titleView.text?.toString()?.trim()
+
+            // If no goal title exists → block checking
+            if (title.isNullOrEmpty() || title == "Tap to set goal") {
+                buttonView.isChecked = false
+
+                Toast.makeText(
+                    requireActivity(),
+                    "Please set a goal name first!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
 
 }
