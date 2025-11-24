@@ -4,10 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.GridView
 import android.widget.ImageView
 import android.widget.ListView
 import androidx.fragment.app.Fragment
 import com.project362.sfuhive.R
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class DashboardFragment : Fragment() {
 
@@ -18,11 +22,17 @@ class DashboardFragment : Fragment() {
         val isComplete: Boolean
     )
 
-    val datesData = listOf(
-        ImportantDate("CMPT 362", "November 6", "Homework", false),
-        ImportantDate("CMPT 362", "November 13", "Homework", false),
-        ImportantDate("CMPT 362", "November 20", "Homework", false),
-        )
+    data class RecentFile(
+        val fileName: String,
+        val date: String,
+        val size: String
+    )
+
+    private lateinit var datesData: List<ImportantDate>
+    private lateinit var recentFilesData: List<RecentFile>
+    private lateinit var adapter: ImportantDateAdapter
+    private lateinit var streakIcons: Array<ImageView?>
+    private lateinit var recentFiles: GridView
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -33,31 +43,55 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initializeDummyData()
+        initializeDummyFiles()
+
+
         val importantDates = view.findViewById<ListView>(R.id.list_view)
+        recentFiles = view.findViewById(R.id.recent_files)
+
         importantDates.adapter = ImportantDateAdapter(requireContext(), datesData)
 
 
+        streakIcons = arrayOf(
+            view.findViewById(R.id.streak_item1),
+            view.findViewById(R.id.streak_item2),
+            view.findViewById(R.id.streak_item3),
+            view.findViewById(R.id.streak_item4),
+            view.findViewById(R.id.streak_item5),
+            view.findViewById(R.id.streak_item6),
+            view.findViewById(R.id.streak_item7)
+        )
 
-        val streakIcons = view.findViewById<ImageView>(R.id.streak_checkmark1)
-        streakIcons.setImageResource(R.drawable.ic_checkmark)
+        for (i in 0 until streakIcons.size) {
+            streakIcons[i]?.setImageResource(R.drawable.ic_ring)
+        }
 
-        val streakIcons2 = view.findViewById<ImageView>(R.id.streak_checkmark2)
-        streakIcons2.setImageResource(R.drawable.ic_checkmark)
+        recentFiles.adapter = RecentFilesAdaptar(requireContext(), recentFilesData)
+    }
 
-        val streakIcons3 = view.findViewById<ImageView>(R.id.streak_cross1)
-        streakIcons3.setImageResource(R.drawable.ic_cross)
 
-        val streakIcons4 = view.findViewById<ImageView>(R.id.streak_cross2)
-        streakIcons4.setImageResource(R.drawable.ic_cross)
+    //Testing Code
+    private fun initializeDummyData() {
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        datesData = listOf(
+            ImportantDate("CMPT 362", today, "Milestone 3 Due", false),
+            ImportantDate("CMPT 354", "2025-12-05", "Final Exam", false)
+        )
+    }
 
-        val streakIcons5 = view.findViewById<ImageView>(R.id.streak_checkmark3)
-        streakIcons5.setImageResource(R.drawable.ic_checkmark)
+    private fun initializeDummyFiles() {
 
-        val streakIcons6 = view.findViewById<ImageView>(R.id.streak_ring1)
-        streakIcons6.setImageResource(R.drawable.ic_ring)
-
-        val streakIcons7 = view.findViewById<ImageView>(R.id.streak_ring2)
-        streakIcons7.setImageResource(R.drawable.ic_ring)
-
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        recentFilesData = listOf(
+            RecentFile("Milestone3_Report.pdf", today, "1.2 MB"),
+            RecentFile("Lecture_Slides_Week10.pptx", "2025-11-15", "5.8 MB"),
+            RecentFile("Lab08_Instructions.docx", "2025-11-14", "312 KB"),
+            RecentFile("Final_Exam_Study_Guide.pdf", "2025-11-12", "850 KB"),
+            RecentFile("Milestone3_Report.pdf", today, "1.2 MB"),
+            RecentFile("Lecture_Slides_Week10.pptx", "2025-11-15", "5.8 MB"),
+            RecentFile("Lab08_Instructions.docx", "2025-11-14", "312 KB"),
+            RecentFile("Final_Exam_Study_Guide.pdf", "2025-11-12", "850 KB")
+        )
     }
 }

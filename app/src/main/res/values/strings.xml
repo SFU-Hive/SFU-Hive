@@ -38,4 +38,6 @@
     <string name="currency">Currency</string>
     <string name="cancel">Cancel</string>
     <string name="reset">Reset</string>
+    <string name="recent">Recent</string>
+    <string name="recent_file_image">Recent File Image</string>
 </resources>

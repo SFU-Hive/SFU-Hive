@@ -6,41 +6,46 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
+
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:padding="16dp">
 
     <TextView
+        android:id="@+id/welcome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/welcome"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.15"
+        app:layout_constraintHorizontal_bias="0.2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.1" />
+        app:layout_constraintVertical_bias="0.05" />
 
     <TextView
+        android:id="@+id/important_dates_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/important_dates"
         android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="50dp"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.05"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.26" />
+        app:layout_constraintTop_toBottomOf="@id/welcome"/>
 
     <LinearLayout
+        android:id="@+id/important_dates_list"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="8dp"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/important_dates_title">
 
         <ListView
             android:id="@+id/list_view"
@@ -52,121 +57,107 @@
     </LinearLayout>
 
     <TextView
+        android:id="@+id/streak_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="8dp"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.05"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.75"
+        app:layout_constraintTop_toBottomOf="@id/important_dates_list"
+        android:textSize="18sp"
         android:text="@string/streak"/>
 
-    <ImageView
-        android:id="@+id/streak_checkmark1"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.helper.widget.Flow
+        android:id="@+id/flow"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="8dp"
+        app:constraint_referenced_ids="streak_item1, streak_item2, streak_item3, streak_item4, streak_item5, streak_item6, streak_item7"
+        app:flow_firstHorizontalBias="0"
+        app:flow_wrapMode="chain"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.05"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.8"
-        android:contentDescription="@string/streak_checkmarks"
-        />
+        app:layout_constraintTop_toBottomOf="@id/streak_title"/>
+
 
     <ImageView
-        android:id="@+id/streak_checkmark2"
+        android:id="@+id/streak_item1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.11"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.8"
         android:contentDescription="@string/streak_checkmarks"
-        />
-
+        tools:ignore="MissingConstraints" />
     <ImageView
-        android:id="@+id/streak_cross1"
+        android:id="@+id/streak_item2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.17"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.8"
         android:contentDescription="@string/streak_checkmarks"
-        />
-
+        tools:ignore="MissingConstraints" />
     <ImageView
-        android:id="@+id/streak_cross2"
+        android:id="@+id/streak_item3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.23"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.8"
         android:contentDescription="@string/streak_checkmarks"
-        />
-
+        tools:ignore="MissingConstraints" />
     <ImageView
-        android:id="@+id/streak_checkmark3"
+        android:id="@+id/streak_item4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.29"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.8"
         android:contentDescription="@string/streak_checkmarks"
-        />
-
+        tools:ignore="MissingConstraints" />
     <ImageView
-        android:id="@+id/streak_ring1"
+        android:id="@+id/streak_item5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.35"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.8"
         android:contentDescription="@string/streak_checkmarks"
-        />
-
+        tools:ignore="MissingConstraints" />
     <ImageView
-        android:id="@+id/streak_ring2"
+        android:id="@+id/streak_item6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.41"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.8"
         android:contentDescription="@string/streak_checkmarks"
-        />
+        tools:ignore="MissingConstraints" />
+    <ImageView
+        android:id="@+id/streak_item7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/streak_checkmarks"
+        tools:ignore="MissingConstraints" />
 
     <TextView
+        android:id="@+id/file"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/files"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="8sp"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.05"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.9"
+        app:layout_constraintTop_toBottomOf="@id/flow"
+        android:textSize="18sp"
         />
 
+    <TextView
+        android:id="@+id/recent_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/recent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/file"
+        />
 
-
+        <GridView
+            android:id="@+id/recent_files"
+            android:layout_width="0dp"
+            android:layout_height="250dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/recent_subtitle"
+            android:numColumns="2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

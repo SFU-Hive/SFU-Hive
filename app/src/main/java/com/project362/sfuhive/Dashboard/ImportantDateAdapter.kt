@@ -8,11 +8,13 @@ import android.widget.BaseAdapter
 import android.widget.CheckBox
 import android.widget.TextView
 import com.project362.sfuhive.R
+import com.project362.sfuhive.Dashboard.DashboardFragment.ImportantDate
+
 
 
 class ImportantDateAdapter(
     private val context: Context,
-    private val importantDates: List<DashboardFragment.ImportantDate>
+    private val importantDates: List<ImportantDate>
 ) : BaseAdapter(){
 
     private val inflator: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
