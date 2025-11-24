@@ -62,4 +62,9 @@ data class Badge(
             println("ERROR: new state is null!")
         }
     }
+
+    public fun getUnlockedIcon(): Int{
+        return iconComplete
+
+    }
 }
