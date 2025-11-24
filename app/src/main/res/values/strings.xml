@@ -35,6 +35,9 @@
     <string name="streaks_title">Streaks</string>
     <string name="not_found">Not Found</string>
     <string name="redeem">Redeem</string>
+    <string name="currency">Currency</string>
+    <string name="cancel">Cancel</string>
+    <string name="reset">Reset</string>
     <string name="recent">Recent</string>
     <string name="recent_file_image">Recent File Image</string>
 </resources>

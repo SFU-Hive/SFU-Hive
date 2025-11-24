@@ -4,13 +4,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.project362.sfuhive.Progress.Badges.Badge
 
+
 class RewardActivityViewModel(
         private var allRewards: List<Reward>
     ):ViewModel(){
 
         public var featuredReward: MutableLiveData<Reward> = MutableLiveData<Reward>(allRewards.get(1))
 
-        public fun getFeaturedBadge(): Reward{
+        public var currencyCount: MutableLiveData<Long> = MutableLiveData<Long>() // temporary start with 100 currency always. Change this later!!
+        public fun getFeaturedReward(): Reward{
 
             return featuredReward.value
         }
@@ -19,8 +21,32 @@ class RewardActivityViewModel(
             featuredReward.value= reward
         }
 
+        public fun getCurrencyCount() : Long{
+                if(currencyCount.value != null){
+                    return currencyCount.value
+                }
+                return 0
+            }
 
+        public fun setCurrencyCount(newCount:Long?){
+            if(newCount!=null){
+                currencyCount.value=newCount
+            }
+        }
 
+        public fun isRedeemable() : Boolean{
+            var isRedeemable =false
+            if(getCurrencyCount() >= featuredReward.value.getCost() ){
+                isRedeemable = true
+            }
+            return isRedeemable
+        }
+
+        public fun subtractCost(){
+            val newCurrency=getCurrencyCount() - featuredReward.value.getCost()
+            setCurrencyCount(newCurrency)
+
+        }
     }
 
 

@@ -2,18 +2,20 @@ package com.project362.sfuhive.Assignments
 
 import android.os.Build
 import android.os.Bundle
+import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.project362.sfuhive.Assignments.RateSubmissionDialog.RatedAssignment
 import com.project362.sfuhive.R
+import com.project362.sfuhive.Util.formatDoubleToText
 
 class DisplayRatedAssignmentActivity: AppCompatActivity() {
 
     private lateinit var courseNameView: TextView
     private lateinit var assignmentNameView: TextView
-    private lateinit var difficultyView: TextView
+    private lateinit var difficultyBar: RatingBar
     private lateinit var hoursView: TextView
 
 
@@ -35,7 +37,7 @@ class DisplayRatedAssignmentActivity: AppCompatActivity() {
 
         courseNameView = findViewById(R.id.course_title)
         assignmentNameView = findViewById(R.id.assignment_title)
-        difficultyView = findViewById(R.id.diff)
+        difficultyBar = findViewById(R.id.difficulty)
         hoursView = findViewById(R.id.hours)
 
         // get course and assignment name
@@ -49,7 +51,7 @@ class DisplayRatedAssignmentActivity: AppCompatActivity() {
         // set values to views
         courseNameView.text = "Course: $courseName"
         assignmentNameView.text = "Assignment: $assignmentName"
-        difficultyView.text = averageDifficulty.toString()
-        hoursView.text = averageHours.toString()
+        difficultyBar.setRating(averageDifficulty.toFloat())
+        hoursView.text = formatDoubleToText(averageHours)
     }
 }

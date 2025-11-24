@@ -1,21 +1,35 @@
 package com.project362.sfuhive.Progress.Rewards
 
+import android.app.Activity
+import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.Progress.Badges.BadgeActivityViewModel
 import com.project362.sfuhive.Progress.Badges.BadgeAdapter
 import com.project362.sfuhive.Progress.Badges.BadgeFactory
+import com.project362.sfuhive.Progress.Badges.BadgeFactory.Companion.BANK_BREAKER
+import com.project362.sfuhive.Progress.Badges.BadgeUtils
+import com.project362.sfuhive.Progress.Badges.UnlockedDialog
 import com.project362.sfuhive.R
+import com.project362.sfuhive.Util
+import com.project362.sfuhive.database.DataViewModel
 
 class RewardActivity : AppCompatActivity() {
     private lateinit var rewardActivityVM : RewardActivityViewModel
+    private lateinit var repoVM : DataViewModel
     private var rewardFactory = RewardFactory()
     private var tmpRewardList =rewardFactory.getAllRewards()
 
@@ -28,12 +42,24 @@ class RewardActivity : AppCompatActivity() {
 
     private lateinit var featuredButtonView: Button
 
+    private lateinit var currencyTextView : TextView
+    private lateinit var currencyImageView : ImageView
+
+    companion object {
+        val REDEEM = "REDEEM"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.fragment_rewards)
 
         rewardActivityVM=RewardActivityViewModel(tmpRewardList)
+        var factory =  Util.getViewModelFactory(this)
+        repoVM =ViewModelProvider(this, factory).get(DataViewModel::class.java)
+
+        // set coin total based on shared prefs total
+        rewardActivityVM.setCurrencyCount(100)//Util.getCoinTotal(this))
+
         val rewardSelectView = findViewById<RecyclerView>(R.id.badge_selection)
         val rewardAdapter = RewardAdapter(this, tmpRewardList,rewardActivityVM )
         rewardSelectView.adapter= rewardAdapter
@@ -46,6 +72,62 @@ class RewardActivity : AppCompatActivity() {
         featuredSubheadView=featuredRewardView.findViewById<TextView>(R.id.subhead)
         featuredCostView=featuredRewardView.findViewById<TextView>(R.id.cost)
         featuredButtonView=featuredRewardView.findViewById<Button>(R.id.buy_button)
+        currencyTextView = findViewById<TextView>(R.id.currency_text)
+        currencyImageView = findViewById<ImageView>(R.id.currency_image)
+
+        currencyTextView.text = rewardActivityVM.getCurrencyCount().toString()
+
+        supportFragmentManager.setFragmentResultListener(REDEEM,this){ requestKey, bundle ->
+            val text_data = bundle.getBundle(PurchaseDialog.DIALOG_RESULT)
+            val user_confirmation = bundle.getString(PurchaseDialog.STRING_RESULT)
+
+            println("inside dialog result data is: $user_confirmation")
+
+            if(user_confirmation == "redeemed"){
+                //subtract cost of the featured reward
+                rewardActivityVM.subtractCost()
+                if(rewardActivityVM.getCurrencyCount()==0L){
+                    if(repoVM.isBadgeLocked(BANK_BREAKER)==true){
+                        repoVM.unlockBadge(BANK_BREAKER)
+                        val badge = BadgeUtils.getBadge(BANK_BREAKER)
+                        if(badge!=null){
+                            val dialog=UnlockedDialog(BadgeUtils.getBadge(BANK_BREAKER)!!)
+                            dialog.show(supportFragmentManager, BANK_BREAKER.toString())
+                        }
+
+                    }
+
+                }
+                // TODO: add Reward to database
+                // TODO: check for badge update
+
+
+
+            }
+        }
+
+
+        rewardActivityVM.currencyCount.observe(this,Observer{ it ->
+            currencyTextView.text = rewardActivityVM.getCurrencyCount().toString()
+        })
+
+        featuredButtonView.setOnClickListener { it ->
+            //check to see if there is enough currency to redeem this reward
+            if(rewardActivityVM.isRedeemable()){
+
+                val dialog=PurchaseDialog(rewardActivityVM.getFeaturedReward())
+                dialog.show(supportFragmentManager,"Redeem Reward")
+                // if response is ok
+//                  --> Add reward to database/Inventory
+//                  --> Reduce cost
+                // if response is canceled
+            }else{
+                val dialog= CantRedeemDialog(rewardActivityVM.getFeaturedReward())
+                dialog.show(supportFragmentManager,"Can't Redeem Reward")
+                println("Cost too high")
+            }
+
+        }
 
     }
 
@@ -57,7 +139,7 @@ class RewardActivity : AppCompatActivity() {
             Observer {
                 // update featured badge card
                 println("observer triggered")
-                updateFeaturedRewardView(rewardActivityVM.getFeaturedBadge())
+                updateFeaturedRewardView(rewardActivityVM.getFeaturedReward())
 
             }
         )

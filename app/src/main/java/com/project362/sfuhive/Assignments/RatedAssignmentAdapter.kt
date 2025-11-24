@@ -9,7 +9,9 @@ import com.project362.sfuhive.R
 import com.project362.sfuhive.Assignments.RateSubmissionDialog.RatedAssignment
 
 // adapted from Daniel Dawda's MyRuns3 with assistance from ChatGPT
-class RatedAssignmentAdapter(private val assignments: List<RatedAssignment>, private val onItemClick: (RatedAssignment) -> Unit) : RecyclerView.Adapter<RatedAssignmentAdapter.AssignmentViewHolder>() {
+class RatedAssignmentAdapter(assignments: List<RatedAssignment>, private val onItemClick: (RatedAssignment) -> Unit) : RecyclerView.Adapter<RatedAssignmentAdapter.AssignmentViewHolder>() {
+
+    private var assignments: List<RatedAssignment>
 
     inner class AssignmentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val assignmentNameText: TextView = itemView.findViewById(R.id.text)
@@ -31,7 +33,7 @@ class RatedAssignmentAdapter(private val assignments: List<RatedAssignment>, pri
         viewType: Int
     ): AssignmentViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.simple_list_item, parent, false)
+            .inflate(R.layout.list_item, parent, false)
         return AssignmentViewHolder(view)
     }
 
@@ -44,5 +46,14 @@ class RatedAssignmentAdapter(private val assignments: List<RatedAssignment>, pri
 
     override fun getItemCount(): Int {
         return assignments.size
+    }
+
+    fun filterList(filterList: ArrayList<RatedAssignment>) {
+        assignments = filterList.distinct()
+        notifyDataSetChanged()
+    }
+
+    init {
+        this.assignments = assignments
     }
 }

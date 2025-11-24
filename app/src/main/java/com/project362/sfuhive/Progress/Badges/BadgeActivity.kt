@@ -8,15 +8,21 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
+import com.project362.sfuhive.Util
+import com.project362.sfuhive.database.DataViewModel
 
 class BadgeActivity : AppCompatActivity(){
 
+    // View Models
     private lateinit var badgeActivityVM : BadgeActivityViewModel
+    private lateinit var repoVM : DataViewModel
     private var badgeFactory = BadgeFactory()
     private var tmpBadgesList = badgeFactory.getAllBadges()
 
@@ -29,6 +35,9 @@ class BadgeActivity : AppCompatActivity(){
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
+        var vmFactory =  Util.getViewModelFactory(this)
+        repoVM=ViewModelProvider(this, vmFactory).get(DataViewModel::class.java)
+        initBadgeStatus()
         setContentView(R.layout.fragment_badges)
         badgeActivityVM=BadgeActivityViewModel(tmpBadgesList)
         val badgeSelectView = findViewById<RecyclerView>(R.id.badge_selection)
@@ -43,6 +52,13 @@ class BadgeActivity : AppCompatActivity(){
         featuredSubheadView=featuredBadgeView.findViewById<TextView>(R.id.subhead)
         featuredBodyView=featuredBadgeView.findViewById<TextView>(R.id.body)
 
+        val resetBadgeButtonView = featuredBadgeView.findViewById<Button>(R.id.reset_badge_button)
+
+        resetBadgeButtonView.setOnClickListener {
+            val badgeid=badgeActivityVM.featuredBadge.value.getId()
+            repoVM.lockBadge(badgeid)
+            initBadgeStatus()
+        }
 
     }
 
@@ -53,7 +69,6 @@ class BadgeActivity : AppCompatActivity(){
             this,
             Observer {
                 // update featured badge card
-                println("observer triggered")
                 updateFeaturedBadgeView(badgeActivityVM.getFeaturedBadge())
 
             }
@@ -66,6 +81,16 @@ class BadgeActivity : AppCompatActivity(){
         featuredBodyView.text = newBadge.getTextStatus()
 
 
+
+    }
+
+    // checks everybadge in the database to set completed badges as true
+    private fun initBadgeStatus(){
+        println("Loading badges...")
+        for (badge in badgeFactory.getAllBadges()){
+            val savedState = repoVM.isBadgeLocked(badge.getId())
+            badge.setIsLocked(savedState)
+        }
 
     }
 }

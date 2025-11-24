@@ -19,13 +19,13 @@ import com.project362.sfuhive.Assignments.RateSubmissionDialog
 import com.project362.sfuhive.Util.LAST_SYNC_KEY
 import com.project362.sfuhive.Util.PREFS_KEY
 import com.project362.sfuhive.Util.SubmittedAssignment
-import com.project362.sfuhive.database.AssignmentViewModel
-import com.project362.sfuhive.database.AssignmentViewModelFactory
+import com.project362.sfuhive.database.DataViewModel
+import com.project362.sfuhive.database.DataViewModelFactory
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var viewModelFactory: AssignmentViewModelFactory
-    private lateinit var assignmentViewModel: AssignmentViewModel
+    private lateinit var viewModelFactory: DataViewModelFactory
+    private lateinit var dataViewModel: DataViewModel
     private lateinit var loadButton: Button
     private lateinit var auth: FirebaseAuth
     private var user: FirebaseUser? = null
@@ -59,13 +59,32 @@ class MainActivity : AppCompatActivity() {
         loadButton = findViewById(R.id.load)
 
         viewModelFactory = Util.getViewModelFactory(this)
-        assignmentViewModel =
-            ViewModelProvider(this, viewModelFactory).get(AssignmentViewModel::class.java)
+        dataViewModel =
+            ViewModelProvider(this, viewModelFactory).get(DataViewModel::class.java)
 
         // observe and log local database changes
-        assignmentViewModel.allAssignmentsLiveData.observe(this, Observer { it ->
+        dataViewModel.allAssignmentsLiveData.observe(this, Observer { it ->
             Log.d("DatabaseCheck", "Assignments count: ${it.size}")
         })
+
+
+
+        loadButton.setOnClickListener {
+            // put all assignments into database on start if not there
+            Thread {
+                Util.getCanvasData(this, this)
+            }.start()
+
+            // open to dashboard
+            intent = Intent(this, NavActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    // Put thread in onStart
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onStart() {
+        super.onStart()
 
         Thread {
             val newSubmissions = Util.getNewlySubmittedAssignments(this)
@@ -76,18 +95,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }.start()
-
-
-        loadButton.setOnClickListener {
-            // put all assignments into database on start if not there
-            Thread {
-                Util.getCanvasAssignments(this, this)
-            }.start()
-
-            // open to dashboard
-            intent = Intent(this, NavActivity::class.java)
-            startActivity(intent)
-        }
     }
 
     private fun handleNewSubmissions(newSubmissions: List<SubmittedAssignment>, index: Int = 0) {
@@ -109,7 +116,7 @@ class MainActivity : AppCompatActivity() {
 
         dialog.arguments = bundle
         dialog.isCancelable = false
-        dialog.show(supportFragmentManager, "RateSubmission")
+        dialog.show(supportFragmentManager, "RateSubmission") // Causes "IllegalStateException: Can not perform this action after onSaveInstanceState" Issue on Miro's Device
 
         // this part assisted by ChatGPT
         // Use a listener for when the dialog is dismissed

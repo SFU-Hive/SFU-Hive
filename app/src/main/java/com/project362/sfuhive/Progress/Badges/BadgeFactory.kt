@@ -4,38 +4,46 @@ import com.project362.sfuhive.R
 
 class BadgeFactory( ){
 
+    companion object{
+        //holds all ids for each badge
+        val GOAL1 = 1L
+        val GOAL2 = 2L
+        val GOAL3 = 3L
+        val BANK_BREAKER = 4L
+
+    }
     private var allBadges = listOf<Badge>(
         Badge(
-            "Badge 1",
-            R.drawable.badge2_place_holder,
+            GOAL1,
+            "Goal 1",
+            R.drawable.wellness_badge_1,
             R.drawable.badge_locked,
-            "This is Pinned Badge 1"),
+            "Complete your Goal 10 times!"),
         Badge(
-            "Badge2",
-            R.drawable.badge2_place_holder,
+            GOAL2,
+            "Goal 2",
+            R.drawable.wellness_badge_2,
             R.drawable.badge_locked,
-            "This is Pinned Badge 2"),
+            "Complete your Goal 10 times!"),
         Badge(
-            "Badge3",
-            R.drawable.badge2_place_holder,
+            GOAL3,
+            "Goal 3",
+            R.drawable.wellness_badge_3,
             R.drawable.badge_locked,
-            "This is Pinned Badge 3"),
+            "Complete your Goal 10 times!"),
         Badge(
-            "Badge4",
-            R.drawable.badge2_place_holder,
+            // Unlocks when the user spends all their money
+            BANK_BREAKER,
+            "Bank Breaker",
+            R.drawable.bank_breaker_badge,
             R.drawable.badge_locked,
-            "This is Pinned Badge 4")
+            "Try breaking the bank!")
 
     )
 
     public fun getAllBadges(): List<Badge>{
 
         return allBadges
-    }
-    // UPDATE PROGRESS should be overridden in "RewardManager" and used as dependency injection
-    public fun purchase(){
-
-
     }
 
 }

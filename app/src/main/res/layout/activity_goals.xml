@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -29,81 +30,310 @@
         app:layout_constraintTop_toBottomOf="@+id/goal_label"
         app:layout_constraintStart_toStartOf="parent"/>
 
-    <TextView
-        android:id="@+id/reminder_label"
-        android:layout_width="wrap_content"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/goal_card1"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Reminder?"
-        android:textStyle="bold"
-        android:textSize="17sp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
+        android:layout_margin="12dp"
+        app:cardElevation="12dp"
+        app:cardCornerRadius="12dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/goal_label" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/wellness_label">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp">
+
+            <!-- Title Row -->
+            <CheckBox
+                android:id="@+id/goal1_cb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/goal1_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Tap to set goal"
+                android:textSize="15sp"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toEndOf="@id/goal1_cb"
+                app:layout_constraintEnd_toStartOf="@id/goal1_menu"
+                app:layout_constraintTop_toTopOf="@id/goal1_cb"
+                app:layout_constraintBottom_toBottomOf="@id/goal1_cb"
+                android:layout_marginStart="8dp" />
+
+            <ImageButton
+                android:id="@+id/goal1_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/more_vert"
+                android:background="@null"
+                android:scaleType="centerInside"
+                app:layout_constraintTop_toTopOf="@id/goal1_cb"
+                app:layout_constraintBottom_toBottomOf="@id/goal1_cb"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Streak Row (label + editable streak days) -->
+            <TextView
+                android:id="@+id/goal1_streak_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Streak:"
+                android:textSize="13sp"
+                android:textColor="@color/black"
+                android:layout_marginTop="12dp"
+                app:layout_constraintTop_toBottomOf="@id/goal1_cb"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <EditText
+                android:id="@+id/goal1_streak_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="0"
+                android:textSize="13sp"
+                android:ems="3"
+                android:background="@null"
+                android:paddingStart="6dp"
+                app:layout_constraintStart_toEndOf="@id/goal1_streak_label"
+                app:layout_constraintBottom_toBottomOf="@id/goal1_streak_label"
+                app:layout_constraintTop_toTopOf="@id/goal1_streak_label" />
+
+            <TextView
+                android:id="@+id/goal1_streak_suffix"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="days"
+                android:textSize="13sp"
+                android:textColor="@color/black"
+                android:paddingStart="4dp"
+                app:layout_constraintStart_toEndOf="@id/goal1_streak_value"
+                app:layout_constraintBottom_toBottomOf="@id/goal1_streak_value"
+                app:layout_constraintTop_toTopOf="@id/goal1_streak_value" />
+
+            <!-- Progress Bar -->
+            <ProgressBar
+                android:id="@+id/goal1_progress"
+                android:layout_width="0dp"
+                android:layout_height="6dp"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:indeterminate="false"
+                android:max="100"
+                android:progress="0"
+                android:progressDrawable="@drawable/goal_progress_drawable"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintTop_toBottomOf="@id/goal1_streak_value"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/goal_card2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        app:cardElevation="12dp"
+        app:cardCornerRadius="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/goal_card1">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp">
+
+            <!-- Title Row -->
+            <CheckBox
+                android:id="@+id/goal2_cb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/goal2_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Tap to set goal"
+                android:textSize="15sp"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toEndOf="@id/goal2_cb"
+                app:layout_constraintEnd_toStartOf="@id/goal2_menu"
+                app:layout_constraintTop_toTopOf="@id/goal2_cb"
+                app:layout_constraintBottom_toBottomOf="@id/goal2_cb"
+                android:layout_marginStart="8dp" />
+
+            <ImageButton
+                android:id="@+id/goal2_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/more_vert"
+                android:background="@null"
+                android:scaleType="centerInside"
+                app:layout_constraintTop_toTopOf="@id/goal2_cb"
+                app:layout_constraintBottom_toBottomOf="@id/goal2_cb"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Streak Label -->
+            <TextView
+                android:id="@+id/goal2_streak"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Streak: 0 days"
+                android:textSize="13sp"
+                android:textColor="@color/black"
+                android:layout_marginTop="12dp"
+                app:layout_constraintTop_toBottomOf="@id/goal2_cb"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <!-- Progress Bar -->
+            <ProgressBar
+                android:id="@+id/goal2_progress"
+                android:layout_width="0dp"
+                android:layout_height="6dp"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:indeterminate="false"
+                android:max="100"
+                android:progress="0"
+                android:progressDrawable="@drawable/goal_progress_drawable"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="6dp"
+                app:layout_constraintTop_toBottomOf="@id/goal2_streak"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/goal_card3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        app:cardElevation="12dp"
+        app:cardCornerRadius="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/goal_card2">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp">
+
+            <!-- Title Row -->
+            <CheckBox
+                android:id="@+id/goal3_cb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/goal3_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Tap to set goal"
+                android:textSize="15sp"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toEndOf="@id/goal3_cb"
+                app:layout_constraintEnd_toStartOf="@id/goal3_menu"
+                app:layout_constraintTop_toTopOf="@id/goal3_cb"
+                app:layout_constraintBottom_toBottomOf="@id/goal3_cb"
+                android:layout_marginStart="8dp" />
+
+            <ImageButton
+                android:id="@+id/goal3_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/more_vert"
+                android:background="@null"
+                android:scaleType="centerInside"
+                app:layout_constraintTop_toTopOf="@id/goal3_cb"
+                app:layout_constraintBottom_toBottomOf="@id/goal3_cb"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Streak Row (label + editable streak days) -->
+            <TextView
+                android:id="@+id/goal3_streak_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Streak:"
+                android:textSize="13sp"
+                android:textColor="@color/black"
+                android:layout_marginTop="12dp"
+                app:layout_constraintTop_toBottomOf="@id/goal3_cb"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <EditText
+                android:id="@+id/goal3_streak_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="0"
+                android:textSize="13sp"
+                android:ems="3"
+                android:background="@null"
+                android:paddingStart="6dp"
+                app:layout_constraintStart_toEndOf="@id/goal3_streak_label"
+                app:layout_constraintBottom_toBottomOf="@id/goal3_streak_label"
+                app:layout_constraintTop_toTopOf="@id/goal3_streak_label" />
+
+            <TextView
+                android:id="@+id/goal3_streak_suffix"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="days"
+                android:textSize="13sp"
+                android:textColor="@color/black"
+                android:paddingStart="4dp"
+                app:layout_constraintStart_toEndOf="@id/goal3_streak_value"
+                app:layout_constraintBottom_toBottomOf="@id/goal3_streak_value"
+                app:layout_constraintTop_toTopOf="@id/goal3_streak_value" />
+
+            <!-- Progress Bar -->
+            <ProgressBar
+                android:id="@+id/goal3_progress"
+                android:layout_width="0dp"
+                android:layout_height="6dp"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:indeterminate="false"
+                android:max="100"
+                android:progress="0"
+                android:progressDrawable="@drawable/goal_progress_drawable"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintTop_toBottomOf="@id/goal3_streak_value"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
 
     <TextView
-        android:id="@+id/goal_sleep"
+        android:id="@+id/goal_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sleep by 11pm"
+        android:text="Three goals are optimal to focus on!"
         android:textSize="15sp"
-        android:paddingBottom="7dp"
-        app:layout_constraintTop_toBottomOf="@+id/wellness_label"
-        app:layout_constraintStart_toStartOf="parent"/>
-
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/sleep_switch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/goal_sleep"
-        app:layout_constraintBottom_toBottomOf="@+id/goal_sleep" />
-
-
-    <TextView
-        android:id="@+id/goal_hydrate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hydrate"
-        android:textSize="15sp"
-        android:paddingBottom="7dp"
-        app:layout_constraintTop_toBottomOf="@id/goal_sleep"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/hydrate_switch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/goal_hydrate"
-        app:layout_constraintBottom_toBottomOf="@+id/goal_hydrate" />
-
-    <TextView
-        android:id="@+id/goal_exercise"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Exercise"
-        android:textSize="15sp"
-        android:paddingBottom="7dp"
-        app:layout_constraintTop_toBottomOf="@id/goal_hydrate"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/exercise_switch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/goal_exercise"
-        app:layout_constraintBottom_toBottomOf="@+id/goal_exercise" />
-
-    <Button
-        android:id="@+id/edit_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Edit"
-        android:textSize="15sp"
-        android:paddingBottom="5dp"
-        app:layout_constraintTop_toBottomOf="@id/goal_exercise"
+        android:paddingStart="12dp"
+        android:paddingTop="5dp"
+        app:layout_constraintTop_toBottomOf="@id/goal_card3"
         app:layout_constraintStart_toStartOf="parent" />
 
     <View
@@ -112,50 +342,9 @@
         android:layout_height="1dp"
         android:layout_marginVertical="20dp"
         android:background="@android:color/darker_gray"
-        app:layout_constraintTop_toBottomOf="@id/edit_button"
+        app:layout_constraintTop_toBottomOf="@id/goal_number"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
-    <TextView
-        android:id="@+id/progress_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Progress Overview"
-        android:textStyle="bold"
-        android:textSize="17sp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        app:layout_constraintTop_toBottomOf="@+id/divider1"
-        app:layout_constraintStart_toStartOf="parent"/>
-
-    <TextView
-        android:id="@+id/streak_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Days of streak: "
-        android:textSize="15sp"
-        android:paddingBottom="5dp"
-        app:layout_constraintTop_toBottomOf="@+id/progress_label"
-        app:layout_constraintStart_toStartOf="parent"/>
-
-    <EditText
-        android:id="@+id/streak_days"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="49"
-        android:textSize="15sp"
-        app:layout_constraintTop_toTopOf="@+id/streak_label"
-        app:layout_constraintBottom_toBottomOf="@+id/streak_label"
-        app:layout_constraintLeft_toRightOf="@id/streak_label"/>
-
-    <CalendarView
-        android:id="@+id/calendar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/streak_label"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

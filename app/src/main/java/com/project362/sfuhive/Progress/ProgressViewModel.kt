@@ -15,16 +15,19 @@ class ProgressViewModel : ViewModel(){
 
     private var tmpBadgesList = listOf<Badge>(
         Badge(
+            1,
             "Badge 1",
             R.drawable.badge2_place_holder,
             R.drawable.badge_locked,
             "This is Pinned Badge 1"),
         Badge(
+            2,
             "Badge 2",
             R.drawable.badge2_place_holder,
             R.drawable.badge_locked,
             "This is Pinned Badge 2"),
         Badge(
+            3,
             "Badge 3",
             R.drawable.badge2_place_holder,
             R.drawable.badge_locked,
