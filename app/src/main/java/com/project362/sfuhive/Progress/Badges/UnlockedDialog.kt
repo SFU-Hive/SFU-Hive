@@ -21,8 +21,9 @@ class UnlockedDialog(theBadge : Badge) : DialogFragment(), DialogInterface.OnCli
         val view = populateView()
         val builder = AlertDialog.Builder(requireActivity())
         builder.setView(view)
+        builder.setTitle("New Badge Unlocked!")
         ///builder.setTitle("")
-        builder.setPositiveButton("Ok", this)
+        builder.setPositiveButton("Ok", null)
         val dialog : Dialog =builder.create()
 
         return dialog
@@ -32,7 +33,7 @@ class UnlockedDialog(theBadge : Badge) : DialogFragment(), DialogInterface.OnCli
         TODO("Not yet implemented")
     }
     private fun populateView():View{
-        // TODO: CREATE AND CHANGE TO R.layout.dialog_unlocked
+
         var view:View = requireActivity().layoutInflater.inflate(R.layout.dialog_unlocked_badge, null)
         // get all views
         val imageView=view.findViewById<ImageView>(R.id.featured_image)
@@ -43,7 +44,7 @@ class UnlockedDialog(theBadge : Badge) : DialogFragment(), DialogInterface.OnCli
         // set all view fields
         imageView.setImageResource(badge.getUnlockedIcon())
         titleView.text = badge.getTitle()
-        subheadView.text = badge.getTextStatus()
+        subheadView.text = "Unlocked!"//badge.getTextStatus()
         bodyView.text = badge.getDescription()
 
         return view

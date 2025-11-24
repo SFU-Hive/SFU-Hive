@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -51,6 +52,13 @@ class BadgeActivity : AppCompatActivity(){
         featuredSubheadView=featuredBadgeView.findViewById<TextView>(R.id.subhead)
         featuredBodyView=featuredBadgeView.findViewById<TextView>(R.id.body)
 
+        val resetBadgeButtonView = featuredBadgeView.findViewById<Button>(R.id.reset_badge_button)
+
+        resetBadgeButtonView.setOnClickListener {
+            val badgeid=badgeActivityVM.featuredBadge.value.getId()
+            repoVM.lockBadge(badgeid)
+            initBadgeStatus()
+        }
 
     }
 
