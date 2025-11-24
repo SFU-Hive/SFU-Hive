@@ -64,6 +64,15 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/subhead" />
+            <Button
+                android:id="@+id/reset_badge_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/reset"
+                app:layout_constraintEnd_toEndOf="@id/title"
+                app:layout_constraintTop_toBottomOf="@id/featured_image"/>
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>
