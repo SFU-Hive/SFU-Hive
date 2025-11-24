@@ -285,9 +285,7 @@
         android:paddingTop="10dp"
         android:paddingBottom="5dp"
         app:layout_constraintTop_toBottomOf="@id/divider3"
-        app:layout_constraintStart_toStartOf="parent"
-        android:onClick="onGoalClick"
-        android:clickable="true"/>
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <TextView
         android:id="@+id/top3_label"
