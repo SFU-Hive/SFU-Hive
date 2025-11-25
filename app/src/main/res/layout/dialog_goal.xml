@@ -66,13 +66,5 @@
 
         </LinearLayout>
 
-        <!-- Manual complete -->
-        <Button
-            android:id="@+id/dialog_mark_complete"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Mark as Complete"
-            android:layout_marginBottom="5dp"/>
-
     </LinearLayout>
 </LinearLayout>
