@@ -1,5 +1,6 @@
 package com.project362.sfuhive.Wellness
 
+import android.R.attr.button
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -16,8 +17,14 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.project362.sfuhive.R
+import com.project362.sfuhive.Util.getViewModelFactory
+import com.project362.sfuhive.database.Badge.BadgeDatabase
+import com.project362.sfuhive.database.DataViewModel
+import com.project362.sfuhive.database.Wellness.Goal
+import kotlinx.coroutines.launch
 
 class WellnessFragment : Fragment() {
     private lateinit var energyBtn1: Button
@@ -26,7 +33,14 @@ class WellnessFragment : Fragment() {
     private lateinit var energyBtn4: Button
     private lateinit var energyBtn5: Button
 
+    // goal labels and check boxes
+    private lateinit var goal1Title: TextView
+    private lateinit var goal2Title: TextView
+    private lateinit var goal3Title: TextView
+
+
     private lateinit var energyViewModel: EnergyViewModel
+    private lateinit var goalViewModel: DataViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,8 +66,14 @@ class WellnessFragment : Fragment() {
             startActivity(intent)
         }
 
-        // energy label functionality ===================================================================
+        // view models and databases
         energyViewModel = ViewModelProvider(this).get(EnergyViewModel::class.java)
+        val badgeDb = BadgeDatabase.getInstance(requireContext()) // Ensure badges are inserted
+        val factory = getViewModelFactory(requireContext())
+        goalViewModel = ViewModelProvider(this, factory).get(DataViewModel::class.java)
+
+
+        // energy label functionality ===================================================================
         energyBtn1 = view.findViewById<Button>(R.id.btn_1)
         energyBtn2 = view.findViewById<Button>(R.id.btn_2)
         energyBtn3 = view.findViewById<Button>(R.id.btn_3)
@@ -91,7 +111,7 @@ class WellnessFragment : Fragment() {
         energyBtn4.setOnClickListener(clickListener)
         energyBtn5.setOnClickListener(clickListener)
 
-        // youtube stuff
+        // youtube stuff  ===================================================================
         loadThumbnail(thumb1, id1)
         loadThumbnail(thumb2, id2)
         loadThumbnail(thumb3, id3)
@@ -100,21 +120,23 @@ class WellnessFragment : Fragment() {
         setYoutubeClick(video2, id2)
         setYoutubeClick(video3, id3)
 
-        // goals functionality
-        attachCheckboxGuard(
-            view.findViewById<CheckBox>(R.id.goal1_cb),
-            view.findViewById(R.id.goal1_title)
-        )
+        // goals functionality  ===================================================================
+        // need to make sure the titles and checkboxes are in sync with the goals activity
+        goal1Title = view.findViewById(R.id.goal1_title)
+        goal2Title = view.findViewById(R.id.goal2_title)
+        goal3Title = view.findViewById(R.id.goal3_title)
 
-        attachCheckboxGuard(
-            view.findViewById(R.id.goal2_cb),
-            view.findViewById(R.id.goal2_title)
-        )
+        lifecycleScope.launch {
+            goalViewModel.getAllGoals().collect { goals ->
+                val g1 = goals.firstOrNull { it.id == 1L }
+                val g2 = goals.firstOrNull { it.id == 2L }
+                val g3 = goals.firstOrNull { it.id == 3L }
 
-        attachCheckboxGuard(
-            view.findViewById(R.id.goal3_cb),
-            view.findViewById(R.id.goal3_title)
-        )
+                updateGoalUI(1, g1)
+                updateGoalUI(2, g2)
+                updateGoalUI(3, g3)
+            }
+        }
 
     }
 
@@ -139,25 +161,25 @@ class WellnessFragment : Fragment() {
         }
     }
 
-    private fun attachCheckboxGuard(
-        checkBox: CheckBox,
-        titleView: TextView
-    ) {
-        checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
+    // for the goal stuff ========================================
+    private fun updateGoalUI(index: Int, goal: Goal?) {
+        val titleView: TextView
+        val checkBox: CheckBox
 
-            val title = titleView.text?.toString()?.trim()
-
-            // If no goal title exists → block checking
-            if (title.isNullOrEmpty() || title == "Tap to set goal") {
-                buttonView.isChecked = false
-
-                Toast.makeText(
-                    requireActivity(),
-                    "Please set a goal name first!",
-                    Toast.LENGTH_SHORT
-                ).show()
+        when (index) {
+            1 -> { titleView = goal1Title }
+            2 -> { titleView = goal2Title }
+            else -> {
+                titleView = goal3Title
             }
         }
-    }
 
+        val name = goal?.goalName.orEmpty()
+
+        if (name.isBlank()) {
+            titleView.text = "Not set"
+        } else {
+            titleView.text = name
+        }
+    }
 }

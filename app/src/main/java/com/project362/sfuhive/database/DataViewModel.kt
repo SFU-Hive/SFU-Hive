@@ -13,9 +13,9 @@ import com.project362.sfuhive.database.Badge.BadgeEntity
 import com.project362.sfuhive.database.Wellness.Goal
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
+import java.util.Calendar
 
 // adapted from RoomDatabase demo
 class DataViewModel(private val repository: DataRepository) : ViewModel() {
@@ -141,6 +141,30 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
                 goal.badgeId?.let { badgeId ->
                     repository.unlockBadge(badgeId)
                 }
+            }
+        }
+    }
+
+    fun updateCompletionCount(goalId: Long, count: Int) {
+        viewModelScope.launch {
+            repository.updateCompletionCount(goalId, count)
+        }
+    }
+
+    // daily reset
+    fun resetDailyGoalsIfNeeded() = viewModelScope.launch {
+        val todayStartMillis = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
+        repository.getAllGoals().first().forEach { goal ->
+            if (goal.lastCompletionDate != todayStartMillis) {
+                // reset completion count and update lastCompletionDate
+                repository.updateLastCompletionDate(goal.id, todayStartMillis)
+                repository.updateCompletionCount(goal.id, 0)
             }
         }
     }

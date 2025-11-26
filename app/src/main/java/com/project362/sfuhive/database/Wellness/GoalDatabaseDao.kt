@@ -23,9 +23,17 @@ interface GoalDatabaseDao {
     @Query("UPDATE goal_table SET completion_count_column = completion_count_column + 1 WHERE id = :key")
     suspend fun incrementCompletionCount(key: Long)
 
+    // reset completion count
+    @Query("UPDATE goal_table SET completion_count_column = :count WHERE id = :key")
+    suspend fun updateCompletionCount(key: Long, count: Int)
+
     // update last completion date
     @Query("UPDATE goal_table SET last_completion_date_column = :date WHERE id = :key")
     suspend fun updateLastCompletionDate(key: Long, date: Long)
+
+    // get last completion date
+    @Query("SELECT last_completion_date_column FROM goal_table WHERE id = :key LIMIT 1")
+    suspend fun getLastCompletionDate(key: Long): Long?
 
     // update nfc tag id
     @Query("UPDATE goal_table SET nfc_tag_id_column = :tag WHERE id = :key")
