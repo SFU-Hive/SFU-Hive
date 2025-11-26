@@ -1,6 +1,10 @@
 package com.project362.sfuhive.Wellness
 
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.nfc.NfcAdapter
+import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
 import android.widget.CheckBox
@@ -43,10 +47,22 @@ class GoalsActivity : AppCompatActivity() {
     private lateinit var goal2Cb: CheckBox
     private lateinit var goal3Cb: CheckBox
 
+    // for nfc to receive scans while open
+    private lateinit var nfcAdapter: NfcAdapter
+    private lateinit var pendingIntent: PendingIntent
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_goals)
+        // nfc stuff
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+        pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+            PendingIntent.FLAG_MUTABLE
+        )
 
         // set up the data base stuff
         val badgeDb = BadgeDatabase.getInstance(this) // Ensure badges are inserted
@@ -81,6 +97,17 @@ class GoalsActivity : AppCompatActivity() {
         attachCheckboxGuard(findViewById(R.id.goal1_cb), findViewById(R.id.goal1_title), 1)
         attachCheckboxGuard(findViewById(R.id.goal2_cb), findViewById(R.id.goal2_title), 2)
         attachCheckboxGuard(findViewById(R.id.goal3_cb), findViewById(R.id.goal3_title), 3)
+    }
+
+    // enable scanning
+    override fun onResume() {
+        super.onResume()
+        nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, null)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        nfcAdapter.disableForegroundDispatch(this)
     }
 
     // bind to update the goals
@@ -176,4 +203,30 @@ class GoalsActivity : AppCompatActivity() {
             )
         }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        if (intent.action == NfcAdapter.ACTION_TAG_DISCOVERED) {
+            val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
+            tag?.let {
+                val tagId = bytesToHex(it.id)
+                Toast.makeText(this, "Detected new tag with id: $tagId", Toast.LENGTH_SHORT).show()
+                handleNfcScan(tagId)
+            }
+        }
+    }
+
+    private fun bytesToHex(bytes: ByteArray): String {
+        return bytes.joinToString("") { "%02X".format(it) }
+    }
+
+    private fun handleNfcScan(tagId: String) {
+        lifecycleScope.launch {
+            Log.d("nfctag", "nfc tag id is: $tagId")
+            // need to check if need to assign or mark as complete, or otherwise not linked to a goal
+        }
+    }
+
+
 }
