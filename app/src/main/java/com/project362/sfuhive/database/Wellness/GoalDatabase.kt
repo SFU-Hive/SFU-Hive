@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 
 
-@Database(entities = [Goal::class, BadgeEntity::class], version = 1, exportSchema = false)
+@Database(entities = [Goal::class, BadgeEntity::class], version = 2, exportSchema = false)
 abstract class GoalDatabase : RoomDatabase() {
     abstract fun goalDatabaseDao(): GoalDatabaseDao
     abstract fun badgeDatabaseDao(): BadgeDatabaseDao

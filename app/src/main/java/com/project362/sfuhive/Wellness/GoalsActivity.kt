@@ -56,6 +56,8 @@ class GoalsActivity : AppCompatActivity() {
         bindViews()
         setupGoalCardClicks()
 
+        viewModel.resetDailyGoalsIfNeeded()
+
         lifecycleScope.launch {
             // initialize goals (will insert defaults if empty)
             Log.d("goalActivity", "Calling initializeGoals()")
@@ -76,9 +78,9 @@ class GoalsActivity : AppCompatActivity() {
             }
         }
 
-        attachCheckboxGuard(findViewById(R.id.goal1_cb), findViewById(R.id.goal1_title))
-        attachCheckboxGuard(findViewById(R.id.goal2_cb), findViewById(R.id.goal2_title))
-        attachCheckboxGuard(findViewById(R.id.goal3_cb), findViewById(R.id.goal3_title))
+        attachCheckboxGuard(findViewById(R.id.goal1_cb), findViewById(R.id.goal1_title), 1)
+        attachCheckboxGuard(findViewById(R.id.goal2_cb), findViewById(R.id.goal2_title), 2)
+        attachCheckboxGuard(findViewById(R.id.goal3_cb), findViewById(R.id.goal3_title), 3)
     }
 
     // bind to update the goals
@@ -116,29 +118,33 @@ class GoalsActivity : AppCompatActivity() {
     }
 
     // prevent user from clicking before setting goal
-    private fun attachCheckboxGuard(checkBox: CheckBox, titleView: TextView) {
-        checkBox.setOnCheckedChangeListener { buttonView, isChecked ->
+    private fun attachCheckboxGuard(
+        checkBox: CheckBox,
+        titleView: TextView,
+        goalId: Long
+    ) {
+        checkBox.setOnCheckedChangeListener { button, isChecked ->
             if (isChecked) {
                 val title = titleView.text?.toString()?.trim()
+
+                // Block checking if name not set
                 if (title.isNullOrEmpty() || title == "Tap to set goal") {
-                    // block
-                    buttonView.isChecked = false
+                    button.isChecked = false
                     Toast.makeText(this, "Please set a goal name first!", Toast.LENGTH_SHORT).show()
-                } else {
-                    // permitted — trigger increment completion and update last date
-                    // map titleView -> goal id (we'll find by comparing view reference)
-                    val goalId = when (titleView.id) {
-                        R.id.goal1_title -> 1L
-                        R.id.goal2_title -> 2L
-                        R.id.goal3_title -> 3L
-                        else -> -1L
-                    }
-                    if (goalId != -1L) {
-                        // increment and update date
-                        viewModel.incrementCompletion(goalId)
-//                        Toast.makeText(this, "Marked complete!", Toast.LENGTH_SHORT).show()
-                    }
+                    return@setOnCheckedChangeListener
                 }
+
+                // Allowed → mark complete
+                viewModel.incrementCompletion(goalId)
+                Toast.makeText(this, "Marked complete!", Toast.LENGTH_SHORT).show()
+
+                // Lock checkbox
+                button.isEnabled = false
+
+            } else {
+                // Prevent unchecking after marking complete
+                button.isChecked = true
+                button.isEnabled = false
             }
         }
     }

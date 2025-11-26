@@ -28,11 +28,11 @@ data class Goal (
     var completionCount: Int = 0,
 
     @ColumnInfo(name = "last_completion_date_column")
-    var lastCompletionDate: Long, // use epoch millis
+    var lastCompletionDate: Long = 0L, // use epoch millis
 
     @ColumnInfo(name = "badge_id", index = true)
-    val badgeId: Long? = null, // FK
+    var badgeId: Long? = null, // FK
 
     @ColumnInfo(name = "nfc_tag_id_column")
-    val string: String? = null,
+    var nfcTagId: String? = null
 )

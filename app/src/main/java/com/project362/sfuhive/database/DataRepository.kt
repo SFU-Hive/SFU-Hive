@@ -4,20 +4,16 @@ import android.content.Context
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.project362.sfuhive.Assignments.RateSubmissionDialog
-import com.project362.sfuhive.Wellness.GoalDatabase
-import com.project362.sfuhive.database.Badge.BadgeDatabase
 import com.project362.sfuhive.database.Badge.BadgeDatabaseDao
 import com.project362.sfuhive.database.Badge.BadgeEntity
 import com.project362.sfuhive.database.Wellness.Goal
 import com.project362.sfuhive.database.Wellness.GoalDatabaseDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
@@ -164,6 +160,12 @@ class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
     fun updateNfcTag(key: Long, tag: String?) {
         CoroutineScope(IO).launch {
             goalDatabaseDao.updateNfcTag(key, tag)
+        }
+    }
+
+    fun updateCompletionCount(key: Long, count: Int) {
+        CoroutineScope(IO).launch {
+            goalDatabaseDao.updateCompletionCount(key, count)
         }
     }
 

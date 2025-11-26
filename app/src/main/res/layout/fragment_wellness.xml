@@ -172,14 +172,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/top3_label" />
 
-    <CheckBox
-        android:id="@+id/goal1_cb"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toEndOf="@+id/goal1_title"
-        app:layout_constraintTop_toTopOf="@+id/goal1_title"
-        app:layout_constraintBottom_toBottomOf="@+id/goal1_title" />
-
     <TextView
         android:id="@+id/goal2_title"
         android:layout_width="wrap_content"
@@ -190,15 +182,6 @@
         app:layout_constraintTop_toBottomOf="@id/goal1_title"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <CheckBox
-        android:id="@+id/goal2_cb"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toEndOf="@+id/goal2_title"
-        app:layout_constraintTop_toTopOf="@+id/goal2_title"
-        app:layout_constraintBottom_toBottomOf="@+id/goal2_title"
-        />
-
     <TextView
         android:id="@+id/goal3_title"
         android:layout_width="wrap_content"
@@ -208,14 +191,6 @@
         android:paddingBottom="5dp"
         app:layout_constraintTop_toBottomOf="@id/goal2_title"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <CheckBox
-        android:id="@+id/goal3_cb"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toEndOf="@+id/goal3_title"
-        app:layout_constraintTop_toTopOf="@+id/goal3_title"
-        app:layout_constraintBottom_toBottomOf="@+id/goal3_title" />
 
     <Button
         android:id="@+id/viewGoals"
@@ -364,9 +339,5 @@
             android:alpha="0.8"
             app:tint="#FFFFFF" />
     </FrameLayout>
-
-
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
