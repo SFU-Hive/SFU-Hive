@@ -211,7 +211,7 @@ class GoalsActivity : AppCompatActivity() {
             val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
             tag?.let {
                 val tagId = bytesToHex(it.id)
-                Toast.makeText(this, "Detected new tag with id: $tagId", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Detected new tag", Toast.LENGTH_SHORT).show()
                 handleNfcScan(tagId)
             }
         }
@@ -225,6 +225,21 @@ class GoalsActivity : AppCompatActivity() {
         lifecycleScope.launch {
             Log.d("nfctag", "nfc tag id is: $tagId")
             // need to check if need to assign or mark as complete, or otherwise not linked to a goal
+            val goal = viewModel.getGoalByNfcTag(tagId)
+
+            if (goal != null) {
+                //  tag already belongs to a goal → mark complete
+                viewModel.incrementCompletion(goal.id)
+                Toast.makeText(this@GoalsActivity, "Goal completed!", Toast.LENGTH_SHORT).show()
+                // need logic to assign tag to selected goal
+
+            } else {
+                Toast.makeText(
+                    this@GoalsActivity,
+                    "This NFC tag is not linked to a goal",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 

@@ -175,6 +175,9 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
         }
     }
 
+    suspend fun getGoalByNfcTag(tag: String): Goal? = repository.getGoalByNfc(tag)
+
+
     // to compute streak
     fun computeStreak(lastDate: Long, completionCount: Int): Int {
         if (lastDate == 0L) return 0

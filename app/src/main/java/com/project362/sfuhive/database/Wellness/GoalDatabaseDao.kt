@@ -55,6 +55,10 @@ interface GoalDatabaseDao {
     @Query("SELECT nfc_tag_id_column FROM goal_table WHERE id=:key LIMIT 1")
     fun getNfcById(key: Long): Flow<String?>
 
+    // get goal by nfc tag
+    @Query("SELECT * FROM goal_table WHERE nfc_tag_id_column = :tag LIMIT 1")
+    suspend fun getGoalByNfc(tag: String): Goal?
+
     // do i need to delete goal? i mean i could be it would just display the default card
 
 }

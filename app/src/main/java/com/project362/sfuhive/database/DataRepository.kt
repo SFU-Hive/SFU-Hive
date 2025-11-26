@@ -175,4 +175,6 @@ class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
     fun getCompletionCount(goalId: Long): Flow<Int> = goalDatabaseDao.getCompletionCount(goalId)
     fun getLastCompletionDateById(goalId: Long): Flow<Long> = goalDatabaseDao.getLastCompletionDateById(goalId)
     fun getNfcById(goalId: Long): Flow<String?> = goalDatabaseDao.getNfcById(goalId)
+    suspend fun getGoalByNfc(tag: String) = goalDatabaseDao.getGoalByNfc(tag)
+
 }
