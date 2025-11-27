@@ -208,7 +208,9 @@ class GoalsActivity : AppCompatActivity() {
             }
 
             // checkbox is checked only if completionCount > 0
-            checkBox.isChecked = completion > 0
+            val isComplete = completion > 0
+            checkBox.isChecked = isComplete
+            checkBox.isEnabled = !isComplete // auto reset daily
 
             Log.d(
                 "goalActivity",
