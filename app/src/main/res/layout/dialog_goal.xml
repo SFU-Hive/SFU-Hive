@@ -59,10 +59,17 @@
                 android:textSize="14sp" />
 
             <Button
-                android:id="@+id/assign_nfc_button"
+                android:id="@+id/assign_nfc_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Assign" />
+
+            <Button
+                android:id="@+id/clear_nfc_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clear Tag"
+                android:visibility="gone" />
 
         </LinearLayout>
 

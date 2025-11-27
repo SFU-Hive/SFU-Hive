@@ -3,10 +3,12 @@ package com.project362.sfuhive.Wellness
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.TextView
@@ -50,6 +52,8 @@ class GoalsActivity : AppCompatActivity() {
     // for nfc to receive scans while open
     private lateinit var nfcAdapter: NfcAdapter
     private lateinit var pendingIntent: PendingIntent
+    var pendingGoalAssignId: Long? = null
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,8 +106,18 @@ class GoalsActivity : AppCompatActivity() {
     // enable scanning
     override fun onResume() {
         super.onResume()
-        nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, null)
+        val intent = Intent(this, javaClass).apply {
+            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_MUTABLE
+        )
+
+        val filters = arrayOf(IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED))
+        nfcAdapter.enableForegroundDispatch(this, pendingIntent, filters, null)
     }
+
 
     override fun onPause() {
         super.onPause()
@@ -163,7 +177,6 @@ class GoalsActivity : AppCompatActivity() {
 
                 // Allowed → mark complete
                 viewModel.incrementCompletion(goalId)
-                Toast.makeText(this, "Marked complete!", Toast.LENGTH_SHORT).show()
 
                 // Lock checkbox
                 button.isEnabled = false
@@ -209,39 +222,72 @@ class GoalsActivity : AppCompatActivity() {
 
         if (intent.action == NfcAdapter.ACTION_TAG_DISCOVERED) {
             val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
-            tag?.let {
-                val tagId = bytesToHex(it.id)
-                Toast.makeText(this, "Detected new tag", Toast.LENGTH_SHORT).show()
+            val tagId = tag?.id?.joinToString("") { "%02X".format(it) } ?: return
+
+            lifecycleScope.launch {
                 handleNfcScan(tagId)
             }
         }
     }
 
-    private fun bytesToHex(bytes: ByteArray): String {
-        return bytes.joinToString("") { "%02X".format(it) }
-    }
-
     private fun handleNfcScan(tagId: String) {
+        // CASE 1: Assigning NFC from dialog
+        pendingGoalAssignId?.let { goalId ->
+            assignNfcToGoal(goalId, tagId)
+            pendingGoalAssignId = null  // clear ONLY after successful assignment
+            return
+        }
+
+        // CASE 2: Completing goal
         lifecycleScope.launch {
-            Log.d("nfctag", "nfc tag id is: $tagId")
-            // need to check if need to assign or mark as complete, or otherwise not linked to a goal
             val goal = viewModel.getGoalByNfcTag(tagId)
 
             if (goal != null) {
-                //  tag already belongs to a goal → mark complete
+                // Found a goal → mark complete
                 viewModel.incrementCompletion(goal.id)
-                Toast.makeText(this@GoalsActivity, "Goal completed!", Toast.LENGTH_SHORT).show()
-                // need logic to assign tag to selected goal
 
-            } else {
                 Toast.makeText(
                     this@GoalsActivity,
-                    "This NFC tag is not linked to a goal",
+                    "Completed: ${goal.goalName}",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+            } else {
+                // Unknown tag
+                Toast.makeText(
+                    this@GoalsActivity,
+                    "This NFC tag is not linked to any goal",
                     Toast.LENGTH_SHORT
                 ).show()
             }
         }
     }
 
+    private fun assignNfcToGoal(goalId: Long, tagId: String) {
+        lifecycleScope.launch {
+
+            // Prevent duplicate tags
+            val existingGoal = viewModel.getGoalByNfcTag(tagId)
+            if (existingGoal != null) {
+                Toast.makeText(
+                    this@GoalsActivity,
+                    "This tag is already assigned to '${existingGoal.goalName}'",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@launch
+            }
+
+            // Assign
+            viewModel.updateNfcTag(goalId, tagId)
+
+            Toast.makeText(this@GoalsActivity, "NFC assigned!", Toast.LENGTH_SHORT).show()
+
+            // notify dialog UI
+            val dialog = supportFragmentManager.findFragmentByTag("GOAL_DIALOG")
+            if (dialog is GoalDialog) {
+                dialog.updateNfcStatus(tagId)
+            }
+        }
+    }
 
 }

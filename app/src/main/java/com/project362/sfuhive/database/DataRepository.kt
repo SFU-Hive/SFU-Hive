@@ -177,4 +177,7 @@ class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
     fun getNfcById(goalId: Long): Flow<String?> = goalDatabaseDao.getNfcById(goalId)
     suspend fun getGoalByNfc(tag: String) = goalDatabaseDao.getGoalByNfc(tag)
 
+    suspend fun isNfcAssigned(tag: String): Boolean {
+        return goalDatabaseDao.getGoalByNfcTag(tag) != null
+    }
 }

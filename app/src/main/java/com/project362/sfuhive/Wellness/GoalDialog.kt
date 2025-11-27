@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
@@ -37,6 +38,10 @@ class GoalDialog (): DialogFragment() {
     private val goalId: Long by lazy { arguments?.getLong(ARG_GOAL_ID) ?: -1L }
     private lateinit var viewModel: DataViewModel
     private lateinit var editName: EditText
+    private lateinit var assignBtn: Button
+    private lateinit var clearBtn: Button
+    private lateinit var nfcStatusText: TextView
+
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -49,16 +54,26 @@ class GoalDialog (): DialogFragment() {
         val view = requireActivity().layoutInflater.inflate(R.layout.dialog_goal, null)
 
         editName = view.findViewById(R.id.edit_goal_name)
+        nfcStatusText = view.findViewById(R.id.nfc_status)
+        assignBtn = view.findViewById(R.id.assign_nfc_btn)
+        clearBtn = view.findViewById(R.id.clear_nfc_btn)
 
-        // preload existing goal name
-        lifecycleScope.launch{
-            try {
-                val goal = viewModel.getGoalById(goalId).firstOrNull()
-                editName.setText(goal?.goalName ?: "")
-            } catch (e: Exception) {
-                Log.e("GoalDialog", "load error: $e")
+        // preload existing goal name and details
+        lifecycleScope.launch {
+            val goal = viewModel.getGoalById(goalId).firstOrNull()
+            val tagId = viewModel.getNfcById(goalId).firstOrNull()
+
+
+            editName.setText(goal?.goalName ?: "")
+
+            if (!tagId.isNullOrEmpty()) {
+                nfcStatusText.text = "Assigned: $tagId"
+                clearBtn.visibility = View.VISIBLE
+            } else {
+                nfcStatusText.text = "No tag assigned"
             }
         }
+
 
         builder.setView(view)
         builder.setTitle("Configure Goal:")
@@ -66,6 +81,29 @@ class GoalDialog (): DialogFragment() {
         builder.setPositiveButton("Save", null) // override later
 
         val dialog = builder.create()
+
+
+        assignBtn.setOnClickListener {
+
+            val name = editName.text.toString().trim()
+            if (name.isEmpty()) {
+                Toast.makeText(requireContext(), "Please enter a goal name first", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            (activity as? GoalsActivity)?.pendingGoalAssignId = goalId
+            nfcStatusText.text = "Waiting for NFC scan..."
+        }
+
+        clearBtn.setOnClickListener {
+            lifecycleScope.launch {
+                viewModel.updateNfcTag(goalId, null)
+                nfcStatusText.text = "No tag assigned"
+                clearBtn.visibility = View.GONE
+                Toast.makeText(requireContext(), "Tag cleared", Toast.LENGTH_SHORT).show()
+            }
+        }
+
 
         // override button clicks after dialog shows so we can control dismissal
         dialog.setOnShowListener {
@@ -92,6 +130,17 @@ class GoalDialog (): DialogFragment() {
                 dialog.dismiss()
             }
         }
+        // to avoid stray scans from registering
+        dialog.setOnDismissListener {
+            (activity as? GoalsActivity)?.pendingGoalAssignId = null
+        }
+
         return dialog
     }
+
+    fun updateNfcStatus(tagId: String) {
+        nfcStatusText.text = "Assigned: $tagId"
+        clearBtn.visibility = View.VISIBLE
+    }
+
 }

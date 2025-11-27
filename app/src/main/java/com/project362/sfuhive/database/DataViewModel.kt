@@ -177,6 +177,10 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
 
     suspend fun getGoalByNfcTag(tag: String): Goal? = repository.getGoalByNfc(tag)
 
+    suspend fun isNfcAssigned(tagId: String): Boolean =
+        repository.isNfcAssigned(tagId)
+
+    fun getNfcById(goalId: Long): Flow<String?> = repository.getNfcById(goalId)
 
     // to compute streak
     fun computeStreak(lastDate: Long, completionCount: Int): Int {
@@ -188,6 +192,12 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
         val diff = ((today - lastDate) / oneDay).toInt()
 
         return if (diff == 1) completionCount else 0
+    }
+
+    fun updateLastCompletionDate(key: Long, date: Long) {
+        viewModelScope.launch {
+            repository.updateLastCompletionDate(key, date)
+        }
     }
 
     // progress bar
