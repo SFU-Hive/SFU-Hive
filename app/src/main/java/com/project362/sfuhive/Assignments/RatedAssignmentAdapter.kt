@@ -49,7 +49,7 @@ class RatedAssignmentAdapter(assignments: List<RatedAssignment>, private val onI
     }
 
     fun filterList(filterList: ArrayList<RatedAssignment>) {
-        assignments = filterList.distinct()
+        assignments = filterList.distinctBy { it.assignmentId }
         notifyDataSetChanged()
     }
 
