@@ -19,7 +19,7 @@ class AssignmentReminderWorker(context: Context, params: WorkerParameters) : Wor
         // build notification
         val notification = NotificationCompat.Builder(applicationContext, "assignment_channel")
             .setContentTitle(title)
-            .setContentTitle("Upcoming Assignment")
+            .setSmallIcon(R.drawable.outline_notifications_24)
             .setContentText("$title is due tomorrow!")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()

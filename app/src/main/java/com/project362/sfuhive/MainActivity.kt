@@ -1,6 +1,8 @@
 package com.project362.sfuhive
 
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -43,6 +45,20 @@ class MainActivity : AppCompatActivity() {
         // use this to reset your sync window (if you wanna push more duplicates into the database)
 //        val prefs = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
 //        prefs.edit().putLong(LAST_SYNC_KEY, 0).apply()
+
+        checkNotificationPermission()
+
+        // add notification channel
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "assignment_channel",
+                "Assignment Reminders",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
+        }
 
         // init firebase
         FirebaseApp.initializeApp(this)

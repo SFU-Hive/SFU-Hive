@@ -79,6 +79,7 @@ object Util {
         return token
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getCanvasData(owner: ViewModelStoreOwner, context: Context) {
         try {
             viewModelFactory = getViewModelFactory(context)
@@ -169,6 +170,9 @@ object Util {
                     assignment.groupWeight = groupWeight
 
                     dataViewModel.insertAssignment(assignment)
+
+                    // schedule reminder
+                    scheduleReminder(context, assignmentId, assnName, assnDue)
                 }
 
                 var filesTabIsPublic = false
@@ -233,6 +237,9 @@ object Util {
 
 
             }
+
+//            // test reminder scheduling
+//            scheduleReminder(context, 9999, "Final Project", "2025-11-29T23:12:00Z")
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -461,6 +468,7 @@ object Util {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun scheduleReminder(context: Context, assignmentId: Long, title: String, dueDate: String) {
+
         // skip if no due date
         if (dueDate.isNullOrBlank()) {
             return
@@ -505,5 +513,7 @@ object Util {
             ExistingWorkPolicy.REPLACE,
             work
         )
+
+        Log.d("ReminderDebug", "Scheduled reminder for '${title}' in $dueDate")
     }
 }
