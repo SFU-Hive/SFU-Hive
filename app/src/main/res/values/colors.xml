@@ -31,8 +31,8 @@
     <color name="cal_selected_bg">#D2E3FC</color>
     <color name="cal_event_dot">#1A73E8</color>
 
-    <color name="priority_high">#E53935</color>
-    <color name="priority_medium">#FB8C00</color>
-    <color name="priority_low">#1E88E5</color>
-    <color name="priority_default">#1E88E5</color>
+    <color name="priority_default">#555555</color> <!-- dark gray -->
+    <color name="priority_low">#2196F3</color>     <!-- blue -->
+    <color name="priority_medium">#FFA500</color>  <!-- orange -->
+    <color name="priority_high">#F44336</color>    <!-- red -->
 </resources>
