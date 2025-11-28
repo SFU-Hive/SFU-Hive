@@ -1,61 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="wrap_content">
 
-    <TextView
-        android:id = "@+id/badges_title"
+    <LinearLayout
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/badges_title"
-        android:textSize="24sp"
-        android:padding="20dp"
-        />
+        android:orientation="vertical">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/pinned_badges"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="30dp"
-        android:numColumns="3"
-    >
+        <TextView
+            android:id = "@+id/badges_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/badges_title"
+            android:textSize="24sp"
+            android:padding="20dp"
+            />
 
-
-    </androidx.recyclerview.widget.RecyclerView>
-
-    <TextView
-        android:id = "@+id/rewards_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/rewards_title"
-        android:textSize="24sp"
-        android:padding="20dp"/>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id= "@+id/pinned_rewards"
-        android:layout_margin="30dp"
-        android:layout_width="match_parent"
-        android:layout_height="350dp"
-        android:numColumns="3">
-    </androidx.recyclerview.widget.RecyclerView>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/pinned_badges"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:numColumns="3"
+        >
 
 
-    <TextView
-        android:id = "@+id/streaks_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/streaks_title"
-        android:textSize="24sp"
-        android:padding="20dp"/>
+        </androidx.recyclerview.widget.RecyclerView>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id= "@+id/pinned_streaks"
-        android:layout_margin="30dp"
-        android:layout_width="match_parent"
-        android:layout_height="350dp"
-        android:numColumns="3">
-    </androidx.recyclerview.widget.RecyclerView>
+        <TextView
+            android:id = "@+id/rewards_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/rewards_title"
+            android:textSize="24sp"
+            android:padding="20dp"/>
 
-</LinearLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id= "@+id/pinned_rewards"
+            android:layout_margin="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="350dp"
+            android:numColumns="3">
+        </androidx.recyclerview.widget.RecyclerView>
+
+
+        <TextView
+            android:id = "@+id/streaks_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/streaks_title"
+            android:textSize="24sp"
+            android:padding="20dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id= "@+id/pinned_streaks"
+            android:layout_margin="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="350dp"
+            android:numColumns="3">
+        </androidx.recyclerview.widget.RecyclerView>
+
+    </LinearLayout>
+</ScrollView>
