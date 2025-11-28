@@ -2,9 +2,7 @@ package com.project362.sfuhive.Calendar
 
 import android.app.Activity
 import android.content.Intent
-import android.os.Build
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -15,9 +13,9 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.calendar.CalendarScopes
 import com.google.api.services.calendar.model.Event
-import com.google.api.client.util.DateTime
+import com.project362.sfuhive.database.Calendar.GoogleEventDatabase
+import com.project362.sfuhive.database.Calendar.GoogleEventEntity
 import kotlinx.coroutines.*
-import java.time.LocalDate
 
 class GoogleCalendarHelper(
     private val activity: Activity,
@@ -84,8 +82,31 @@ class GoogleCalendarHelper(
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .execute()
-                val items = events.items
 
+                val items = events.items ?: emptyList()
+
+                // Persist to GoogleEventDatabase
+                val dao = GoogleEventDatabase.getInstance(activity).googleEventDao()
+                dao.deleteAllEvents()
+
+                val entities = items.mapNotNull { event ->
+                    val start = event.start?.dateTime ?: event.start?.date
+                    if (start == null) return@mapNotNull null
+
+                    val dateStr = start.toString().substring(0, 10)
+
+                    GoogleEventEntity(
+                        eventId = event.id ?: "",
+                        title = event.summary ?: "Untitled Event",
+                        date = dateStr,
+                        startTime = event.start.dateTime?.toString(),
+                        endTime = event.end?.dateTime?.toString()
+                    )
+                }
+
+                dao.insertEvents(entities)
+
+                // Update UI with fresh events
                 withContext(Dispatchers.Main) {
                     onEventsFetched(items)
                 }

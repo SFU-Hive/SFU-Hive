@@ -15,15 +15,22 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.api.client.util.DateTime
 import com.google.api.services.calendar.model.Event
+import com.google.api.services.calendar.model.EventDateTime
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.project362.sfuhive.R
 import com.project362.sfuhive.Util
 import com.project362.sfuhive.database.Assignment
 import com.project362.sfuhive.database.DataViewModel
+import com.project362.sfuhive.database.Calendar.GoogleEventDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -114,7 +121,6 @@ class CalendarFragment : Fragment() {
             val popup = PopupMenu(requireContext(), btnOverflow)
             popup.menuInflater.inflate(R.menu.calendar_menu, popup.menu)
 
-            // NEW: Dynamic visibility
             val account = GoogleSignIn.getLastSignedInAccount(requireContext())
             popup.menu.findItem(R.id.menu_sign_in).isVisible = (account == null)
             popup.menu.findItem(R.id.menu_sign_out).isVisible = (account != null)
@@ -138,6 +144,15 @@ class CalendarFragment : Fragment() {
                     R.id.menu_sign_out -> {
                         googleHelper.signOut()
                         googleEventsByDate.clear()
+
+                        // Clear persisted Google events from DB
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            GoogleEventDatabase
+                                .getInstance(requireContext())
+                                .googleEventDao()
+                                .deleteAllEvents()
+                        }
+
                         updateCalendar()
                         Toast.makeText(requireContext(), "Signed out.", Toast.LENGTH_SHORT).show()
                     }
@@ -147,12 +162,36 @@ class CalendarFragment : Fragment() {
             popup.show()
         }
 
-        /** FAB: Add Canvas Task **/
+        /** FAB: Add Canvas Task via OCR **/
         fabAddEvent.setOnClickListener {
             startActivity(Intent(requireContext(), TaskScanActivity::class.java))
         }
 
-        /** Draw initial calendar **/
+        /** Load persisted Google events from Room on start **/
+        lifecycleScope.launch(Dispatchers.IO) {
+            val dao = GoogleEventDatabase.getInstance(requireContext()).googleEventDao()
+            val savedEvents = dao.getAllEvents()
+
+            withContext(Dispatchers.Main) {
+                googleEventsByDate.clear()
+
+                for (e in savedEvents) {
+                    val date = LocalDate.parse(e.date)
+                    val event = Event().apply {
+                        id = e.eventId
+                        summary = e.title
+                        // Set a simple all-day EventDateTime so existing parsing still works
+                        start = EventDateTime().setDate(DateTime("${e.date}T00:00:00Z"))
+                    }
+                    googleEventsByDate[date] =
+                        googleEventsByDate.getOrDefault(date, emptyList()) + event
+                }
+
+                updateCalendar()
+            }
+        }
+
+        /** Draw initial calendar (Canvas + custom tasks; Google events will merge when loaded) **/
         updateCalendar()
     }
 
@@ -229,8 +268,6 @@ class CalendarFragment : Fragment() {
             if (date == selectedDate) {
                 val intent = Intent(requireContext(), DayViewActivity::class.java)
                 intent.putExtra("selected_date", date.toString())
-                GoogleEventCache.events[date.toString()] =
-                    googleEventsByDate[date] ?: listOf()
                 startActivity(intent)
             } else {
                 selectedDate = date
@@ -268,7 +305,7 @@ class CalendarFragment : Fragment() {
         taskAdapter.update(canvasAssignments + googleAssignments)
     }
 
-    /** ---------- GOOGLE EVENTS ---------- **/
+    /** ---------- GOOGLE EVENTS (fresh fetch from API) ---------- **/
     @RequiresApi(Build.VERSION_CODES.O)
     private fun handleGoogleEvents(events: List<Event>) {
         googleEventsByDate.clear()
