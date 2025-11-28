@@ -1,13 +1,17 @@
 package com.project362.sfuhive
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
@@ -61,13 +65,6 @@ class MainActivity : AppCompatActivity() {
         viewModelFactory = Util.getViewModelFactory(this)
         dataViewModel =
             ViewModelProvider(this, viewModelFactory).get(DataViewModel::class.java)
-
-        // observe and log local database changes
-        dataViewModel.allAssignmentsLiveData.observe(this, Observer { it ->
-            Log.d("DatabaseCheck", "Assignments count: ${it.size}")
-        })
-
-
 
         loadButton.setOnClickListener {
             // put all assignments into database on start if not there
@@ -123,6 +120,20 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.setFragmentResultListener("RateSubmission", this) { _, _ ->
             // Show next dialog
             handleNewSubmissions(newSubmissions, index + 1)
+        }
+    }
+
+    fun checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    100
+                )
+            }
         }
     }
 }
