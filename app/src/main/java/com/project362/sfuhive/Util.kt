@@ -1,13 +1,20 @@
 package com.project362.sfuhive
 
+import android.Manifest
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.project362.sfuhive.Wellness.GoalDatabase
 import com.project362.sfuhive.database.Assignment
 import com.project362.sfuhive.database.AssignmentDatabase
@@ -26,8 +33,10 @@ import org.json.JSONObject
 import org.json.JSONTokener
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
 
 object Util {
 
@@ -60,165 +69,185 @@ object Util {
         val grade: Double,
     )
 
+
     private fun getToken(context: Context): String? {
         // get key from manifest and set URL
         val ai: ApplicationInfo = context.packageManager
             .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-        val token =  ai.metaData.getString("keyValue")
+        val token = ai.metaData.getString("keyValue")
 
         return token
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getCanvasData(owner: ViewModelStoreOwner, context: Context) {
-            try {
-                viewModelFactory = getViewModelFactory(context)
-                dataViewModel = ViewModelProvider(owner, viewModelFactory).get(DataViewModel::class.java)
+        try {
+            viewModelFactory = getViewModelFactory(context)
+            dataViewModel =
+                ViewModelProvider(owner, viewModelFactory).get(DataViewModel::class.java)
 
-                // delete all before inserting for fresh restart
-                dataViewModel.deleteAllAssignments()
-                dataViewModel.deleteAllFiles()
+            // delete all before inserting for fresh restart
+            dataViewModel.deleteAllAssignments()
+            dataViewModel.deleteAllFiles()
 
-                val token = getToken(context)
+            val token = getToken(context)
 
-                // get students name
-                val userURL = URL("https://canvas.sfu.ca/api/v1/users/self")
-                val userObject = getJsonObjectFromURL(userURL, token)
-                val name = userObject.optString("name")
+            // get students name
+            val userURL = URL("https://canvas.sfu.ca/api/v1/users/self")
+            val userObject = getJsonObjectFromURL(userURL, token)
+            val name = userObject.optString("name")
 
-                Log.d("CanvasAPI_name", "Name: $name")
+            Log.d("CanvasAPI_name", "Name: $name")
 
-                // add name to prefs
-                val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
-                val editor = prefs.edit()
-                editor.putString(NAME_KEY, name)
-                editor.apply()
+            // add name to prefs
+            val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
+            val editor = prefs.edit()
+            editor.putString(NAME_KEY, name)
+            editor.apply()
 
-                val coursesURL = URL("https://canvas.sfu.ca/api/v1/courses?enrollment_state=active")
+            val coursesURL = URL("https://canvas.sfu.ca/api/v1/courses?enrollment_state=active")
 
-                val coursesArray = getJsonArrayFromURL(coursesURL, token)
+            val coursesArray = getJsonArrayFromURL(coursesURL, token)
 
-                // for course id and course names
-                for (i in 0 until coursesArray.length()) {
-                    val course = coursesArray.getJSONObject(i)
-                    val courseId = course.optInt("id")
-                    val courseName = course.optString("name")
+            // for course id and course names
+            for (i in 0 until coursesArray.length()) {
+                val course = coursesArray.getJSONObject(i)
+                val courseId = course.optInt("id")
+                val courseName = course.optString("name")
 
-                    if (courseName == null || courseName == "") {
-                        continue
-                    }
-
-                    // get assignment group weights
-                    val groupsURL = URL("https://canvas.sfu.ca/api/v1/courses/$courseId/assignment_groups")
-                    val groupsArray = getJsonArrayFromURL(groupsURL, token)
-
-                    val groupWeightMap = mutableMapOf<Long, Double>()
-
-                    for (j in 0 until groupsArray.length()) {
-                        val group = groupsArray.getJSONObject(j)
-                        val groupId = group.optLong("id")
-                        val groupWeight = group.optDouble("group_weight", 0.0)
-
-                        // Populate the map
-                        groupWeightMap[groupId] = groupWeight
-                    }
-
-                    // get assignments for each course
-                    val assignmentsURL = URL("https://canvas.sfu.ca/api/v1/courses/$courseId/assignments")
-                    val assignmentArray = getJsonArrayFromURL(assignmentsURL, token)
-
-                    // read assignments
-                    for (j in 0 until assignmentArray.length()) {
-
-                        // get all relevant assignment info
-                        val canvasAssignment = assignmentArray.getJSONObject(j)
-                        val assignmentId = canvasAssignment.optLong("id")
-                        val assnDue = canvasAssignment.optString("due_at", "")
-                        val assnName = canvasAssignment.optString("name", "")
-                        val assnPoints = canvasAssignment.optDouble("points_possible", 0.0)
-                        val assnGroupId = canvasAssignment.optLong("assignment_group_id")
-
-                        // map group id
-                        val groupWeight = groupWeightMap[assnGroupId] ?: 0.0
-
-                        // use if u wanna log assignments
-                        Log.d("CanvasAPI_assignments", "Course Name: $courseName, Assignment Name: $assnName, Assignment Points: $assnPoints, Assignment Due: $assnDue, Group Weight: $groupWeight")
-
-                        val assignment = Assignment()
-                        // manually setting id
-                        assignment.assignmentId = assignmentId
-                        assignment.courseName = courseName
-                        assignment.assignmentName = assnName
-                        assignment.pointsPossible = assnPoints
-                        assignment.dueAt = assnDue
-                        assignment.groupWeight = groupWeight
-
-                        dataViewModel.insertAssignment(assignment)
-                    }
-
-                    var filesTabIsPublic = false
-
-                    // find if course has public files
-                    val tabsURL = URL("https://canvas.sfu.ca/api/v1/courses/$courseId/tabs")
-                    val tabsArray = getJsonArrayFromURL(tabsURL, token)
-
-                    // search through tabs
-                    for (j in 0 until tabsArray.length()) {
-                        val tab = tabsArray.getJSONObject(j)
-                        val tabId = tab.optString("id")
-                        val tabVisibility = tab.optString("visibility")
-
-                        // if files tab exists and is public then set flag to true
-                        if (tabId == "files" && tabVisibility == "public") {
-                            filesTabIsPublic = true
-                            break
-                        }
-                    }
-
-                    // skip course files if files unavailable
-                    if (!filesTabIsPublic) {
-                        Log.d("CanvasAPI_Files", "Skipping Course $courseId: Files tab is not public or missing.")
-                        continue
-                    }
-
-                    // get files for each course
-                    val filesURL = URL("https://canvas.sfu.ca/api/v1/courses/$courseId/files")
-                    val fileArray = getJsonArrayFromURL(filesURL, token)
-
-                    // read files
-                    for (j in 0 until fileArray.length()) {
-
-                        // get all relevant file info
-                        val canvasFile = fileArray.getJSONObject(j)
-                        val fileId = canvasFile.optLong("id")
-                        val fileName = canvasFile.optString("display_name", "")
-                        val fileUrl = canvasFile.optString("url", "")
-
-
-                        // use if u wanna log file
-                        Log.d("CanvasAPI_Files", "Course Name: $courseName, File Name: $fileName, File URL: $fileUrl")
-
-
-                        val file = File()
-                        // manually setting id
-                        file.fileId = fileId
-                        file.courseId = courseId.toLong()
-                        file.courseName = courseName
-                        file.fileName = fileName
-                        file.fileURL = fileUrl
-
-                        dataViewModel.insertFile(file)
-                    }
-
-
+                if (courseName == null || courseName == "") {
+                    continue
                 }
 
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Log.e("CanvasAPI", "Error: ", e)
+                // get assignment group weights
+                val groupsURL =
+                    URL("https://canvas.sfu.ca/api/v1/courses/$courseId/assignment_groups")
+                val groupsArray = getJsonArrayFromURL(groupsURL, token)
+
+                val groupWeightMap = mutableMapOf<Long, Double>()
+
+                for (j in 0 until groupsArray.length()) {
+                    val group = groupsArray.getJSONObject(j)
+                    val groupId = group.optLong("id")
+                    val groupWeight = group.optDouble("group_weight", 0.0)
+
+                    // Populate the map
+                    groupWeightMap[groupId] = groupWeight
+                }
+
+                // get assignments for each course
+                val assignmentsURL =
+                    URL("https://canvas.sfu.ca/api/v1/courses/$courseId/assignments")
+                val assignmentArray = getJsonArrayFromURL(assignmentsURL, token)
+
+                // read assignments
+                for (j in 0 until assignmentArray.length()) {
+
+                    // get all relevant assignment info
+                    val canvasAssignment = assignmentArray.getJSONObject(j)
+                    val assignmentId = canvasAssignment.optLong("id")
+                    val assnDue = canvasAssignment.optString("due_at", "")
+                    val assnName = canvasAssignment.optString("name", "")
+                    val assnPoints = canvasAssignment.optDouble("points_possible", 0.0)
+                    val assnGroupId = canvasAssignment.optLong("assignment_group_id")
+
+                    // map group id
+                    val groupWeight = groupWeightMap[assnGroupId] ?: 0.0
+
+                    // use if u wanna log assignments
+                    Log.d(
+                        "CanvasAPI_assignments",
+                        "Course Name: $courseName, Assignment Name: $assnName, Assignment Points: $assnPoints, Assignment Due: $assnDue, Group Weight: $groupWeight"
+                    )
+
+                    val assignment = Assignment()
+                    // manually setting id
+                    assignment.assignmentId = assignmentId
+                    assignment.courseName = courseName
+                    assignment.assignmentName = assnName
+                    assignment.pointsPossible = assnPoints
+                    assignment.dueAt = assnDue
+                    assignment.groupWeight = groupWeight
+
+                    dataViewModel.insertAssignment(assignment)
+
+                    // schedule reminder
+                    scheduleReminder(context, assignmentId, assnName, assnDue)
+                }
+
+                var filesTabIsPublic = false
+
+                // find if course has public files
+                val tabsURL = URL("https://canvas.sfu.ca/api/v1/courses/$courseId/tabs")
+                val tabsArray = getJsonArrayFromURL(tabsURL, token)
+
+                // search through tabs
+                for (j in 0 until tabsArray.length()) {
+                    val tab = tabsArray.getJSONObject(j)
+                    val tabId = tab.optString("id")
+                    val tabVisibility = tab.optString("visibility")
+
+                    // if files tab exists and is public then set flag to true
+                    if (tabId == "files" && tabVisibility == "public") {
+                        filesTabIsPublic = true
+                        break
+                    }
+                }
+
+                // skip course files if files unavailable
+                if (!filesTabIsPublic) {
+                    Log.d(
+                        "CanvasAPI_Files",
+                        "Skipping Course $courseId: Files tab is not public or missing."
+                    )
+                    continue
+                }
+
+                // get files for each course
+                val filesURL = URL("https://canvas.sfu.ca/api/v1/courses/$courseId/files")
+                val fileArray = getJsonArrayFromURL(filesURL, token)
+
+                // read files
+                for (j in 0 until fileArray.length()) {
+
+                    // get all relevant file info
+                    val canvasFile = fileArray.getJSONObject(j)
+                    val fileId = canvasFile.optLong("id")
+                    val fileName = canvasFile.optString("display_name", "")
+                    val fileUrl = canvasFile.optString("url", "")
+
+
+                    // use if u wanna log file
+                    Log.d(
+                        "CanvasAPI_Files",
+                        "Course Name: $courseName, File Name: $fileName, File URL: $fileUrl"
+                    )
+
+
+                    val file = File()
+                    // manually setting id
+                    file.fileId = fileId
+                    file.courseId = courseId.toLong()
+                    file.courseName = courseName
+                    file.fileName = fileName
+                    file.fileURL = fileUrl
+
+                    dataViewModel.insertFile(file)
+                }
+
+
             }
+
+//            // test reminder scheduling
+//            scheduleReminder(context, 9999, "Final Project", "2025-11-29T23:12:00Z")
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e("CanvasAPI", "Error: ", e)
+        }
     }
 
-    private fun getRecentSubmissions(context: Context) : JSONArray? {
+    private fun getRecentSubmissions(context: Context): JSONArray? {
         try {
             // get key from manifest and set URL
             val ai: ApplicationInfo = context.packageManager
@@ -294,8 +323,10 @@ object Util {
             val state = submissionObj.optString("workflow_state")
             val submittedAt = submissionObj.optString("submitted_at")
 
-            Log.d("Submission", "Fetched $state, ASSIGNMENT: ${assignmentObj.optString("name")}, " +
-                    "COURSE: ${courseObj.optString("name")}, SCORE: ${submissionObj.optDouble("score")}")
+            Log.d(
+                "Submission", "Fetched $state, ASSIGNMENT: ${assignmentObj.optString("name")}, " +
+                        "COURSE: ${courseObj.optString("name")}, SCORE: ${submissionObj.optDouble("score")}"
+            )
 
             // check if assignment has been submitted
             if (submissionObj != null && (state == "submitted" || state == "graded") && submittedAt != null && submittedAt != "null") {
@@ -316,7 +347,8 @@ object Util {
                         assignmentName = assignmentObj.optString("name"),
                         courseId = courseObj.optLong("id"),
                         courseName = courseObj.optString("name"),
-                        grade = submissionObj.optDouble("score"))
+                        grade = submissionObj.optDouble("score")
+                    )
 
                     // add submitted assignment to return list
                     newAssignmentSubmissions.add(assignment)
@@ -404,7 +436,13 @@ object Util {
         val goalDatabase = GoalDatabase.getInstance(context)
         val goalDatabaseDao = goalDatabase.goalDatabaseDao()
 
-        repository = DataRepository(databaseDao, fileDatabaseDao, remoteDatabase,badgeDatabaseDao, goalDatabaseDao)
+        repository = DataRepository(
+            databaseDao,
+            fileDatabaseDao,
+            remoteDatabase,
+            badgeDatabaseDao,
+            goalDatabaseDao
+        )
         viewModelFactory = DataViewModelFactory(repository)
         return viewModelFactory
     }
@@ -413,7 +451,7 @@ object Util {
         return String.format("%.1f", value)
     }
 
-    fun updateCoinTotal(context :Context, newTotal : Long?){
+    fun updateCoinTotal(context: Context, newTotal: Long?) {
         // add name to prefs
         val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
         val editor = prefs.edit()
@@ -421,10 +459,61 @@ object Util {
         editor.apply()
     }
 
-    fun getCoinTotal(context: Context): Long?{
+    fun getCoinTotal(context: Context): Long? {
         val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
-        val total=prefs.getLong(COIN_KEY, 0)
+        val total = prefs.getLong(COIN_KEY, 0)
 
         return total
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun scheduleReminder(context: Context, assignmentId: Long, title: String, dueDate: String) {
+
+        // skip if no due date
+        if (dueDate.isNullOrBlank()) {
+            return
+        }
+
+        // convert due date to milliseconds
+        // conversion process adapted from ChatGPT implementation
+        val dueAtMilli =
+            try {
+                val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                val instant = Instant.from(formatter.parse(dueDate))
+                instant.toEpochMilli()
+            } catch (e: Exception) {
+                Log.e("Reminder", "Error parsing due_at: $dueDate", e)
+                return
+            }
+
+        // set reminder time 24 hours before due date
+        val reminderTime = dueAtMilli - 24 * 60 * 60 * 1000
+
+        // skip due dates from the past
+        val delay = reminderTime - System.currentTimeMillis()
+        if (delay <= 0) {
+            Log.d("Reminder", "Skipping past reminder for $title")
+            return
+        }
+
+        // prep data for worker
+        val data = Data.Builder()
+            .putString("title", title)
+            .putLong("id", assignmentId)
+            .build()
+
+        val work = OneTimeWorkRequestBuilder<AssignmentReminderWorker>()
+            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+            .addTag("assignment_reminder")
+            .setInputData(data)
+            .build()
+
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            "assignment_$assignmentId",
+            ExistingWorkPolicy.REPLACE,
+            work
+        )
+
+        Log.d("ReminderDebug", "Scheduled reminder for '${title}' in $dueDate")
     }
 }

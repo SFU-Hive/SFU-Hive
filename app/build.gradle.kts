@@ -130,4 +130,6 @@ dependencies {
 
     implementation("com.google.firebase:firebase-config")
 
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
 }
