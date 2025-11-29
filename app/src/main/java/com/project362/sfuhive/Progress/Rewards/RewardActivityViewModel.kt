@@ -47,6 +47,7 @@ class RewardActivityViewModel(
         public fun subtractCost(): Int{
             val newCurrency=getCurrencyCount() - featuredReward.value.getCost()
             setCurrencyCount(newCurrency)
+
             return featuredReward.value.getCost()
         }
     }

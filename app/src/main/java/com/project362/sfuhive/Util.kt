@@ -483,19 +483,19 @@ object Util {
         Log.d("Coin Update","New total: ${newTotal}")
         Log.d("Coin Update","Coin difference: ${difference}")
 
-        if(oldTotal!!>newTotal){
+        if(oldTotal!!<newTotal){
             toastText = "Coins Earned! +"
             val coinToast = Toast.makeText(context,"${toastText}${difference}",Toast.LENGTH_LONG)
             coinToast.show()
-        }else if(oldTotal!!<newTotal){
-            toastText = "Coins Spent! -"
+        }else if(oldTotal!!>newTotal){
+            toastText = "Coins Spent! "
             val coinToast = Toast.makeText(context,"${toastText}${difference}",Toast.LENGTH_LONG)
             coinToast.show()
         }else{
             Log.d("Coin Update","Coin value didn't change")
 
         }
-        // notify user of coin gain via toa
+        // notify user of coin gain via toast
     }
 
     fun getCoinTotal(context: Context): Long? {

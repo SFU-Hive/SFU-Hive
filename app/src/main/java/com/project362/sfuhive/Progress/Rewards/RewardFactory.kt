@@ -19,7 +19,7 @@ class RewardFactory {
         Reward(
             R.drawable.treat_reward,
             "Sweet Treat",
-            10,
+            5,
             "Treat yourself to a sweet treat!"),
         Reward(
             R.drawable.reward_bath,
