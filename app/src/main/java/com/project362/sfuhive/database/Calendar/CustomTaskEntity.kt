@@ -6,7 +6,8 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "custom_task_table")
 data class CustomTaskEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Long = 0L,
+    val id: Long = 0L,   // MUST remain 0 so Room autogenerates a new ID
+
     val title: String,
     val date: String,     // yyyy-MM-dd
     val startTime: String?,
