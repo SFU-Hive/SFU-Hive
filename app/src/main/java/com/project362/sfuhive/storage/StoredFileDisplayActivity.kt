@@ -33,6 +33,16 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
         StoredFileViewModel.StoredFileViewModelFactory(repository)
     }
 
+    //https://developer.android.com/training/basics/intents/result
+    //https://developer.android.com/reference/androidx/activity/result/contract/ActivityResultContracts.OpenDocument
+    private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()){ uri ->
+        if(uri != null){
+            handleSelectedFile(uri)
+        }else{
+            Toast.makeText(this, "No file selected", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityFileDisplayBinding.inflate(layoutInflater)
@@ -67,9 +77,7 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
         binding.fileRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.fileRecyclerView.adapter = adapter
 
-        Log.d("xd", "Hello")
         viewModel.filesInFolder.observe(this) { files ->
-            Log.d("xd", "Files in folder: $files")
             files?.let {
                 adapter.setData(it)
                 //if the list is empty, show the empty view
@@ -119,7 +127,6 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
             viewModel.openFolder(file.id)
         }else{
             if(file.url == null) {
-                Log.e("xd", "File url is null")
                 Toast.makeText(this, "Cannot open file", Toast.LENGTH_SHORT).show()
                 return
             }
@@ -134,17 +141,8 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
             try{
                 startActivity(openFileIntent)
             }catch (e: Exception){
-                Log.e("xd", "Error opening file: $e")
                 Toast.makeText(this, "Cannot open file", Toast.LENGTH_SHORT).show()
             }
-        }
-    }
-
-    private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()){ uri ->
-        if(uri != null){
-            handleSelectedFile(uri)
-        }else{
-            Toast.makeText(this, "No file selected", Toast.LENGTH_SHORT).show()
         }
     }
 
