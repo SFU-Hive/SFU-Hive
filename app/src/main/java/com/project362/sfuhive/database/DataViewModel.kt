@@ -145,6 +145,7 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
                 goal.badgeId?.let { badgeId ->
                     repository.unlockBadge(badgeId)
 
+
                 }
             }
         }

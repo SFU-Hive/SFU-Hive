@@ -34,11 +34,11 @@ class ProgressFragment : Fragment() {
     private lateinit var repoVM : DataViewModel
     private lateinit var badgeActivity: BadgeActivity
     private lateinit var rewardsActivity: RewardActivity
-    private lateinit var streaksActivity: StreakActivity
+    //private lateinit var streaksActivity: StreakActivity
 
     private lateinit var badgeResult: ActivityResultLauncher<Intent>
     private lateinit var rewardResult: ActivityResultLauncher<Intent>
-    private lateinit var streakResult: ActivityResultLauncher<Intent>
+    //private lateinit var streakResult: ActivityResultLauncher<Intent>
 
     private var rewards = RewardFactory()
     private var badges = BadgeFactory()
@@ -54,18 +54,18 @@ class ProgressFragment : Fragment() {
 
         val badgesTitleView: TextView =view.findViewById<TextView>(R.id.badges_title)
         val rewardsTitleView: TextView =view.findViewById<TextView>(R.id.rewards_title)
-        val streaksTitleView: TextView =view.findViewById<TextView>(R.id.streaks_title)
+        //val streaksTitleView: TextView =view.findViewById<TextView>(R.id.streaks_title)
         badgeActivity = BadgeActivity()
         rewardsActivity= RewardActivity()
-        streaksActivity= StreakActivity()
+        //streaksActivity= StreakActivity()
 
         val badgeIntent = Intent(activity, BadgeActivity::class.java)
         val rewardIntent = Intent(activity, RewardActivity::class.java)
-        val streakIntent = Intent(activity, StreakActivity::class.java)
+        //val streakIntent = Intent(activity, StreakActivity::class.java)
 
         badgeResult=registerBadgeActivity()
         rewardResult=registerRewardActivity()
-        streakResult=registerStreakActivity()
+        //streakResult=registerStreakActivity()
 
         // Set onClickListener on all titles to change the fragment to the fragment associated with it
 
@@ -80,10 +80,10 @@ class ProgressFragment : Fragment() {
             rewardResult.launch(rewardIntent)
         }
 
-        streaksTitleView.setOnClickListener {
-            // on click take user to all the streaks
-            streakResult.launch(streakIntent)
-        }
+//        streaksTitleView.setOnClickListener {
+//            // on click take user to all the streaks
+//            streakResult.launch(streakIntent)
+//        }
 
 
         val pinnedBadgesView: RecyclerView=view.findViewById<RecyclerView>(R.id.pinned_badges)
@@ -158,20 +158,20 @@ class ProgressFragment : Fragment() {
         return result
     }
 
-    private fun registerStreakActivity(): ActivityResultLauncher<Intent> {
-        val result = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { result: ActivityResult ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                println("Streak result was ok!")
-                println("Activity was ${result.data}")
-
-            } else {
-                println("Streak result NOT OK!")
-            }
-        }
-        return result
-    }
+//    private fun registerStreakActivity(): ActivityResultLauncher<Intent> {
+//        val result = registerForActivityResult(
+//            ActivityResultContracts.StartActivityForResult()
+//        ) { result: ActivityResult ->
+//            if (result.resultCode == Activity.RESULT_OK) {
+//                println("Streak result was ok!")
+//                println("Activity was ${result.data}")
+//
+//            } else {
+//                println("Streak result NOT OK!")
+//            }
+//        }
+//        return result
+    //}
     private fun initBadgeStatus() {
         println("Loading badges...")
         for (badge in badges.getAllBadges()) {

@@ -20,6 +20,7 @@ import com.project362.sfuhive.R
 import com.project362.sfuhive.Util.getViewModelFactory
 import com.project362.sfuhive.database.DataViewModel
 import androidx.lifecycle.lifecycleScope
+import com.project362.sfuhive.Util
 import com.project362.sfuhive.database.Badge.BadgeDatabase
 import com.project362.sfuhive.database.Badge.BadgeEntity
 import com.project362.sfuhive.database.DataRepository
@@ -247,6 +248,11 @@ class GoalsActivity : AppCompatActivity() {
             if (goal != null) {
                 // Found a goal → mark complete
                 viewModel.incrementCompletion(goal.id)
+
+                //Miro added to display goal
+                if(viewModel.isBadgeLocked(goal.badgeId!!)==false){
+                    Util.UnlockBadgeDialog(goal.id, supportFragmentManager)
+                }
 
                 Toast.makeText(
                     this@GoalsActivity,
