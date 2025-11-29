@@ -104,7 +104,13 @@ class CalendarFragment : Fragment() {
         fabAddEvent = view.findViewById(R.id.fabAddEvent)
 
         tasksRecycler.layoutManager = LinearLayoutManager(requireContext())
-        taskAdapter = TaskAdapter(emptyList(), emptyList())
+        taskAdapter = TaskAdapter(
+            emptyList(),
+            emptyList()
+        ) {
+            // 🔥 Auto-refresh calendar dots when priority changes
+            updateCalendar()
+        }
         tasksRecycler.adapter = taskAdapter
 
         calendarAdapter = CalendarAdapter(
@@ -218,25 +224,35 @@ class CalendarFragment : Fragment() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateCalendar() {
+
         val merged = mutableMapOf<LocalDate, MutableList<String>>()
 
-        fun put(date: LocalDate, tag: String) {
-            merged.getOrPut(date) { mutableListOf() }.add(tag)
+        fun put(date: LocalDate, id: String) {
+            merged.getOrPut(date) { mutableListOf() }.add(id)
         }
 
+        // CANVAS — store REAL assignmentId
         canvasAssignments.forEach {
             if (it.dueAt.length >= 10) {
                 val d = LocalDate.parse(it.dueAt.substring(0, 10))
-                put(d, "canvas")
+                put(d, it.assignmentId.toString())
             }
         }
 
-        googleEventsByDate.forEach { (d, _) -> put(d, "google") }
+        // GOOGLE — store REAL event priority ID
+        googleEventsByDate.forEach { (d, events) ->
+            events.forEach { e ->
+                val id = "google_${e.id}"
+                put(d, id)
+            }
+        }
 
+        // CUSTOM — store REAL task priority ID
         customTasks.forEach {
             if (it.date.length == 10) {
                 val d = LocalDate.parse(it.date)
-                put(d, "custom")
+                val id = "custom_${it.id}"
+                put(d, id)
             }
         }
 

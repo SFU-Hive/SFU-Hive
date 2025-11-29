@@ -52,7 +52,10 @@ class DayViewActivity : AppCompatActivity() {
             )
         }
 
-        taskAdapter = TaskAdapter(tasks, ids)
+        taskAdapter = TaskAdapter(tasks, ids) {
+            // Refresh month calendar when returning from Day View
+            finish()  // closes day view
+        }
         recycler.adapter = taskAdapter
     }
 }
