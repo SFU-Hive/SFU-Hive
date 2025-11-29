@@ -7,8 +7,13 @@ import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import com.project362.sfuhive.Progress.Badges.BadgeFactory
+import com.project362.sfuhive.Progress.Badges.BadgeFactory.Companion.BANK_BREAKER
+import com.project362.sfuhive.Progress.Badges.BadgeUtils
+import com.project362.sfuhive.Progress.Badges.UnlockedDialog
 import com.project362.sfuhive.Wellness.GoalDatabase
 import com.project362.sfuhive.database.Assignment
 import com.project362.sfuhive.database.AssignmentDatabase
@@ -462,5 +467,15 @@ object Util {
         val toastText = "Coins Spent! -"
         val coinToast = Toast.makeText(context,"${toastText}${amountSpent}",Toast.LENGTH_LONG)
         coinToast.show()
+    }
+    // MIRO test in coin spending!
+    fun UnlockBadgeDialog(badgeId : Long, theSupportFragmentManager : FragmentManager){
+        val badgeFactory=BadgeFactory()
+        val badge=badgeFactory.getBageById(badgeId)
+        if(badge!=null){
+            val dialog=UnlockedDialog(badge)
+            dialog.show(theSupportFragmentManager, badgeId.toString())
+        }
+
     }
 }
