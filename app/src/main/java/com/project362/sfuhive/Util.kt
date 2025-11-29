@@ -164,6 +164,7 @@ object Util {
                     // manually setting id
                     assignment.assignmentId = assignmentId
                     assignment.courseName = courseName
+                    assignment.courseId = courseId.toLong()
                     assignment.assignmentName = assnName
                     assignment.pointsPossible = assnPoints
                     assignment.dueAt = assnDue

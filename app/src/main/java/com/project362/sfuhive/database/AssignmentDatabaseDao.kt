@@ -17,8 +17,11 @@ interface AssignmentDatabaseDao {
     suspend fun deleteAll()
 
     @Query("SELECT * FROM assignment_table")
-    fun getAllActivities(): Flow<List<Assignment>>
+    fun getAllAssignments(): Flow<List<Assignment>>
 
     @Query("SELECT * FROM assignment_table WHERE assignmentId = :key LIMIT 1")
     suspend fun getAssignment(key: Long): Assignment?
+
+    @Query("SELECT DISTINCT course_id_column FROM assignment_table")
+    fun getUniqueCourseIds(): Flow<List<Long>>
 }

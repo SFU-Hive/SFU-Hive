@@ -7,6 +7,7 @@ import com.google.firebase.database.database
 import com.project362.sfuhive.Assignments.RateSubmissionDialog.RatedAssignment
 import kotlinx.coroutines.tasks.await
 
+// Firebase implementation assisted by ChatGPT
 class FirebaseRemoteDatabase {
 
     data class Course(

@@ -9,7 +9,6 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.project362.sfuhive.Wellness.GoalDatabase
 import com.project362.sfuhive.database.Badge.BadgeDatabase
-import com.project362.sfuhive.database.Badge.BadgeEntity
 import com.project362.sfuhive.database.Wellness.Goal
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -20,7 +19,8 @@ import java.util.Calendar
 // adapted from RoomDatabase demo
 class DataViewModel(private val repository: DataRepository) : ViewModel() {
 
-    val allAssignmentsLiveData: LiveData<List<Assignment>> = repository.allAssignments.asLiveData()
+    val allMyAssignmentsLiveData: LiveData<List<Assignment>> = repository.allAssignments.asLiveData()
+    val myUniqueCourseIdsLiveData: LiveData<List<Long>> = repository.myUniqueCourseIds.asLiveData()
 
     fun insertAssignment(assignment: Assignment) {
         repository.insertAssignment(assignment)

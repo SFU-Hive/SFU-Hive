@@ -29,6 +29,9 @@ class AssignmentFragment : Fragment() {
     private val courseList = mutableListOf<Course>()
     private val allAssignments = mutableListOf<RatedAssignment>()
     private lateinit var viewModel: DataViewModel
+    private var myCourses: List<Course> = emptyList()
+    private var otherCourses: List<Course> = emptyList()
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -44,10 +47,9 @@ class AssignmentFragment : Fragment() {
         recyclerView = view.findViewById(R.id.course_recycler)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        adapter = CourseAdapter(courseList) { selectedCourse ->
+        adapter = CourseAdapter { selectedCourse: Course ->
             showAssignmentsForCourse(selectedCourse)
         }
-
         recyclerView.adapter = adapter
 
         // setup tool bar
@@ -64,9 +66,16 @@ class AssignmentFragment : Fragment() {
         viewModel.courseListLiveData.observe(viewLifecycleOwner) { newCourseList ->
             courseList.clear()
             courseList.addAll(newCourseList)
-            adapter.notifyDataSetChanged()
+
+            // all of the users assignments
+            viewModel.myUniqueCourseIdsLiveData.observe(viewLifecycleOwner) { myCourseIds ->
+                myCourses = courseList.filter { myCourseIds.contains(it.id) }
+                otherCourses = courseList.filter { !myCourseIds.contains(it.id) }
+                adapter.setCourses(myCourses, otherCourses)
+            }
         }
 
+        // all rated assignments from Firebase
         viewModel.allAssignmentsStateFlow.observe(viewLifecycleOwner) { assignments ->
             allAssignments.clear()
             allAssignments.addAll(assignments)
@@ -95,15 +104,23 @@ class AssignmentFragment : Fragment() {
     }
 
     private fun filter(text: String) {
-        val filtered = ArrayList<Course>()
+        val filteredMyCourses = ArrayList<Course>()
+        val filteredOtherCourses = ArrayList<Course>()
 
-        for (item in courseList) {
+        for (item in myCourses) {
             // perform search
             if (item.name.lowercase().contains(text.lowercase(Locale.getDefault()))) {
-                filtered.add(item)
+                filteredMyCourses.add(item)
             }
-            adapter.filterList(filtered)
         }
+        for (item in otherCourses) {
+            // perform search
+            if (item.name.lowercase().contains(text.lowercase(Locale.getDefault()))) {
+                filteredOtherCourses.add(item)
+            }
+        }
+
+        adapter.setCourses(filteredMyCourses, filteredOtherCourses)
     }
 
     private fun showAssignmentsForCourse(course: Course) {

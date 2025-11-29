@@ -27,7 +27,8 @@ class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
                      private val goalDatabaseDao: GoalDatabaseDao
 ) {
 
-    val allAssignments: Flow<List<Assignment>> = assignmentDatabaseDao.getAllActivities()
+    val allAssignments: Flow<List<Assignment>> = assignmentDatabaseDao.getAllAssignments()
+    val myUniqueCourseIds: Flow<List<Long>> = assignmentDatabaseDao.getUniqueCourseIds()
 
     fun insertAssignment(assignment: Assignment) {
         CoroutineScope(IO).launch {
@@ -46,6 +47,7 @@ class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
             assignmentDatabaseDao.deleteAll()
         }
     }
+
 
     // Files section
     val  allFiles: Flow<List<File>> = fileDatabaseDao.getAllFiles()
