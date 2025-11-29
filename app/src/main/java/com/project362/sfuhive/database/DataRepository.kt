@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.util.Calendar
 import java.util.Date
 
 // adapted from RoomDatabase demo
@@ -186,16 +187,23 @@ class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
     }
 
     // section for streaks
-    fun addStreak(type:String, date : Date){
+    fun addStreak(type:String, date : Calendar){
         CoroutineScope(IO).launch {
-            Log.d("StreakDB","adding streak with date ${date.toString()}")
-            var newStreak = StreakEntity(type,date.toString())
+
+            val year = date.get(Calendar.YEAR)
+            val month = date.get(Calendar.MONTH)
+            val day = date.get(Calendar.DAY_OF_MONTH)
+            Log.d("StreakDB","adding streak with date = ${year}, ${month}, ${day}")
+            var newStreak = StreakEntity(type,year,month,day)
             streakDatabaseDao.insertStreak(newStreak)
         }
     }
 
     fun getStreaksOfType(type: String): Flow<List<StreakEntity?>> {
-        return streakDatabaseDao.getStreaksOfType(type)
+        val selectedStreaks= streakDatabaseDao.getStreaksOfType(type)
+        Log.d("StreakDB","selecting streak with type = ${type}")
+        Log.d("StreakDB","getStreaksOfType(type) returning ${selectedStreaks}")
+        return selectedStreaks
     }
 
     fun getAllStreaks():Flow<List<StreakEntity?>>{

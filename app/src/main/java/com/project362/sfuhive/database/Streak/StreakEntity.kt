@@ -5,11 +5,17 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.Date
 
-@Entity(tableName = "streak_table",primaryKeys=["type","date"])
+@Entity(tableName = "streak_table",primaryKeys=["type","year","month","day"])
 data class StreakEntity (
     @ColumnInfo(name = "type")
     var type: String,
 
-    @ColumnInfo(name = "date")
-    var date: String
+    @ColumnInfo(name = "year")
+    var year: Int,
+
+    @ColumnInfo(name = "month")
+    var month: Int,
+
+    @ColumnInfo(name = "day")
+    var day: Int
 )
