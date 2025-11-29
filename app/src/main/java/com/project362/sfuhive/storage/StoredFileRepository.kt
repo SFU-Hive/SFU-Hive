@@ -35,4 +35,8 @@ class StoredFileRepository(private val storedFileDatabaseDao: StoredFileDatabase
         }
     }
 
+    suspend fun getChildCount(parentId: Long?): Int {
+        return storedFileDatabaseDao.getChildCount(parentId)
+    }
+
 }

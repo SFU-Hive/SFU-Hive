@@ -61,6 +61,10 @@ class StoredFileViewModel(private val repository: StoredFileRepository) : ViewMo
         repository.deleteAll()
     }
 
+    suspend fun isFolderEmpty(parentId: Long?): Boolean {
+        return repository.getChildCount(parentId) == 0
+    }
+
     class StoredFileViewModelFactory(private val repository: StoredFileRepository) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(StoredFileViewModel::class.java)) {
