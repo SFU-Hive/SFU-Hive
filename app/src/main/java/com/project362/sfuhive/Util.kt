@@ -21,6 +21,8 @@ import com.project362.sfuhive.database.DataViewModelFactory
 import com.project362.sfuhive.database.File
 import com.project362.sfuhive.database.FileDatabase
 import com.project362.sfuhive.database.FirebaseRemoteDatabase
+import com.project362.sfuhive.database.Streak.StreakDatabase
+import com.project362.sfuhive.database.Streak.StreakDatabaseDao
 import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
@@ -404,7 +406,11 @@ object Util {
         val goalDatabase = GoalDatabase.getInstance(context)
         val goalDatabaseDao = goalDatabase.goalDatabaseDao()
 
-        repository = DataRepository(databaseDao, fileDatabaseDao, remoteDatabase,badgeDatabaseDao, goalDatabaseDao)
+        // streaks database
+        val streakDatabase = StreakDatabase.getInstance(context)
+        val streakDatabaseDao = streakDatabase.streakDatabaseDao
+
+        repository = DataRepository(databaseDao, fileDatabaseDao, remoteDatabase,badgeDatabaseDao, goalDatabaseDao, streakDatabaseDao)
         viewModelFactory = DataViewModelFactory(repository)
         return viewModelFactory
     }
