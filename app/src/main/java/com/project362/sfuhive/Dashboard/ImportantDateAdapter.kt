@@ -8,13 +8,12 @@ import android.widget.BaseAdapter
 import android.widget.CheckBox
 import android.widget.TextView
 import com.project362.sfuhive.R
-import com.project362.sfuhive.Dashboard.DashboardFragment.ImportantDate
-
 
 
 class ImportantDateAdapter(
     private val context: Context,
-    private val importantDates: List<ImportantDate>
+    private val importantDates: MutableList<ImportantDate>,
+    private val onDeleteClicked: (ImportantDate) -> Unit
 ) : BaseAdapter(){
 
     private val inflator: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -43,17 +42,28 @@ class ImportantDateAdapter(
         val dateText = rowView.findViewById<TextView>(R.id.date_text)
         val checkbox = rowView.findViewById<CheckBox>(R.id.checkbox)
 
-        val importantDate = getItem(pos) as DashboardFragment.ImportantDate
+        val importantDate = getItem(pos) as ImportantDate
 
         courseNameTask.text = importantDate.name + " " + importantDate.task
         dateText.text = importantDate.date
+        checkbox.setOnCheckedChangeListener(null)
         checkbox.isChecked = importantDate.isComplete
 
         if (importantDate.name.isNotEmpty()) {
             courseImageIdentifier.text = importantDate.name.first().toString()
         }
 
+        checkbox.setOnCheckedChangeListener { _, isChecked ->
+            onDeleteClicked(importantDate)
+        }
+
         return rowView
     }
+    fun updateData(newDates: List<ImportantDate>) {
+        importantDates.clear()
+        importantDates.addAll(newDates)
+        notifyDataSetChanged()
+    }
+
 
 }

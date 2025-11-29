@@ -35,9 +35,24 @@
     <string name="streaks_title">Streaks</string>
     <string name="not_found">Not Found</string>
     <string name="redeem">Redeem</string>
-    <string name="currency">Currency</string>
-    <string name="cancel">Cancel</string>
-    <string name="reset">Reset</string>
     <string name="recent">Recent</string>
     <string name="recent_file_image">Recent File Image</string>
+    <string name="see_more_files">See more files</string>
+    <string name="currency">Currency</string>
+    <string name="cancel">Cancel</string>
+    <string name="title_activity_stored_file_display">StoredFileDisplayActivity</string>
+    <string name="file_icon">File icon</string>
+    <string name="add_new_file">Add new file</string>
+    <string name="no_files_found">No files found.</string>
+    <string name="reset">Reset</string>
+    <string name="delete_file">Delete File</string>
+    <string name="delete_confirmation">Delete Confirmation</string>
+    <string name="warning_msg">Are you sure you want to delete this file?\n This action cannot be undone.</string>
+    <string name="folder_image">Folder Image</string>
+    <string name="temp_folder_name">CMPT 410</string>
+    <string name="more_options">more_options</string>
+    <string name="delete">Delete</string>
+    <string name="rename">Rename</string>
+    <string name="name_of_folder">Name of Folder</string>
+    <string name="cmpt_110_assignments">CMPT 110 Assignments</string>
 </resources>

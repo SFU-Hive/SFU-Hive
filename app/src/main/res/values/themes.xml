@@ -2,10 +2,13 @@
 <resources>
 
     <style name="Base.Theme.SFUHive" parent="Theme.Material3.DayNight.NoActionBar" />
+
     <style name="Theme.SFUHive" parent="Base.Theme.SFUHive" />
+
     <style name="Button.White" parent="ThemeOverlay.AppCompat">
         <item name="colorAccent">@color/white</item>
     </style>
+
     <style name="Back.DarkRed" parent="ThemeOverlay.AppCompat">
         <item name="colorAccent">@color/dark_red</item>
     </style>

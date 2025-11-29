@@ -1,5 +1,6 @@
 package com.project362.sfuhive.Dashboard
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,32 +8,18 @@ import android.view.ViewGroup
 import android.widget.GridView
 import android.widget.ImageView
 import android.widget.ListView
+import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.project362.sfuhive.R
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.project362.sfuhive.storage.StoredFileDisplayActivity
 
 class DashboardFragment : Fragment() {
 
-    data class ImportantDate(
-        val name: String,
-        val date: String,
-        val task: String,
-        val isComplete: Boolean
-    )
-
-    data class RecentFile(
-        val fileName: String,
-        val date: String,
-        val size: String
-    )
-
-    private lateinit var datesData: List<ImportantDate>
-    private lateinit var recentFilesData: List<RecentFile>
-    private lateinit var adapter: ImportantDateAdapter
+    private val viewModel: DashboardViewModel by viewModels()
     private lateinit var streakIcons: Array<ImageView?>
-    private lateinit var recentFiles: GridView
+
+    private lateinit var importantDateAdapter: ImportantDateAdapter
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -43,14 +30,10 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initializeDummyData()
-        initializeDummyFiles()
-
-
-        val importantDates = view.findViewById<ListView>(R.id.list_view)
-        recentFiles = view.findViewById(R.id.recent_files)
-
-        importantDates.adapter = ImportantDateAdapter(requireContext(), datesData)
+        val importantDatesListView = view.findViewById<ListView>(R.id.list_view)
+        val recentFilesGridView = view.findViewById<GridView>(R.id.recent_files)
+        val welcomeMessageView = view.findViewById<TextView>(R.id.welcome)
+        val showMoreFilesButton = view.findViewById<ImageView>(R.id.more_files_arrow)
 
 
         streakIcons = arrayOf(
@@ -63,35 +46,41 @@ class DashboardFragment : Fragment() {
             view.findViewById(R.id.streak_item7)
         )
 
-        for (i in 0 until streakIcons.size) {
-            streakIcons[i]?.setImageResource(R.drawable.ic_ring)
+        importantDateAdapter = ImportantDateAdapter(requireContext(), mutableListOf()) {
+            viewModel.deleteImportantDate(it)
         }
 
-        recentFiles.adapter = RecentFilesAdaptar(requireContext(), recentFilesData)
-    }
+        importantDatesListView.adapter = importantDateAdapter
+
+        viewModel.welcomeMessage.observe(viewLifecycleOwner) { message ->
+            welcomeMessageView.text = message
+        }
+
+        viewModel.importantDates.observe(viewLifecycleOwner) { dates ->
+            importantDateAdapter.updateData(dates)
+        }
+
+        viewModel.recentFiles.observe(viewLifecycleOwner) { files ->
+            recentFilesGridView.adapter = RecentFilesAdapter(requireContext(), files)
+        }
 
 
-    //Testing Code
-    private fun initializeDummyData() {
-        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        datesData = listOf(
-            ImportantDate("CMPT 362", today, "Milestone 3 Due", false),
-            ImportantDate("CMPT 354", "2025-12-05", "Final Exam", false)
-        )
-    }
+        viewModel.streakStatus.observe(viewLifecycleOwner) { statusList ->
+            statusList.forEachIndexed { index, isComplete ->
+                if(index < streakIcons.size){
+                    val icon = when (isComplete) {
+                        true -> R.drawable.ic_checkmark
+                        false -> R.drawable.ic_cross
+                        null -> R.drawable.ic_ring
+                    }
+                    streakIcons[index]?.setImageResource(icon)
+                }
+            }
+        }
 
-    private fun initializeDummyFiles() {
-
-        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        recentFilesData = listOf(
-            RecentFile("Milestone3_Report.pdf", today, "1.2 MB"),
-            RecentFile("Lecture_Slides_Week10.pptx", "2025-11-15", "5.8 MB"),
-            RecentFile("Lab08_Instructions.docx", "2025-11-14", "312 KB"),
-            RecentFile("Final_Exam_Study_Guide.pdf", "2025-11-12", "850 KB"),
-            RecentFile("Milestone3_Report.pdf", today, "1.2 MB"),
-            RecentFile("Lecture_Slides_Week10.pptx", "2025-11-15", "5.8 MB"),
-            RecentFile("Lab08_Instructions.docx", "2025-11-14", "312 KB"),
-            RecentFile("Final_Exam_Study_Guide.pdf", "2025-11-12", "850 KB")
-        )
+        showMoreFilesButton.setOnClickListener {
+            val intent = Intent(requireContext(), StoredFileDisplayActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

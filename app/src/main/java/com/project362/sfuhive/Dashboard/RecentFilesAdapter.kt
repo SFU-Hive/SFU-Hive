@@ -6,11 +6,10 @@ import android.widget.BaseAdapter
 import android.content.Context
 import android.view.LayoutInflater
 import android.widget.TextView
-import com.project362.sfuhive.Dashboard.DashboardFragment.RecentFile
 import com.project362.sfuhive.R
 
 
-class RecentFilesAdaptar(
+class RecentFilesAdapter(
     private val context: Context,
     private val recentFiles: List<RecentFile>
 ) : BaseAdapter() {
