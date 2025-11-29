@@ -6,6 +6,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -466,6 +467,29 @@ object Util {
         val editor = prefs.edit()
         editor.putLong(COIN_KEY, newTotal!!)
         editor.apply()
+
+        // Probably better ways to do this -Miro
+        var toastText = "Coins Spent! +"
+        val oldTotal=getCoinTotal(context)
+        val difference = newTotal - oldTotal!!
+
+        Log.d("Coin Update","Old total: ${oldTotal}")
+        Log.d("Coin Update","New total: ${newTotal}")
+        Log.d("Coin Update","Coin difference: ${difference}")
+
+        if(oldTotal!!>newTotal){
+            toastText = "Coins Earned! +"
+            val coinToast = Toast.makeText(context,"${toastText}${difference}",Toast.LENGTH_LONG)
+            coinToast.show()
+        }else if(oldTotal!!<newTotal){
+            toastText = "Coins Spent! -"
+            val coinToast = Toast.makeText(context,"${toastText}${difference}",Toast.LENGTH_LONG)
+            coinToast.show()
+        }else{
+            Log.d("Coin Update","Coin value didn't change")
+
+        }
+        // notify user of coin gain via toa
     }
 
     fun getCoinTotal(context: Context): Long? {
@@ -524,5 +548,11 @@ object Util {
         )
 
         Log.d("ReminderDebug", "Scheduled reminder for '${title}' in $dueDate")
+    }
+
+    fun coinsSpentToast(context: Context,amountSpent: Long){
+        val toastText = "Coins Spent! -"
+        val coinToast = Toast.makeText(context,"${toastText}${amountSpent}",Toast.LENGTH_LONG)
+        coinToast.show()
     }
 }

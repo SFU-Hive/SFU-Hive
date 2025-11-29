@@ -3,6 +3,7 @@ package com.project362.sfuhive.Progress.Rewards
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.project362.sfuhive.Progress.Badges.Badge
+import com.project362.sfuhive.Util.coinsSpentToast
 
 
 class RewardActivityViewModel(
@@ -30,6 +31,7 @@ class RewardActivityViewModel(
 
         public fun setCurrencyCount(newCount:Long?){
             if(newCount!=null){
+
                 currencyCount.value=newCount
             }
         }
@@ -42,10 +44,10 @@ class RewardActivityViewModel(
             return isRedeemable
         }
 
-        public fun subtractCost(){
+        public fun subtractCost(): Int{
             val newCurrency=getCurrencyCount() - featuredReward.value.getCost()
             setCurrencyCount(newCurrency)
-
+            return featuredReward.value.getCost()
         }
     }
 

@@ -58,7 +58,7 @@ class RewardActivity : AppCompatActivity() {
         repoVM =ViewModelProvider(this, factory).get(DataViewModel::class.java)
 
         // set coin total based on shared prefs total
-        rewardActivityVM.setCurrencyCount(100)//Util.getCoinTotal(this))
+        rewardActivityVM.setCurrencyCount(Util.getCoinTotal(this))//Util.getCoinTotal(this))
 
         val rewardSelectView = findViewById<RecyclerView>(R.id.badge_selection)
         val rewardAdapter = RewardAdapter(this, tmpRewardList,rewardActivityVM )
@@ -85,7 +85,9 @@ class RewardActivity : AppCompatActivity() {
 
             if(user_confirmation == "redeemed"){
                 //subtract cost of the featured reward
-                rewardActivityVM.subtractCost()
+               val totalSpent= rewardActivityVM.subtractCost()
+                Util.coinsSpentToast(this, totalSpent.toLong())
+
                 if(rewardActivityVM.getCurrencyCount()==0L){
                     if(repoVM.isBadgeLocked(BANK_BREAKER)==true){
                         repoVM.unlockBadge(BANK_BREAKER)
@@ -94,7 +96,6 @@ class RewardActivity : AppCompatActivity() {
                             val dialog=UnlockedDialog(BadgeUtils.getBadge(BANK_BREAKER)!!)
                             dialog.show(supportFragmentManager, BANK_BREAKER.toString())
                         }
-
                     }
                 }
             }
@@ -136,6 +137,14 @@ class RewardActivity : AppCompatActivity() {
 
             }
         )
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // save total coins user has to sharedPrefs
+        val newTotal=rewardActivityVM.currencyCount.value
+        Util.updateCoinTotal(this,newTotal)
     }
 
     private fun updateFeaturedRewardView(newReward : Reward){
