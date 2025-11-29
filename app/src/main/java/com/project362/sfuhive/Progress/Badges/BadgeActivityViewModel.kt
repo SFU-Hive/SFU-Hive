@@ -3,14 +3,15 @@ package com.project362.sfuhive.Progress.Badges
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import kotlin.collections.mutableListOf
 
 class BadgeActivityViewModel(
     private var allBadges: MutableLiveData<List<Badge>>
 ):ViewModel(){
 
-    public lateinit var mutableBadges :  List<MutableLiveData<Badge>>
+    public lateinit var mutableBadges :  MutableList<MutableLiveData<Badge>>
     init{
-        var mutableBadges = mutableListOf<MutableLiveData<Badge>>()
+        mutableBadges = mutableListOf<MutableLiveData<Badge>>()
         allBadges.value.forEach { badge ->
 
             var liveDataBadge = MutableLiveData<Badge>(badge)
