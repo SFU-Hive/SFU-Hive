@@ -39,11 +39,13 @@ class BadgeActivity : AppCompatActivity(){
         repoVM=ViewModelProvider(this, vmFactory).get(DataViewModel::class.java)
         initBadgeStatus()
         setContentView(R.layout.fragment_badges)
-        badgeActivityVM=BadgeActivityViewModel(tmpBadgesList)
+        badgeActivityVM=BadgeActivityViewModel(badgeFactory.mutableBadges)
         val badgeSelectView = findViewById<RecyclerView>(R.id.badge_selection)
         val badgeAdapter = BadgeAdapter(this, tmpBadgesList,badgeActivityVM )
         badgeSelectView.adapter= badgeAdapter
         badgeSelectView.layoutManager = GridLayoutManager(this, 3)
+
+        badgeActivityVM.setBadgeList(badgeFactory.getAllBadges())
 
         featuredBadgeView =findViewById<CardView>(R.id.featured_badge)
 
@@ -73,6 +75,7 @@ class BadgeActivity : AppCompatActivity(){
 
             }
         )
+        initBadgeStatus()
     }
     private fun updateFeaturedBadgeView(newBadge: Badge){
         featuredImageView.setImageResource(newBadge.getIconId())
@@ -87,10 +90,10 @@ class BadgeActivity : AppCompatActivity(){
     // checks everybadge in the database to set completed badges as true
     private fun initBadgeStatus(){
         println("Loading badges...")
-        for (badge in badgeFactory.getAllBadges()){
+        for (badge in badgeFactory.mutableBadges.value){
+
             val savedState = repoVM.isBadgeLocked(badge.getId())
             badge.setIsLocked(savedState)
         }
-
     }
 }

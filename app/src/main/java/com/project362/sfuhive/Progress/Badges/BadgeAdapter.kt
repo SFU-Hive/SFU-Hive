@@ -6,22 +6,27 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
+import okhttp3.internal.notify
+
 
 class BadgeAdapter(
-    context: Context,
+    private val context: Context,
     private val badges : List<Badge>,
     private val viewModel: BadgeActivityViewModel
-):RecyclerView.Adapter<BadgeAdapter.ViewHolder>(){
 
+):RecyclerView.Adapter<BadgeAdapter.ViewHolder>(){
+    private lateinit var parentContext : Context
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
     ): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.badge_view, parent, false)
-        
+        parentContext=parent.context
         val viewHolder=ViewHolder(view)
 
 
@@ -32,17 +37,24 @@ class BadgeAdapter(
         holder: ViewHolder,
         position: Int
     ) {
-        holder.badgeIconView.setImageResource(badges.get(position).getIconId())
-        holder.badgeTitleView.text = badges.get(position).getTitle()
+        var badge = viewModel.mutableBadges.get(position)
+
+        holder.badgeIconView.setImageResource(badge.value.getIconId())
+        holder.badgeTitleView.text = badge.value.getTitle()
         holder.view.setOnClickListener {
-            println("setting featured badge to {${badges.get(position).getTitle()}}")
-            viewModel.setFeaturedBadge(badges.get(position))
+            println("setting featured badge to {${badge.value.getTitle()}}")
+            viewModel.setFeaturedBadge(badge.value)
             //Change theme here
         }
+        val lifeCycleOwner=context as LifecycleOwner
+        badge.observe(lifeCycleOwner, Observer {
+            holder.badgeIconView.setImageResource(badge.value.getIconId())
+            holder.badgeTitleView.text = badge.value.getTitle()
+        })
     }
 
     override fun getItemCount(): Int {
-        return badges.size
+        return viewModel.mutableBadges.size
     }
 
 

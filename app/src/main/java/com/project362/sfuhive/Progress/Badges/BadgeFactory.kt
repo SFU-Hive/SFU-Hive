@@ -1,5 +1,6 @@
 package com.project362.sfuhive.Progress.Badges
 
+import androidx.lifecycle.MutableLiveData
 import com.project362.sfuhive.R
 
 class BadgeFactory( ){
@@ -40,6 +41,8 @@ class BadgeFactory( ){
             "Try breaking the bank!")
 
     )
+
+    public var mutableBadges = MutableLiveData<List<Badge>>(allBadges)
 
     public fun getAllBadges(): List<Badge>{
 
