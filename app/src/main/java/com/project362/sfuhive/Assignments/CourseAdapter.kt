@@ -7,52 +7,84 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
 import com.project362.sfuhive.database.FirebaseRemoteDatabase.Course
+import kotlin.collections.distinct
+
+private const val TYPE_HEADER = 0
+private const val TYPE_ITEM = 1
 
 // adapted from Daniel Dawda's MyRuns3 with assistance from ChatGPT
-class CourseAdapter(courses: List<Course>, private val onItemClick: (Course) -> Unit) : RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
+class CourseAdapter(private val onItemClick: (Course) -> Unit) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private var courses: List<Course>
+    private var displayList: List<Any> = emptyList()
+
+    inner class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val headerText: TextView = itemView.findViewById(R.id.headerTitle)
+
+        // assistance from ChatGPT
+        fun bind(title: String) {
+            headerText.text = title
+        }
+    }
+
     inner class CourseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val courseNameText: TextView = itemView.findViewById(R.id.text)
 
         // assistance from ChatGPT
-        init {
+        fun bind(course: Course) {
+            courseNameText.text = course.name
             itemView.setOnClickListener {
-                val position = getBindingAdapterPosition()
-                if (position != RecyclerView.NO_POSITION) {
-                    val itemId = courses[position]
-                    onItemClick(itemId)
-                }
+                onItemClick(course)
             }
         }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (displayList[position] is String) TYPE_HEADER else TYPE_ITEM
     }
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): CourseViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.list_item, parent, false)
-        return CourseViewHolder(view)
+    ): RecyclerView.ViewHolder {
+        if (viewType == TYPE_HEADER) {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_header, parent, false)
+            return HeaderViewHolder(view)
+        } else {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.list_item, parent, false)
+            return CourseViewHolder(view)
+        }
     }
 
     override fun onBindViewHolder(
-        holder: CourseViewHolder,
+        holder: RecyclerView.ViewHolder,
         position: Int
     ) {
-        holder.courseNameText.text = courses[position].name
+        val item = displayList[position]
+        if (holder is HeaderViewHolder && item is String) {
+            holder.bind(item)
+        } else if (holder is CourseViewHolder && item is Course) {
+            holder.bind(item)
+        }
     }
 
     override fun getItemCount(): Int {
-        return courses.size
+        return displayList.size
     }
 
-    fun filterList(filterList: ArrayList<Course>) {
-        courses = filterList.distinct()
+    fun setCourses(myCourses: List<Course>, restCourses: List<Course>) {
+
+        val list = mutableListOf<Any>()
+        if (myCourses.isNotEmpty()) {
+            list.add("My Courses")
+            list.addAll(myCourses.distinct())
+        }
+        if (restCourses.isNotEmpty()) {
+            list.add("Other Courses")
+            list.addAll(restCourses.distinct())
+        }
+        displayList = list
         notifyDataSetChanged()
-    }
-
-    init {
-        this.courses = courses
     }
 }

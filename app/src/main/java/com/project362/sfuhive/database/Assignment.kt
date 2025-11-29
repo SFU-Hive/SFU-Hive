@@ -17,6 +17,9 @@ data class Assignment (
     @ColumnInfo(name = "course_name_column")
     var courseName: String = "",
 
+    @ColumnInfo(name = "course_id_column")
+    var courseId: Long = 0L,
+
     @ColumnInfo(name = "assignment_name_column")
     var assignmentName: String = "",
 

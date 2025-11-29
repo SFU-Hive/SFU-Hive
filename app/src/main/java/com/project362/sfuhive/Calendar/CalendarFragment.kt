@@ -159,7 +159,7 @@ class CalendarFragment : Fragment() {
     /** ---------- UPDATE CALENDAR ---------- **/
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateCalendar() {
-        dataViewModel.allAssignmentsLiveData.observe(viewLifecycleOwner) { assignments ->
+        dataViewModel.allMyAssignmentsLiveData.observe(viewLifecycleOwner) { assignments ->
             renderCalendar(assignments)
         }
     }
@@ -251,7 +251,7 @@ class CalendarFragment : Fragment() {
 
         selectedDateText.text = date.format(DateTimeFormatter.ofPattern("MMM dd"))
 
-        val canvasAssignments = dataViewModel.allAssignmentsLiveData.value?.filter {
+        val canvasAssignments = dataViewModel.allMyAssignmentsLiveData.value?.filter {
             it.dueAt.startsWith(date.toString())
         }.orEmpty()
 

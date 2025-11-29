@@ -46,7 +46,7 @@ class DayViewActivity : ComponentActivity() {
         val googleEvents = GoogleEventCache.events[dateStr] ?: listOf()
 
         /** ⭐ FIX: Observe LiveData instead of using .value */
-        dataViewModel.allAssignmentsLiveData.observe(this, Observer { allAssignments ->
+        dataViewModel.allMyAssignmentsLiveData.observe(this, Observer { allAssignments ->
 
             // Canvas + custom tasks
             val roomTasksForDate = allAssignments.filter {
