@@ -7,7 +7,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.project362.sfuhive.Wellness.GoalDatabase
 
-@Database(entities = [StreakEntity::class], version =1 , exportSchema = false)
+@Database(entities = [StreakEntity::class], version =2 , exportSchema = false)
 abstract class StreakDatabase : RoomDatabase(){
 
     abstract val streakDatabaseDao : StreakDatabaseDao

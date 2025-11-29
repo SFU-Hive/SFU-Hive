@@ -210,8 +210,8 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
 
     // streaks section
 
-    fun addStreak(type:String, date : Date){
-        repository.addStreak(type, date)
+    fun addStreak(type:String, calendar: Calendar ){
+        repository.addStreak(type, calendar)
     }
 
     fun getStreaksOfType(type:String): Flow<List<StreakEntity?>>{
