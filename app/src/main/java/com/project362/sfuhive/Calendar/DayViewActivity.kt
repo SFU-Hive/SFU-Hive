@@ -3,80 +3,56 @@ package com.project362.sfuhive.Calendar
 import android.os.Build
 import android.os.Bundle
 import android.widget.TextView
-import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
-import com.project362.sfuhive.Util
 import com.project362.sfuhive.database.Assignment
-import com.project362.sfuhive.database.DataViewModel
-import com.project362.sfuhive.database.Calendar.GoogleEventDatabase
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
-class DayViewActivity : ComponentActivity() {
+class DayViewActivity : AppCompatActivity() {
 
-    private lateinit var dateTitle: TextView
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: TaskAdapter
-    private lateinit var dataViewModel: DataViewModel
+    private lateinit var tvDate: TextView
+    private lateinit var recycler: androidx.recyclerview.widget.RecyclerView
+    private lateinit var taskAdapter: TaskAdapter
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_day_view)
 
-        dateTitle = findViewById(R.id.dayViewDateTitle)
-        recyclerView = findViewById(R.id.dayViewRecycler)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        // FIXED ID HERE
+        tvDate = findViewById(R.id.dayViewDateTitle)
+        recycler = findViewById(R.id.dayViewRecycler)
 
-        adapter = TaskAdapter(listOf())
-        recyclerView.adapter = adapter
+        recycler.layoutManager = LinearLayoutManager(this)
 
-        dataViewModel = Util.getViewModelFactory(this)
-            .let { ViewModelProvider(this, it) }
-            .get(DataViewModel::class.java)
+        // Retrieve data passed from CalendarFragment
+        val date = intent.getStringExtra("selected_date") ?: ""
+        tvDate.text = date
 
-        val dateStr = intent.getStringExtra("selected_date") ?: return
-        val date = LocalDate.parse(dateStr)
+        val titles = intent.getStringArrayListExtra("task_titles") ?: arrayListOf()
+        val courses = intent.getStringArrayListExtra("task_courses") ?: arrayListOf()
+        val dates = intent.getStringArrayListExtra("task_dates") ?: arrayListOf()
+        val ids = intent.getStringArrayListExtra("task_priority_ids") ?: arrayListOf()
+        val points = intent.getDoubleArrayExtra("task_points") ?: DoubleArray(titles.size)
+        val groups = intent.getDoubleArrayExtra("task_groups") ?: DoubleArray(titles.size)
 
-        dateTitle.text = date.format(DateTimeFormatter.ofPattern("EEEE, MMM dd"))
+        val tasks = mutableListOf<Assignment>()
 
-        dataViewModel.allAssignmentsLiveData.observe(this, Observer { allAssignments ->
+        for (i in titles.indices) {
+            tasks.add(
+                Assignment(
+                    assignmentId = i.toLong(), // temp ID; not used for priority
+                    courseName = courses[i],
+                    assignmentName = titles[i],
+                    dueAt = dates[i],
+                    pointsPossible = points[i],
+                    groupWeight = groups[i]
+                )
+            )
+        }
 
-            // Canvas + custom tasks for this day
-            val roomTasksForDate = allAssignments.filter {
-                it.dueAt.startsWith(dateStr)
-            }
-
-            // Load Google events for this day from DB
-            lifecycleScope.launch(Dispatchers.IO) {
-                val dao = GoogleEventDatabase.getInstance(this@DayViewActivity).googleEventDao()
-                val dbEvents = dao.getEventsForDate(dateStr)
-
-                val googleAsAssignments = dbEvents.map {
-                    Assignment(
-                        assignmentId = 0L,
-                        courseName = "Google Calendar",
-                        assignmentName = it.title,
-                        dueAt = it.date,
-                        pointsPossible = 0.0
-                    )
-                }
-
-                val combined = roomTasksForDate + googleAsAssignments
-
-                withContext(Dispatchers.Main) {
-                    adapter.update(combined)
-                }
-            }
-        })
+        taskAdapter = TaskAdapter(tasks, ids)
+        recycler.adapter = taskAdapter
     }
 }
