@@ -29,10 +29,12 @@ git clone https://github.com/SFU-Hive/SFU-Hive.git
 ```
 
 ## Acknowledgements
-Online reasources such as official docs, tutorials, and generative AI were used in the development of this app, examples might include:
+Online resources such as official docs, tutorials, and generative AI were used in the development of this app, examples might include:
 - [Canvas API Docs](https://developerdocs.instructure.com/services/canvas)
 - [Google API Docs](https://developers.google.com/workspace/calendar/api/guides/overview)
 - [Microsoft Azure](https://azure.microsoft.com/en-ca)
 - [Android Docs](https://source.android.com/docs)
 - [GeeksforGeeks](https://www.geeksforgeeks.org/)
 - [ChatGPT](https://chatgpt.com/)
+- [Gemini](https://gemini.google.com//)
+

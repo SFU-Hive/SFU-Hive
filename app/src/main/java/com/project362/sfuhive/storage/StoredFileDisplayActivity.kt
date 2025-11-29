@@ -1,12 +1,16 @@
 package com.project362.sfuhive.storage
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.project362.sfuhive.R
 import com.project362.sfuhive.databinding.ActivityFileDisplayBinding
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogFragment.ConfirmationListener {
 
@@ -84,7 +89,7 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
         }
 
         binding.addFile.setOnClickListener {
-            addFile()
+            filePickerLauncher.launch(arrayOf("*/*"))
             binding.addFile.visibility = View.GONE
             binding.addDirectory.visibility = View.GONE
         }
@@ -113,13 +118,75 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
         if (file.type == "folder") {
             viewModel.openFolder(file.id)
         }else{
-            Toast.makeText(this, "File clicked: ${file.name}", Toast.LENGTH_SHORT).show()
+            if(file.url == null) {
+                Log.e("xd", "File url is null")
+                Toast.makeText(this, "Cannot open file", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            val uri = file.url!!.toUri()
+            val mimeType = contentResolver.getType(uri)
+
+            val openFileIntent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, mimeType)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            try{
+                startActivity(openFileIntent)
+            }catch (e: Exception){
+                Log.e("xd", "Error opening file: $e")
+                Toast.makeText(this, "Cannot open file", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
+    private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()){ uri ->
+        if(uri != null){
+            handleSelectedFile(uri)
+        }else{
+            Toast.makeText(this, "No file selected", Toast.LENGTH_SHORT).show()
+        }
+    }
 
-    private fun addFile(){
-        addDummyFile()
+    private fun handleSelectedFile(uri: Uri){
+        val (fileName, fileSize) = getFileDetails(uri)
+        val timestamp = System.currentTimeMillis()
+
+        val file = StoredFileEntity(
+            id = timestamp,
+            parentId = viewModel.getCurrFolderId(),
+            name = fileName,
+            type = getFileExtension(fileName),
+            size = fileSize,
+            lastAccessed = timestamp,
+            uploadDate = timestamp,
+            url = uri.toString(),
+            source = FileSource.USER_UPLOAD
+        )
+        viewModel.insertFile(file)
+        Toast.makeText(this, "File added: $fileName", Toast.LENGTH_SHORT).show()
+
+    }
+
+    private fun getFileDetails(uri: Uri): Pair<String, Long>{
+        var fileName = ""
+        var fileSize = 0L
+        contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if(cursor.moveToFirst()){
+                fileName = cursor.getString(nameIndex)
+            }
+            val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+            if(cursor.moveToFirst()){
+                fileSize = cursor.getLong(sizeIndex)
+            }
+        }
+
+        return Pair(fileName, fileSize)
+    }
+
+    private fun getFileExtension(fileName: String): String{
+        return fileName.substringAfterLast('.', "file")
     }
 
     private fun addFolder(folderName: String){
@@ -143,24 +210,6 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
             viewModel.deleteFile(it)
         }
         fileIdToDelete = null
-    }
-
-
-    //test code
-    private fun addDummyFile(){
-        val timestamp = System.currentTimeMillis()
-        val dummyFile = StoredFileEntity(
-            id = timestamp,
-            parentId = viewModel.getCurrFolderId(),
-            name = "Report_Q4_${timestamp % 1000}.pdf",
-            type = "PDF",
-            size = (10000..5000000).random().toLong(), // Random size
-            lastAccessed = timestamp,
-            uploadDate = timestamp,
-            source = FileSource.USER_UPLOAD
-        )
-
-        viewModel.insertFile(dummyFile)
     }
 
     private fun showNewFolderDialog(){
