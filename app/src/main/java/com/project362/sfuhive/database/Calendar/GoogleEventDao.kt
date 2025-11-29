@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.project362.sfuhive.database.Calendar.GoogleEventEntity
 
 @Dao
 interface GoogleEventDao {
@@ -20,4 +19,8 @@ interface GoogleEventDao {
 
     @Query("DELETE FROM google_events")
     suspend fun deleteAllEvents()
+
+    // ⭐ NEW — fixes your unresolved reference
+    @Query("SELECT COUNT(*) FROM google_events")
+    suspend fun getEventCount(): Int
 }
