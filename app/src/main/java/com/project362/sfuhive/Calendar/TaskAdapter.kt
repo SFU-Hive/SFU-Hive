@@ -15,7 +15,8 @@ import kotlinx.coroutines.*
 
 class TaskAdapter(
     private var items: List<Assignment>,
-    private var priorityIds: List<String>
+    private var priorityIds: List<String>,
+    private val onPriorityChanged: (() -> Unit)? = null   // 🔥 NEW CALLBACK
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     inner class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -100,6 +101,7 @@ class TaskAdapter(
                 dao.setPriority(AssignmentPriority(id, chosen))
                 withContext(Dispatchers.Main) {
                     applyPriorityUI(holder.tvPriority, chosen)
+                    onPriorityChanged?.invoke()   // 🔥 TRIGGER CALLBACK
                 }
             }
             true

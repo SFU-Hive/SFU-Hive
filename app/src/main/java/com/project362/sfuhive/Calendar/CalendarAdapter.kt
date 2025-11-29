@@ -1,5 +1,6 @@
 package com.project362.sfuhive.Calendar
 
+import android.content.Context
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
@@ -10,8 +11,9 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
+import com.project362.sfuhive.database.EventPriority.EventPriorityDatabase
+import kotlinx.coroutines.*
 import java.time.LocalDate
-import java.util.Collections.addAll
 
 class CalendarAdapter(
     private val days: MutableList<LocalDate?>,
@@ -40,6 +42,7 @@ class CalendarAdapter(
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: DayViewHolder, position: Int) {
         val date = days[position]
+
         holder.dayText.text = ""
         holder.bgHighlight.visibility = View.GONE
         holder.dotContainer.visibility = View.GONE
@@ -48,7 +51,7 @@ class CalendarAdapter(
         if (date != null) {
             holder.dayText.text = date.dayOfMonth.toString()
 
-            // Highlight selected date
+            // Selected date highlight
             if (date == selectedDate) {
                 holder.bgHighlight.visibility = View.VISIBLE
                 holder.bgHighlight.setBackgroundResource(R.drawable.bg_day_selected)
@@ -70,17 +73,38 @@ class CalendarAdapter(
                 }
             }
 
-            // Show up to 3 gray dots if events/tasks exist
-            val tasks = assignmentsByDate[date].orEmpty()
-            if (tasks.isNotEmpty()) {
-                holder.dotContainer.visibility = View.VISIBLE
-                val colorRes = R.color.priority_default // always gray
+            // SHOW PRIORITY DOTS
+            val ids = assignmentsByDate[date].orEmpty()
 
-                tasks.take(3).forEachIndexed { index, _ ->
-                    val dot = holder.dots[index]
-                    dot.visibility = View.VISIBLE
-                    dot.backgroundTintList =
-                        ContextCompat.getColorStateList(holder.itemView.context, colorRes)
+            if (ids.isNotEmpty()) {
+                holder.dotContainer.visibility = View.VISIBLE
+
+                val ctx = holder.itemView.context
+                val dao = EventPriorityDatabase.getInstance(ctx).assignmentPriorityDao()
+
+                CoroutineScope(Dispatchers.IO).launch {
+
+                    // Fetch priorities in order
+                    val priorities = ids.take(3).map { id ->
+                        dao.getPriority(id) ?: "default"
+                    }
+
+                    withContext(Dispatchers.Main) {
+                        priorities.forEachIndexed { index, p ->
+                            val dot = holder.dots[index]
+                            dot.visibility = View.VISIBLE
+
+                            val colorRes = when (p) {
+                                "high" -> R.color.priority_high
+                                "medium" -> R.color.priority_medium
+                                "low" -> R.color.priority_low
+                                else -> R.color.priority_default
+                            }
+
+                            dot.backgroundTintList =
+                                ContextCompat.getColorStateList(ctx, colorRes)
+                        }
+                    }
                 }
             }
 
@@ -97,16 +121,13 @@ class CalendarAdapter(
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun updateAssignments(newMap: Map<LocalDate, List<String>>) {
-        // Replace old map COMPLETELY
         assignmentsByDate = newMap.toMutableMap()
         notifyDataSetChanged()
     }
 
     fun setDays(newDays: List<LocalDate?>) {
-        // Replace internal list and refresh UI
         (this.days as MutableList).clear()
         (this.days as MutableList).addAll(newDays)
         notifyDataSetChanged()
     }
-
 }
