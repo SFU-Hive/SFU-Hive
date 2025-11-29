@@ -26,7 +26,6 @@ class GoogleCalendarHelper(
     }
 
     private lateinit var googleSignInClient: GoogleSignInClient
-    fun getSignInIntent(): Intent = googleSignInClient.signInIntent
 
     fun setupGoogleSignIn() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -37,9 +36,10 @@ class GoogleCalendarHelper(
         googleSignInClient = GoogleSignIn.getClient(activity, gso)
     }
 
-    fun signIn() {
-        val signInIntent = googleSignInClient.signInIntent
-        activity.startActivityForResult(signInIntent, RC_SIGN_IN)
+    fun getSignInIntent(): Intent = googleSignInClient.signInIntent
+
+    fun isSignedIn(): Boolean {
+        return GoogleSignIn.getLastSignedInAccount(activity) != null
     }
 
     fun signOut() {
@@ -63,6 +63,15 @@ class GoogleCalendarHelper(
         }
     }
 
+    fun refreshEvents() {
+        val account = GoogleSignIn.getLastSignedInAccount(activity)
+        if (account != null) {
+            fetchCalendarEvents(account)
+        } else {
+            Toast.makeText(activity, "Please sign in first", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     fun fetchCalendarEvents(account: GoogleSignInAccount) {
         val credential = GoogleAccountCredential.usingOAuth2(
             activity, listOf(CalendarScopes.CALENDAR_READONLY)
@@ -78,21 +87,18 @@ class GoogleCalendarHelper(
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val events = service.events().list("primary")
-                    .setMaxResults(2500) // Google Calendar limit
+                    .setMaxResults(2500)
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .execute()
 
                 val items = events.items ?: emptyList()
 
-                // Persist to GoogleEventDatabase
                 val dao = GoogleEventDatabase.getInstance(activity).googleEventDao()
                 dao.deleteAllEvents()
 
                 val entities = items.mapNotNull { event ->
-                    val start = event.start?.dateTime ?: event.start?.date
-                    if (start == null) return@mapNotNull null
-
+                    val start = event.start?.dateTime ?: event.start?.date ?: return@mapNotNull null
                     val dateStr = start.toString().substring(0, 10)
 
                     GoogleEventEntity(
@@ -106,12 +112,10 @@ class GoogleCalendarHelper(
 
                 dao.insertEvents(entities)
 
-                // Update UI with fresh events
                 withContext(Dispatchers.Main) {
                     onEventsFetched(items)
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
                 withContext(Dispatchers.Main) {
                     Toast.makeText(activity, "Failed to fetch Google events", Toast.LENGTH_SHORT).show()
                 }
