@@ -86,8 +86,10 @@ class RewardActivity : AppCompatActivity() {
 
             if(user_confirmation == "redeemed"){
                 //subtract cost of the featured reward
-               val totalSpent= rewardActivityVM.subtractCost()
-                Util.coinsSpentToast(this, totalSpent.toLong())
+               rewardActivityVM.subtractCost()
+                val newTotal=rewardActivityVM.currencyCount.value
+                Util.updateCoinTotal(this,newTotal)
+
 
                 if(rewardActivityVM.getCurrencyCount()==0L){
                     if(repoVM.isBadgeLocked(BANK_BREAKER)==true){
@@ -140,8 +142,6 @@ class RewardActivity : AppCompatActivity() {
         super.onDestroy()
 
         // save total coins user has to sharedPrefs
-        val newTotal=rewardActivityVM.currencyCount.value
-        Util.updateCoinTotal(this,newTotal)
     }
 
     private fun updateFeaturedRewardView(newReward : Reward){
