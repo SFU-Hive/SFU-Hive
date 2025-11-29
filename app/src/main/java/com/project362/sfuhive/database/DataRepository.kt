@@ -89,6 +89,7 @@ class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
     }
 
     fun unlockBadge(id: Long){
+
         return runBlocking(IO) {
             badgeDatabaseDao.updateIsLocked(id, false)
         }

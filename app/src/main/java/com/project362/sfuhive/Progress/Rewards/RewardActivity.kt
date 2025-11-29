@@ -17,6 +17,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.dynamic.SupportFragmentWrapper
 import com.project362.sfuhive.Progress.Badges.BadgeActivityViewModel
 import com.project362.sfuhive.Progress.Badges.BadgeAdapter
 import com.project362.sfuhive.Progress.Badges.BadgeFactory
@@ -91,11 +92,7 @@ class RewardActivity : AppCompatActivity() {
                 if(rewardActivityVM.getCurrencyCount()==0L){
                     if(repoVM.isBadgeLocked(BANK_BREAKER)==true){
                         repoVM.unlockBadge(BANK_BREAKER)
-                        val badge = BadgeUtils.getBadge(BANK_BREAKER)
-                        if(badge!=null){
-                            val dialog=UnlockedDialog(BadgeUtils.getBadge(BANK_BREAKER)!!)
-                            dialog.show(supportFragmentManager, BANK_BREAKER.toString())
-                        }
+                        Util.UnlockBadgeDialog(BANK_BREAKER, this.supportFragmentManager)
                     }
                 }
             }

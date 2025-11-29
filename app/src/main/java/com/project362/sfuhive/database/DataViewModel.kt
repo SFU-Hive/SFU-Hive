@@ -65,6 +65,8 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
 
     fun unlockBadge(id: Long) {
         repository.unlockBadge(id)
+        // Idea: trigger unlocked badge dialog here
+
     }
 
 
@@ -142,6 +144,7 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
             if (goal.completionCount + 1 >= 10) {
                 goal.badgeId?.let { badgeId ->
                     repository.unlockBadge(badgeId)
+
                 }
             }
         }
