@@ -468,6 +468,7 @@ object Util {
     }
     fun updateCoinTotal(context: Context, newTotal: Long?) {
         // add name to prefs
+        val oldTotal=getCoinTotal(context)
         val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
         val editor = prefs.edit()
         editor.putLong(COIN_KEY, newTotal!!)
@@ -475,7 +476,7 @@ object Util {
 
         // Probably better ways to do this -Miro
         var toastText = "Coins Spent! +"
-        val oldTotal=getCoinTotal(context)
+
         val difference = newTotal - oldTotal!!
 
         Log.d("Coin Update","Old total: ${oldTotal}")
@@ -560,7 +561,7 @@ object Util {
         val coinToast = Toast.makeText(context,"${toastText}${amountSpent}",Toast.LENGTH_LONG)
         coinToast.show()
     }
-    // MIRO test in coin spending!
+
     fun UnlockBadgeDialog(badgeId : Long, theSupportFragmentManager : FragmentManager){
         val badgeFactory=BadgeFactory()
         val badge=badgeFactory.getBageById(badgeId)

@@ -32,7 +32,7 @@ class PurchaseDialog(theReward:Reward): DialogFragment(), DialogInterface.OnClic
         val view: View = populateView()
 
         builder.setView(view)
-        ///builder.setTitle("")
+        builder.setTitle("Buy this reward?")
         builder.setPositiveButton("Redeem", this)
         builder.setNegativeButton("Cancel", this)
         val dialog : Dialog =builder.create()
@@ -62,7 +62,7 @@ class PurchaseDialog(theReward:Reward): DialogFragment(), DialogInterface.OnClic
         // set all view fields
         imageView.setImageResource(reward.getIconId())
         titleView.text = reward.getTitle()
-        subheadView.text = reward.getCost().toString()
+        subheadView.text = "Cost: $${reward.getCost().toString()}"
         bodyView.text = reward.getDescription()
 
         return view
