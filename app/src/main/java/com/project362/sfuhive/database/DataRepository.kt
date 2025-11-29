@@ -6,6 +6,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.project362.sfuhive.Assignments.RateSubmissionDialog
 import com.project362.sfuhive.database.Badge.BadgeDatabaseDao
 import com.project362.sfuhive.database.Badge.BadgeEntity
+import com.project362.sfuhive.database.Streak.StreakDatabaseDao
+import com.project362.sfuhive.database.Streak.StreakEntity
 import com.project362.sfuhive.database.Wellness.Goal
 import com.project362.sfuhive.database.Wellness.GoalDatabaseDao
 import kotlinx.coroutines.CoroutineScope
@@ -18,13 +20,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.util.Date
 
 // adapted from RoomDatabase demo
 class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
                      private val fileDatabaseDao: FileDatabaseDao,
                      private val remoteDatabase: FirebaseRemoteDatabase,
                      private val badgeDatabaseDao: BadgeDatabaseDao,
-                     private val goalDatabaseDao: GoalDatabaseDao
+                     private val goalDatabaseDao: GoalDatabaseDao,
+                     private val streakDatabaseDao: StreakDatabaseDao
 ) {
 
     val allAssignments: Flow<List<Assignment>> = assignmentDatabaseDao.getAllAssignments()
@@ -182,4 +186,30 @@ class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
     suspend fun isNfcAssigned(tag: String): Boolean {
         return goalDatabaseDao.getGoalByNfcTag(tag) != null
     }
+
+    // section for streaks
+    fun addStreak(type:String, date : Date){
+        CoroutineScope(IO).launch {
+            Log.d("StreakDB","adding streak with date ${date.toString()}")
+            var newStreak = StreakEntity(type,date.toString())
+            streakDatabaseDao.insertStreak(newStreak)
+        }
+    }
+
+    fun getStreaksOfType(type: String): Flow<List<StreakEntity?>> {
+        return streakDatabaseDao.getStreaksOfType(type)
+    }
+
+    fun getAllStreaks():Flow<List<StreakEntity?>>{
+        return streakDatabaseDao.getAllStreaks()
+    }
+
+    fun deleteStreaksOfType(type :String){
+        streakDatabaseDao.deleteStreaksOfType(type)
+    }
+
+    fun deleteAllStreaks(){
+        streakDatabaseDao.deleteAll()
+    }
+
 }
