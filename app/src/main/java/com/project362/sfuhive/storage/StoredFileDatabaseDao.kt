@@ -31,4 +31,6 @@ interface StoredFileDatabaseDao {
     @Query("SELECT * FROM stored_file_table WHERE parent_id = :parentId")
     fun getFilesInFolder(parentId: Long?): LiveData<List<StoredFileEntity>>
 
+    @Query("SELECT COUNT(*) FROM stored_file_table WHERE parent_id = :parentId")
+    suspend fun getChildCount(parentId: Long?): Int
 }

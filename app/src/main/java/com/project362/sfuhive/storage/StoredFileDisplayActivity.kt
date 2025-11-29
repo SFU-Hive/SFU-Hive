@@ -10,9 +10,11 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.project362.sfuhive.R
 import com.project362.sfuhive.databinding.ActivityFileDisplayBinding
+import kotlinx.coroutines.launch
 
 class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogFragment.ConfirmationListener {
 
@@ -34,8 +36,24 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
         val adapter = FolderAdapter(
             onItemClicked = { file -> onFileClicked(file) },
             onDeleteClicked = { file ->
-                fileIdToDelete = file.id
-                DeleteConfirmationDialogFragment().show(supportFragmentManager, "delete_confirmation")
+                lifecycleScope.launch {
+                    if(file.type == "folder"){
+                        if(viewModel.isFolderEmpty(file.id)){
+                            fileIdToDelete = file.id
+                            DeleteConfirmationDialogFragment().show(
+                                supportFragmentManager,
+                                "delete_confirmation"
+                            )
+                        }else
+                            Toast.makeText(this@StoredFileDisplayActivity, "Folder is not empty", Toast.LENGTH_SHORT).show()
+                    }else{
+                        fileIdToDelete = file.id
+                        DeleteConfirmationDialogFragment().show(
+                            supportFragmentManager,
+                            "delete_confirmation"
+                        )
+                    }
+                }
             },
             onRenameClicked = { file ->
                 showRenameDialog(file)
