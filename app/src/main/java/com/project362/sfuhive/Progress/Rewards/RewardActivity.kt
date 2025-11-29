@@ -96,16 +96,9 @@ class RewardActivity : AppCompatActivity() {
                         }
 
                     }
-
                 }
-                // TODO: add Reward to database
-                // TODO: check for badge update
-
-
-
             }
         }
-
 
         rewardActivityVM.currencyCount.observe(this,Observer{ it ->
             currencyTextView.text = rewardActivityVM.getCurrencyCount().toString()
@@ -148,7 +141,7 @@ class RewardActivity : AppCompatActivity() {
     private fun updateFeaturedRewardView(newReward : Reward){
         featuredImageView.setImageResource(newReward.getIconId())
         featuredTitleView.text = newReward.getTitle()
-        featuredCostView.text = newReward.getCost().toString()
+        featuredCostView.text = "Cost: $${newReward.getCost()}"
         featuredSubheadView.text = newReward.getDescription()
 
     }
