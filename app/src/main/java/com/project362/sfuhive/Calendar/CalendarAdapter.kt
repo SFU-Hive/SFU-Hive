@@ -11,9 +11,10 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
 import java.time.LocalDate
+import java.util.Collections.addAll
 
 class CalendarAdapter(
-    private val days: List<LocalDate?>,
+    private val days: MutableList<LocalDate?>,
     private var assignmentsByDate: MutableMap<LocalDate, List<String>>,
     private var selectedDate: LocalDate?,
     private val onDayClicked: (LocalDate) -> Unit
@@ -94,9 +95,18 @@ class CalendarAdapter(
         notifyDataSetChanged()
     }
 
-    fun updateAssignments(newData: Map<LocalDate, List<String>>) {
-        assignmentsByDate.clear()
-        assignmentsByDate.putAll(newData)
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun updateAssignments(newMap: Map<LocalDate, List<String>>) {
+        // Replace old map COMPLETELY
+        assignmentsByDate = newMap.toMutableMap()
         notifyDataSetChanged()
     }
+
+    fun setDays(newDays: List<LocalDate?>) {
+        // Replace internal list and refresh UI
+        (this.days as MutableList).clear()
+        (this.days as MutableList).addAll(newDays)
+        notifyDataSetChanged()
+    }
+
 }

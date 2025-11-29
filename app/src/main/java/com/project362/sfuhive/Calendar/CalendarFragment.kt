@@ -48,10 +48,15 @@ class CalendarFragment : Fragment() {
     private lateinit var googleHelper: GoogleCalendarHelper
     private lateinit var customVM: CustomTaskViewModel
 
+    private lateinit var calendarAdapter: CalendarAdapter
+
     private val googleEventsByDate = mutableMapOf<LocalDate, List<Event>>()
-    private var customTasks: List<CustomTaskEntity> = emptyList()
     private var canvasAssignments: List<Assignment> = emptyList()
+    private var customTasks: List<CustomTaskEntity> = emptyList()
     private var selectedDate: LocalDate = LocalDate.now()
+
+    // **** GLOBAL MERGE FIX ****
+    private val mergedAssignments = mutableMapOf<LocalDate, MutableList<String>>()
 
     private val signInLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -63,38 +68,22 @@ class CalendarFragment : Fragment() {
             }
         }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_calendar, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return inflater.inflate(R.layout.fragment_calendar, container, false)
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 🔹 Setup ViewModels
         dataViewModel = ViewModelProvider(requireActivity(), Util.getViewModelFactory(requireContext()))
             .get(DataViewModel::class.java)
 
         val customDb = CustomTaskDatabase.getInstance(requireContext())
         val customRepo = CustomTaskRepository(customDb.customDao())
-        customVM = ViewModelProvider(this, CustomTaskVMFactory(customRepo))
+        customVM = ViewModelProvider(requireActivity(), CustomTaskVMFactory(customRepo))
             .get(CustomTaskViewModel::class.java)
 
-        // 🔹 Observe Canvas assignments
-        dataViewModel.allAssignmentsLiveData.observe(viewLifecycleOwner) { list ->
-            canvasAssignments = list
-            updateCalendar()
-        }
-
-        // 🔹 Observe Custom tasks
-        customVM.allTasks.observe(viewLifecycleOwner) { list ->
-            customTasks = list
-            updateCalendar()
-        }
-
-        // 🔹 UI setup
         monthYearText = view.findViewById(R.id.tvMonthYear)
         selectedDateText = view.findViewById(R.id.tvSelectedDate)
         calendarRecycler = view.findViewById(R.id.calendarRecycler)
@@ -108,25 +97,49 @@ class CalendarFragment : Fragment() {
         taskAdapter = TaskAdapter(listOf())
         tasksRecycler.adapter = taskAdapter
 
+        calendarAdapter = CalendarAdapter(
+            days = mutableListOf(),
+            assignmentsByDate = mutableMapOf(),
+            selectedDate = selectedDate,
+            onDayClicked = { date ->
+                selectedDate = date
+                calendarAdapter.updateSelectedDate(date)
+                showAssignmentsForDay(date)
+            }
+        )
+
+        calendarRecycler.layoutManager = GridLayoutManager(requireContext(), 7)
+        calendarRecycler.adapter = calendarAdapter
+
         btnPrev.setOnClickListener { selectedDate = selectedDate.minusMonths(1); updateCalendar() }
         btnNext.setOnClickListener { selectedDate = selectedDate.plusMonths(1); updateCalendar() }
 
         googleHelper = GoogleCalendarHelper(requireActivity()) { handleGoogleEvents(it) }
         googleHelper.setupGoogleSignIn()
 
-        btnOverflow.setOnClickListener { showOverflowMenu() }
-
         fabAddEvent.setOnClickListener {
             startActivity(Intent(requireContext(), TaskScanActivity::class.java))
         }
 
-        // 🔹 Load saved Google events
+        // Canvas
+        dataViewModel.allAssignmentsLiveData.observe(viewLifecycleOwner) {
+            canvasAssignments = it
+            updateCalendar()
+        }
+
+        // Custom tasks from db
+        customVM.allTasks.observe(viewLifecycleOwner) {
+            customTasks = it
+            updateCalendar()
+        }
+
+        // Load saved Google events from DB
         lifecycleScope.launch(Dispatchers.IO) {
             val dao = GoogleEventDatabase.getInstance(requireContext()).googleEventDao()
             val saved = dao.getAllEvents()
             withContext(Dispatchers.Main) {
                 googleEventsByDate.clear()
-                for (e in saved) {
+                saved.forEach { e ->
                     val date = LocalDate.parse(e.date)
                     val event = Event().apply {
                         id = e.eventId
@@ -141,79 +154,57 @@ class CalendarFragment : Fragment() {
         }
     }
 
-    private fun showOverflowMenu() {
-        val popup = PopupMenu(requireContext(), btnOverflow)
-        popup.menuInflater.inflate(R.menu.calendar_menu, popup.menu)
-        val acc = GoogleSignIn.getLastSignedInAccount(requireContext())
-        popup.menu.findItem(R.id.menu_sign_in).isVisible = (acc == null)
-        popup.menu.findItem(R.id.menu_sign_out).isVisible = (acc != null)
-
-        popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.menu_sign_in -> signInLauncher.launch(googleHelper.getSignInIntent())
-                R.id.menu_refresh -> {
-                    val account = GoogleSignIn.getLastSignedInAccount(requireContext())
-                    if (account != null) googleHelper.fetchCalendarEvents(account)
-                    else Toast.makeText(requireContext(), "Please sign in first", Toast.LENGTH_SHORT).show()
-                }
-                R.id.menu_sign_out -> {
-                    googleHelper.signOut()
-                    googleEventsByDate.clear()
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        GoogleEventDatabase.getInstance(requireContext()).googleEventDao().deleteAllEvents()
-                    }
-                    updateCalendar()
-                    Toast.makeText(requireContext(), "Signed out.", Toast.LENGTH_SHORT).show()
-                }
-            }
-            true
-        }
-        popup.show()
-    }
-
+    // --------------------------------------------------------------------
+    // FIXED MERGED LOGIC – ALL TASKS PERSIST FOREVER
+    // --------------------------------------------------------------------
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateCalendar() {
-        renderCalendar(canvasAssignments)
-    }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun renderCalendar(assignments: List<Assignment>) {
-        val map = mutableMapOf<LocalDate, List<String>>()
+        mergedAssignments.clear()
 
-        fun add(date: LocalDate, priority: String) {
-            map[date] = (map[date] ?: listOf()) + priority
+        fun put(date: LocalDate, tag: String) {
+            mergedAssignments.getOrPut(date) { mutableListOf() }.add(tag)
         }
 
-        // ✅ Canvas Assignments (blue = low)
-        for (a in assignments) {
-            if (a.dueAt.isNullOrEmpty() || a.dueAt.length < 10) continue
-            val dateStr = a.dueAt.substring(0, 10)
-            val date = try { LocalDate.parse(dateStr) } catch (_: Exception) { null }
-            date?.let { add(it, "low") }
+        // Canvas
+        canvasAssignments.forEach {
+            if (it.dueAt.length >= 10) {
+                val d = LocalDate.parse(it.dueAt.substring(0, 10))
+                put(d, "canvas")
+            }
         }
 
-        // ✅ Google Events (orange = medium)
-        for ((d, _) in googleEventsByDate) add(d, "medium")
-
-        // ✅ Custom Tasks (red = high)
-        for (t in customTasks) {
-            val d = try { LocalDate.parse(t.date) } catch (_: Exception) { null }
-            d?.let { add(it, "high") }
+        // Google
+        googleEventsByDate.forEach { (d, _) ->
+            put(d, "google")
         }
 
-        // ✅ Build Calendar Grid
+        // Custom
+        customTasks.forEach {
+            if (it.date.length == 10) {
+                val d = LocalDate.parse(it.date)
+                put(d, "custom")
+            }
+        }
+
+        // ---------- BUILD MONTH GRID ----------
         val ym = YearMonth.from(selectedDate)
         val first = selectedDate.withDayOfMonth(1)
         val shift = first.dayOfWeek.value % 7
-        val days = MutableList(shift) { null } + (1..ym.lengthOfMonth()).map { selectedDate.withDayOfMonth(it) }
+
+        val days = MutableList(shift) { null } +
+                (1..ym.lengthOfMonth()).map { selectedDate.withDayOfMonth(it) }
 
         monthYearText.text = selectedDate.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
-        calendarRecycler.layoutManager = GridLayoutManager(requireContext(), 7)
-        calendarRecycler.adapter = CalendarAdapter(days, map, selectedDate) { date ->
-            selectedDate = date
-            (calendarRecycler.adapter as CalendarAdapter).updateSelectedDate(date)
-            showAssignmentsForDay(date)
-        }
+
+        calendarAdapter.setDays(days)
+
+        // only show assignments for the visible month grid
+        val visibleAssignments =
+            mergedAssignments.filterKeys { days.contains(it) }
+
+        calendarAdapter.updateAssignments(visibleAssignments)
+        calendarAdapter.updateSelectedDate(selectedDate)
 
         showAssignmentsForDay(selectedDate)
     }
@@ -222,16 +213,12 @@ class CalendarFragment : Fragment() {
     private fun showAssignmentsForDay(date: LocalDate) {
         selectedDateText.text = date.format(DateTimeFormatter.ofPattern("MMM dd"))
 
-        val canvas = canvasAssignments.filter {
-            it.dueAt.startsWith(date.toString())
-        }
-
+        val canvas = canvasAssignments.filter { it.dueAt.startsWith(date.toString()) }
         val google = googleEventsByDate[date]?.map {
             Assignment(0L, "Google Calendar", it.summary ?: "Untitled Event", date.toString(), 0.0)
         }.orEmpty()
-
         val custom = customTasks.filter { it.date == date.toString() }.map {
-            Assignment(0L, "Custom", it.title, it.date, 0.0)
+            Assignment(0L, "Task", it.title, it.date, 0.0)
         }
 
         taskAdapter.update(canvas + google + custom)
@@ -240,10 +227,10 @@ class CalendarFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun handleGoogleEvents(events: List<Event>) {
         googleEventsByDate.clear()
-        for (event in events) {
-            val start = event.start?.dateTime ?: event.start?.date ?: continue
+        events.forEach { e ->
+            val start = e.start?.dateTime ?: e.start?.date ?: return@forEach
             val d = LocalDate.parse(start.toString().substring(0, 10))
-            googleEventsByDate[d] = googleEventsByDate.getOrDefault(d, listOf()) + event
+            googleEventsByDate[d] = googleEventsByDate.getOrDefault(d, emptyList()) + e
         }
         updateCalendar()
         Toast.makeText(requireContext(), "Google Calendar updated!", Toast.LENGTH_SHORT).show()

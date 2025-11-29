@@ -18,9 +18,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.project362.sfuhive.R
-import com.project362.sfuhive.Util
-import com.project362.sfuhive.database.Assignment
-import com.project362.sfuhive.database.DataViewModel
+import com.project362.sfuhive.database.Calendar.CustomTaskDatabase
+import com.project362.sfuhive.database.Calendar.CustomTaskEntity
+import com.project362.sfuhive.database.Calendar.CustomTaskRepository
+import com.project362.sfuhive.database.Calendar.CustomTaskVMFactory
+import com.project362.sfuhive.database.Calendar.CustomTaskViewModel
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -32,7 +34,7 @@ class TaskScanActivity : AppCompatActivity() {
     private lateinit var etDate: EditText
     private lateinit var etTime: EditText
 
-    private lateinit var dataViewModel: DataViewModel
+    private lateinit var customVM: CustomTaskViewModel
     private lateinit var remoteConfig: FirebaseRemoteConfig
 
     private var selectedBytes: ByteArray? = null
@@ -57,17 +59,19 @@ class TaskScanActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_scan)
 
-        // ViewModel
-        dataViewModel = ViewModelProvider(
+        // ---- SHARED CUSTOM TASK VIEWMODEL ----
+        val dao = CustomTaskDatabase.getInstance(applicationContext).customDao()
+        val repo = CustomTaskRepository(dao)
+        customVM = ViewModelProvider(
             this,
-            Util.getViewModelFactory(this)
-        ).get(DataViewModel::class.java)
+            CustomTaskVMFactory(repo)
+        ).get(CustomTaskViewModel::class.java)
 
-        // Remote Config setup
+        // ---- REMOTE CONFIG ----
         remoteConfig = FirebaseRemoteConfig.getInstance()
         remoteConfig.setConfigSettingsAsync(
             FirebaseRemoteConfigSettings.Builder()
-                .setMinimumFetchIntervalInSeconds(0)   // ALWAYS fetch fresh config
+                .setMinimumFetchIntervalInSeconds(0)
                 .build()
         )
 
@@ -176,7 +180,7 @@ class TaskScanActivity : AppCompatActivity() {
         val cal = Calendar.getInstance()
         DatePickerDialog(
             this,
-            { _, y, m, d -> etDate.setText("$y-${m + 1}-$d") },
+            { _, y, m, d -> etDate.setText(String.format("%04d-%02d-%02d", y, m + 1, d)) },
             cal.get(Calendar.YEAR),
             cal.get(Calendar.MONTH),
             cal.get(Calendar.DAY_OF_MONTH)
@@ -204,17 +208,16 @@ class TaskScanActivity : AppCompatActivity() {
             return
         }
 
-        val dueAt = if (time.isBlank()) "${date}T00:00" else "${date}T$time"
-
-        val assignment = Assignment(
-            assignmentId = 0L,
-            courseName = "Task",
-            assignmentName = title,
-            dueAt = dueAt,
-            pointsPossible = 0.0
+        // ---- CREATE CUSTOM TASK ENTITY ----
+        val task = CustomTaskEntity(
+            title = title,
+            date = date,                     // yyyy-MM-dd
+            startTime = if (time.isBlank()) null else time,
+            endTime = null
         )
 
-        dataViewModel.insertAssignment(assignment)
+        // ---- INSERT INTO CUSTOM TASK DB ----
+        customVM.insert(task)
 
         Toast.makeText(this, "Task Saved!", Toast.LENGTH_SHORT).show()
         finish()
