@@ -28,6 +28,7 @@ interface StoredFileDatabaseDao {
     @Query("DELETE FROM stored_file_table WHERE id = :id")
     suspend fun deleteFile(id: Long)
 
-
+    @Query("SELECT * FROM stored_file_table WHERE parent_id = :parentId")
+    fun getFilesInFolder(parentId: Long?): LiveData<List<StoredFileEntity>>
 
 }

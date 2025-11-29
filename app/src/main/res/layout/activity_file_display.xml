@@ -10,10 +10,10 @@
         android:id="@+id/file_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="8dp"
         android:clipToPadding="false"
+        android:padding="8dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/file_list_item" />
+        tools:listitem="@layout/folder_list_item" />
 
     <TextView
         android:id="@+id/empty_view"
@@ -26,13 +26,43 @@
         tools:visibility="visible"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/add_file_button"
+        android:id="@+id/add_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
+        android:layout_marginEnd="48dp"
+        android:layout_marginBottom="8dp"
         android:src="@drawable/ic_add"
         app:tint="@android:color/white"
         android:contentDescription="@string/add_new_file" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_directory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="70dp"
+        android:contentDescription="@string/add_new_file"
+        android:src="@drawable/ic_directory"
+        app:tint="@android:color/white"
+        app:fabSize="mini"
+        app:layout_anchor="@id/add_button"
+        app:layout_anchorGravity="bottom|end"
+        android:visibility="gone"
+        android:clickable="false"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_file"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="84dp"
+        android:layout_marginBottom="70dp"
+        android:clickable="false"
+        android:contentDescription="@string/add_new_file"
+        android:src="@drawable/file_icon"
+        app:fabSize="mini"
+        app:layout_anchor="@id/add_button"
+        app:layout_anchorGravity="bottom|end"
+        android:visibility="gone"
+        app:tint="@android:color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

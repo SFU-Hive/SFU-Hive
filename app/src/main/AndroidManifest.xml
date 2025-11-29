@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SFUHive">
         <activity
-            android:name=".database.StoredFileDisplayActivity"
+            android:name=".storage.StoredFileDisplayActivity"
             android:exported="false"
             android:label="@string/title_activity_stored_file_display"
             android:theme="@style/Theme.SFUHive" />

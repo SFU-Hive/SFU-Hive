@@ -8,6 +8,9 @@ import androidx.room.PrimaryKey
 data class StoredFileEntity(
     @PrimaryKey val id: Long,
 
+    @ColumnInfo(name = "parent_id")
+    var parentId: Long? = null,
+
     @ColumnInfo(name = "stored_file_name")
     var name: String = "",
 

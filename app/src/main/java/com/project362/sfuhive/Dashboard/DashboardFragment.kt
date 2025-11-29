@@ -1,5 +1,6 @@
 package com.project362.sfuhive.Dashboard
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,11 +12,14 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.project362.sfuhive.R
+import com.project362.sfuhive.storage.StoredFileDisplayActivity
 
 class DashboardFragment : Fragment() {
 
     private val viewModel: DashboardViewModel by viewModels()
     private lateinit var streakIcons: Array<ImageView?>
+
+    private lateinit var importantDateAdapter: ImportantDateAdapter
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -29,6 +33,8 @@ class DashboardFragment : Fragment() {
         val importantDatesListView = view.findViewById<ListView>(R.id.list_view)
         val recentFilesGridView = view.findViewById<GridView>(R.id.recent_files)
         val welcomeMessageView = view.findViewById<TextView>(R.id.welcome)
+        val showMoreFilesButton = view.findViewById<ImageView>(R.id.more_files_arrow)
+
 
         streakIcons = arrayOf(
             view.findViewById(R.id.streak_item1),
@@ -40,12 +46,18 @@ class DashboardFragment : Fragment() {
             view.findViewById(R.id.streak_item7)
         )
 
+        importantDateAdapter = ImportantDateAdapter(requireContext(), mutableListOf()) {
+            viewModel.deleteImportantDate(it)
+        }
+
+        importantDatesListView.adapter = importantDateAdapter
+
         viewModel.welcomeMessage.observe(viewLifecycleOwner) { message ->
             welcomeMessageView.text = message
         }
 
         viewModel.importantDates.observe(viewLifecycleOwner) { dates ->
-            importantDatesListView.adapter = ImportantDateAdapter(requireContext(), dates)
+            importantDateAdapter.updateData(dates)
         }
 
         viewModel.recentFiles.observe(viewLifecycleOwner) { files ->
@@ -66,5 +78,9 @@ class DashboardFragment : Fragment() {
             }
         }
 
+        showMoreFilesButton.setOnClickListener {
+            val intent = Intent(requireContext(), StoredFileDisplayActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

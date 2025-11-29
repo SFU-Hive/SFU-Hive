@@ -8,6 +8,10 @@ import kotlinx.coroutines.flow.Flow
 class StoredFileRepository(private val storedFileDatabaseDao: StoredFileDatabaseDao) {
     val allFiles: Flow<List<StoredFileEntity>> = storedFileDatabaseDao.getAllStoredFilesSortedByLastAccessed()
 
+    fun getFilesInFolder(parentId: Long?):LiveData<List<StoredFileEntity>> {
+        return storedFileDatabaseDao.getFilesInFolder(parentId)
+    }
+
     fun insertFile(file: StoredFileEntity) {
         CoroutineScope(IO).launch {
             storedFileDatabaseDao.insertFile(file)

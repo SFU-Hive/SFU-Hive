@@ -38,6 +38,13 @@ class DashboardViewModel : ViewModel(){
         //fetchImportantDates()
     }
 
+    fun deleteImportantDate(date: ImportantDate) {
+        val currentDates = _importantDates.value ?: return
+        val updatedDates = currentDates.toMutableList()
+        updatedDates.remove(date)
+        _importantDates.value = updatedDates
+    }
+
     private fun fetchUsername(): String{
         //TODO fetch username from database
         return "John Doe"

@@ -12,7 +12,8 @@ import com.project362.sfuhive.R
 
 class ImportantDateAdapter(
     private val context: Context,
-    private val importantDates: List<ImportantDate>
+    private val importantDates: MutableList<ImportantDate>,
+    private val onDeleteClicked: (ImportantDate) -> Unit
 ) : BaseAdapter(){
 
     private val inflator: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -45,13 +46,24 @@ class ImportantDateAdapter(
 
         courseNameTask.text = importantDate.name + " " + importantDate.task
         dateText.text = importantDate.date
+        checkbox.setOnCheckedChangeListener(null)
         checkbox.isChecked = importantDate.isComplete
 
         if (importantDate.name.isNotEmpty()) {
             courseImageIdentifier.text = importantDate.name.first().toString()
         }
 
+        checkbox.setOnCheckedChangeListener { _, isChecked ->
+            onDeleteClicked(importantDate)
+        }
+
         return rowView
     }
+    fun updateData(newDates: List<ImportantDate>) {
+        importantDates.clear()
+        importantDates.addAll(newDates)
+        notifyDataSetChanged()
+    }
+
 
 }
