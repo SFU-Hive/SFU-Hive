@@ -61,7 +61,6 @@ class BadgeActivity : AppCompatActivity(){
             repoVM.lockBadge(badgeid)
             initBadgeStatus()
         }
-
     }
 
     override fun onResume() {

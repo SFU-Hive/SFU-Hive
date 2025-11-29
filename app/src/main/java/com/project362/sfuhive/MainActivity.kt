@@ -98,6 +98,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleNewSubmissions(newSubmissions: List<SubmittedAssignment>, index: Int = 0) {
+
         if (index >= newSubmissions.size) {
             val prefs = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
             prefs.edit().putLong(LAST_SYNC_KEY, System.currentTimeMillis()).apply()
@@ -116,7 +117,18 @@ class MainActivity : AppCompatActivity() {
 
         dialog.arguments = bundle
         dialog.isCancelable = false
-        dialog.show(supportFragmentManager, "RateSubmission") // Causes "IllegalStateException: Can not perform this action after onSaveInstanceState" Issue on Miro's Device
+        try {
+            dialog.show(
+                supportFragmentManager,
+                "RateSubmission"
+            ) // Causes "IllegalStateException: Can not perform this action after onSaveInstanceState" Issue on Miro's Device
+        }catch(e :IllegalStateException){
+            Log.d("handleNewSubmissions", "IllegalStateException THROWN")
+        }
+         //get 10 coins per submitted assignment
+        var coins=Util.getCoinTotal(this)
+        coins= coins!! + 10
+        Util.updateCoinTotal(this,coins)
 
         // this part assisted by ChatGPT
         // Use a listener for when the dialog is dismissed
@@ -124,5 +136,6 @@ class MainActivity : AppCompatActivity() {
             // Show next dialog
             handleNewSubmissions(newSubmissions, index + 1)
         }
+
     }
 }
