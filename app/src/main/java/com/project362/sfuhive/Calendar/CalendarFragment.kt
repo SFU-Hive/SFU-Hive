@@ -354,4 +354,70 @@ class CalendarFragment : Fragment() {
 
         return
     }
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun openDayView(date: LocalDate) {
+
+        val assignmentsForDay = mutableListOf<Assignment>()
+        val priorityIds = mutableListOf<String>()
+        val pointsList = mutableListOf<Double>()
+        val groupList = mutableListOf<Double>()
+
+        // Canvas
+        canvasAssignments.filter { it.dueAt.startsWith(date.toString()) }.forEach {
+            assignmentsForDay.add(it)
+            priorityIds.add(it.assignmentId.toString())
+            pointsList.add(it.pointsPossible)
+            groupList.add(it.groupWeight)
+        }
+
+        // Google
+        googleEventsByDate[date]?.forEach { e ->
+            val id = "google_${e.id}"
+            assignmentsForDay.add(
+                Assignment(
+                    assignmentId = id.hashCode().toLong(),
+                    courseName = "Google Calendar",
+                    assignmentName = e.summary ?: "Untitled Event",
+                    dueAt = date.toString(),
+                    pointsPossible = 0.0,
+                    groupWeight = 0.0
+                )
+            )
+            priorityIds.add(id)
+            pointsList.add(0.0)
+            groupList.add(0.0)
+        }
+
+        // Custom
+        customTasks.filter { it.date == date.toString() }.forEach {
+            val id = "custom_${it.id}"
+            assignmentsForDay.add(
+                Assignment(
+                    assignmentId = id.hashCode().toLong(),
+                    courseName = "Task",
+                    assignmentName = it.title,
+                    dueAt = it.date,
+                    pointsPossible = 0.0,
+                    groupWeight = 0.0
+                )
+            )
+            priorityIds.add(id)
+            pointsList.add(0.0)
+            groupList.add(0.0)
+        }
+
+        // SEND TO DAY VIEW ACTIVITY
+        val intent = Intent(requireContext(), DayViewActivity::class.java)
+        intent.putExtra("selected_date", date.toString())
+
+        intent.putStringArrayListExtra("task_titles", ArrayList(assignmentsForDay.map { it.assignmentName }))
+        intent.putStringArrayListExtra("task_courses", ArrayList(assignmentsForDay.map { it.courseName }))
+        intent.putStringArrayListExtra("task_dates", ArrayList(assignmentsForDay.map { it.dueAt }))
+        intent.putStringArrayListExtra("task_priority_ids", ArrayList(priorityIds))
+        intent.putExtra("task_points", pointsList.toDoubleArray())
+        intent.putExtra("task_groups", groupList.toDoubleArray())
+
+        startActivity(intent)
+    }
+
 }
