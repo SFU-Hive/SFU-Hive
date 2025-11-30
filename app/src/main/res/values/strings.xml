@@ -30,8 +30,8 @@
     <string name="pinned_badge1">pinned badge 1</string>
     <string name="pinned_badge2">pinned badge 2</string>
     <string name="pinned_badge3">pinned badge 3</string>
-    <string name="badges_title">Badges</string>
-    <string name="rewards_title">Rewards</string>
+    <string name="badges_title"><u>Badges</u></string>
+    <string name="rewards_title"><u>Rewards</u></string>
     <string name="streaks_title">Streaks</string>
     <string name="not_found">Not Found</string>
     <string name="redeem">Redeem</string>

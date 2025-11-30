@@ -4,19 +4,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="@color/dark_red"/>
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/dark_red"
+        android:gravity="bottom"
         android:text="@string/badges_title"
-        android:textSize="24sp"/>
+        android:textColor="@android:color/black"
+        android:textSize="26sp"
+        android:padding="10dp"
+        />
 
     <!--Adapted from: https://developer.android.com/develop/ui/views/layout/cardview-->
     <androidx.cardview.widget.CardView
         android:id = "@+id/featured_badge"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="10dp">
+        app:cardCornerRadius="10dp"
+        >
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:padding="4dp"
@@ -68,6 +78,7 @@
                 android:id="@+id/reset_badge_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:backgroundTint="@color/light_red"
                 android:text="@string/reset"
                 app:layout_constraintEnd_toEndOf="@id/title"
                 app:layout_constraintTop_toBottomOf="@id/featured_image"/>
