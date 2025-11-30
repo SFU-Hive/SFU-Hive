@@ -28,6 +28,12 @@ Please view our project webpage [here](https://danieldawda2448.wixsite.com/sfuhi
 git clone https://github.com/SFU-Hive/SFU-Hive.git
 ```
 
+## Architecture
+### MVVM Diagram
+<img width="671" height="751" alt="MVVM drawio" src="https://github.com/user-attachments/assets/34e57e25-d0fa-430d-b116-5065c1049dd2" />
+
+
+
 ## Acknowledgements
 Online resources such as official docs, tutorials, and generative AI were used in the development of this app, examples might include:
 - [Canvas API Docs](https://developerdocs.instructure.com/services/canvas)
