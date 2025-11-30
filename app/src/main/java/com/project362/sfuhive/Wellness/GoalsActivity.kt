@@ -50,7 +50,7 @@ class GoalsActivity : AppCompatActivity() {
     private lateinit var goal3Cb: CheckBox
 
     // for nfc to receive scans while open
-    private lateinit var nfcAdapter: NfcAdapter
+    private var nfcAdapter: NfcAdapter? = null
     private lateinit var pendingIntent: PendingIntent
     var pendingGoalAssignId: Long? = null
 
@@ -61,6 +61,10 @@ class GoalsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_goals)
         // nfc stuff
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+
+        if (nfcAdapter == null) {
+            Toast.makeText(this, "This device does not support NFC", Toast.LENGTH_LONG).show()
+        }
         pendingIntent = PendingIntent.getActivity(
             this,
             0,
@@ -106,6 +110,9 @@ class GoalsActivity : AppCompatActivity() {
     // enable scanning
     override fun onResume() {
         super.onResume()
+
+        val adapter = nfcAdapter ?: return // check if adapter actually assigned
+
         val intent = Intent(this, javaClass).apply {
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         }
@@ -115,13 +122,13 @@ class GoalsActivity : AppCompatActivity() {
         )
 
         val filters = arrayOf(IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED))
-        nfcAdapter.enableForegroundDispatch(this, pendingIntent, filters, null)
+        adapter.enableForegroundDispatch(this, pendingIntent, filters, null)
     }
 
 
     override fun onPause() {
         super.onPause()
-        nfcAdapter.disableForegroundDispatch(this)
+        nfcAdapter?.disableForegroundDispatch(this)
     }
 
     // bind to update the goals
