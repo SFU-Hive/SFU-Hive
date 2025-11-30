@@ -46,7 +46,7 @@ class DashboardViewModel (application: Application): AndroidViewModel(applicatio
         loadDashboardData()
     }
 
-    private fun loadDashboardData() {
+    fun loadDashboardData() {
         _welcomeMessage.value = "Welcome!"
 
         fetchImportantDates()
