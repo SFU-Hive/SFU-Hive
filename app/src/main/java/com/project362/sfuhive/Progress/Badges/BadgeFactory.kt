@@ -1,5 +1,7 @@
 package com.project362.sfuhive.Progress.Badges
 
+import androidx.lifecycle.MutableLiveData
+import com.project362.sfuhive.Progress.Badges.BadgeUtils.BadgeIds
 import com.project362.sfuhive.R
 
 class BadgeFactory( ){
@@ -37,13 +39,32 @@ class BadgeFactory( ){
             "Bank Breaker",
             R.drawable.bank_breaker_badge,
             R.drawable.badge_locked,
-            "Try breaking the bank!")
+            "Try spending all your coins!")
 
     )
+
+    val id2BadgeMap = mapOf(
+        BadgeIds.GOAL1 to allBadges.get(0),
+
+        BadgeIds.GOAL2 to allBadges.get(1),
+
+        BadgeIds.GOAL3 to allBadges.get(2),
+
+        BadgeIds.BANK_BREAKER to allBadges.get(3)
+    )
+
+    public var mutableBadges = MutableLiveData<List<Badge>>(allBadges)
 
     public fun getAllBadges(): List<Badge>{
 
         return allBadges
+    }
+
+    public fun getBageById(id : Long):Badge?{
+
+        return id2BadgeMap.get(id)
+
+
     }
 
 }

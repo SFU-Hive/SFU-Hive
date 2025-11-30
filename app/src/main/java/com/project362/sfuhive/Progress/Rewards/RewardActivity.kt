@@ -17,6 +17,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.dynamic.SupportFragmentWrapper
 import com.project362.sfuhive.Progress.Badges.BadgeActivityViewModel
 import com.project362.sfuhive.Progress.Badges.BadgeAdapter
 import com.project362.sfuhive.Progress.Badges.BadgeFactory
@@ -58,7 +59,7 @@ class RewardActivity : AppCompatActivity() {
         repoVM =ViewModelProvider(this, factory).get(DataViewModel::class.java)
 
         // set coin total based on shared prefs total
-        rewardActivityVM.setCurrencyCount(100)//Util.getCoinTotal(this))
+        rewardActivityVM.setCurrencyCount(Util.getCoinTotal(this))//Util.getCoinTotal(this))
 
         val rewardSelectView = findViewById<RecyclerView>(R.id.badge_selection)
         val rewardAdapter = RewardAdapter(this, tmpRewardList,rewardActivityVM )
@@ -85,27 +86,19 @@ class RewardActivity : AppCompatActivity() {
 
             if(user_confirmation == "redeemed"){
                 //subtract cost of the featured reward
-                rewardActivityVM.subtractCost()
+               rewardActivityVM.subtractCost()
+                val newTotal=rewardActivityVM.currencyCount.value
+                Util.updateCoinTotal(this,newTotal)
+
+
                 if(rewardActivityVM.getCurrencyCount()==0L){
                     if(repoVM.isBadgeLocked(BANK_BREAKER)==true){
                         repoVM.unlockBadge(BANK_BREAKER)
-                        val badge = BadgeUtils.getBadge(BANK_BREAKER)
-                        if(badge!=null){
-                            val dialog=UnlockedDialog(BadgeUtils.getBadge(BANK_BREAKER)!!)
-                            dialog.show(supportFragmentManager, BANK_BREAKER.toString())
-                        }
-
+                        Util.UnlockBadgeDialog(BANK_BREAKER, this.supportFragmentManager)
                     }
-
                 }
-                // TODO: add Reward to database
-                // TODO: check for badge update
-
-
-
             }
         }
-
 
         rewardActivityVM.currencyCount.observe(this,Observer{ it ->
             currencyTextView.text = rewardActivityVM.getCurrencyCount().toString()
@@ -145,10 +138,16 @@ class RewardActivity : AppCompatActivity() {
         )
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // save total coins user has to sharedPrefs
+    }
+
     private fun updateFeaturedRewardView(newReward : Reward){
         featuredImageView.setImageResource(newReward.getIconId())
         featuredTitleView.text = newReward.getTitle()
-        featuredCostView.text = newReward.getCost().toString()
+        featuredCostView.text = "Cost: $${newReward.getCost()}"
         featuredSubheadView.text = newReward.getDescription()
 
     }

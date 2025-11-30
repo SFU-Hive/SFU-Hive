@@ -12,6 +12,7 @@ import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
@@ -36,14 +37,19 @@ class BadgeActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         var vmFactory =  Util.getViewModelFactory(this)
+
         repoVM=ViewModelProvider(this, vmFactory).get(DataViewModel::class.java)
-        initBadgeStatus()
+
+        //initBadgeStatus()
         setContentView(R.layout.fragment_badges)
-        badgeActivityVM=BadgeActivityViewModel(tmpBadgesList)
+
+        badgeActivityVM=BadgeActivityViewModel(badgeFactory.getAllBadges(),repoVM)
         val badgeSelectView = findViewById<RecyclerView>(R.id.badge_selection)
         val badgeAdapter = BadgeAdapter(this, tmpBadgesList,badgeActivityVM )
         badgeSelectView.adapter= badgeAdapter
         badgeSelectView.layoutManager = GridLayoutManager(this, 3)
+
+        //badgeActivityVM.setBadgeList(badgeFactory.getAllBadges())
 
         featuredBadgeView =findViewById<CardView>(R.id.featured_badge)
 
@@ -57,9 +63,8 @@ class BadgeActivity : AppCompatActivity(){
         resetBadgeButtonView.setOnClickListener {
             val badgeid=badgeActivityVM.featuredBadge.value.getId()
             repoVM.lockBadge(badgeid)
-            initBadgeStatus()
+            //initBadgeStatus()
         }
-
     }
 
     override fun onResume() {
@@ -70,27 +75,24 @@ class BadgeActivity : AppCompatActivity(){
             Observer {
                 // update featured badge card
                 updateFeaturedBadgeView(badgeActivityVM.getFeaturedBadge())
-
             }
         )
+//        initBadgeStatus()
     }
     private fun updateFeaturedBadgeView(newBadge: Badge){
         featuredImageView.setImageResource(newBadge.getIconId())
         featuredTitleView.text = newBadge.getTitle()
         featuredSubheadView.text = newBadge.getDescription()
         featuredBodyView.text = newBadge.getTextStatus()
-
-
-
     }
 
     // checks everybadge in the database to set completed badges as true
-    private fun initBadgeStatus(){
-        println("Loading badges...")
-        for (badge in badgeFactory.getAllBadges()){
-            val savedState = repoVM.isBadgeLocked(badge.getId())
-            badge.setIsLocked(savedState)
-        }
 
-    }
+//    private fun initBadgeStatus() {
+//        println("Loading badges...")
+//        for (badge in badgeActivityVM.mutableBadges) {
+//            //val savedState = repoVM.isBadgeLocked(badge.getId())
+//            badge.badgeEntity = repoVM.getBadgeFlow(badge.getId()).asLiveData()
+//        }
+//    }
 }

@@ -6,22 +6,28 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.observe
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
+import okhttp3.internal.notify
+
 
 class BadgeAdapter(
-    context: Context,
+    private val context: Context,
     private val badges : List<Badge>,
     private val viewModel: BadgeActivityViewModel
-):RecyclerView.Adapter<BadgeAdapter.ViewHolder>(){
 
+):RecyclerView.Adapter<BadgeAdapter.ViewHolder>(){
+    private lateinit var parentContext : Context
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
     ): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.badge_view, parent, false)
-        
+        parentContext=parent.context
         val viewHolder=ViewHolder(view)
 
 
@@ -32,17 +38,23 @@ class BadgeAdapter(
         holder: ViewHolder,
         position: Int
     ) {
-        holder.badgeIconView.setImageResource(badges.get(position).getIconId())
-        holder.badgeTitleView.text = badges.get(position).getTitle()
+        var badge = viewModel.getBadgeList().get(position)
+
+        holder.badgeIconView.setImageResource(badge.getIconId()) // set observer for this
+        holder.badgeTitleView.text = badge.getTitle()
         holder.view.setOnClickListener {
-            println("setting featured badge to {${badges.get(position).getTitle()}}")
-            viewModel.setFeaturedBadge(badges.get(position))
+            println("setting featured badge to {${badge.getTitle()}}")
+            viewModel.setFeaturedBadge(badge)
             //Change theme here
         }
+        val lifeCycleOwner=context as LifecycleOwner
+        badge.badgeEntity.observe(lifeCycleOwner, Observer {
+            holder.badgeIconView.setImageResource(badge.getIconId())
+        })
     }
 
     override fun getItemCount(): Int {
-        return badges.size
+        return viewModel.getBadgeList().size
     }
 
 
@@ -56,6 +68,9 @@ class BadgeAdapter(
         init {
             badgeIconView = view.findViewById<ImageView>(R.id.icon_view)
             badgeTitleView= view.findViewById<TextView>(R.id.badge_title_view)
+
+            // observe live badge data here
+
         }
 
     }

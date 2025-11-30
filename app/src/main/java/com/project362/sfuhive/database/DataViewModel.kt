@@ -9,12 +9,15 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.project362.sfuhive.Wellness.GoalDatabase
 import com.project362.sfuhive.database.Badge.BadgeDatabase
+import com.project362.sfuhive.database.Badge.BadgeEntity
+import com.project362.sfuhive.database.Streak.StreakEntity
 import com.project362.sfuhive.database.Wellness.Goal
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 import java.util.Calendar
+import java.util.Date
 
 // adapted from RoomDatabase demo
 class DataViewModel(private val repository: DataRepository) : ViewModel() {
@@ -63,6 +66,15 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
 
     fun unlockBadge(id: Long) {
         repository.unlockBadge(id)
+
+    }
+
+    fun getAllBadgesState(): Flow<List<BadgeEntity>>{
+        return repository.getAllBadgesState()
+
+    }
+    fun getBadgeFlow(id : Long): Flow<BadgeEntity>{
+        return repository.getBadgeFlow(id)
     }
 
 
@@ -140,6 +152,7 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
             if (goal.completionCount + 1 >= 10) {
                 goal.badgeId?.let { badgeId ->
                     repository.unlockBadge(badgeId)
+
                 }
             }
         }
@@ -218,6 +231,30 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
         val max = 10f // unlock badge at 10 completions
         return ((count / max) * 100).toInt().coerceIn(0, 100)
     }
+
+    // streaks section
+
+    fun addStreak(type:String, calendar: Calendar ){
+        repository.addStreak(type, calendar)
+    }
+
+    fun getStreaksOfType(type:String): Flow<List<StreakEntity?>>{
+        return repository.getStreaksOfType(type)
+    }
+
+    fun getAllStreaks(): Flow<List<StreakEntity?>>{
+        return repository.getAllStreaks()
+    }
+
+    fun deleteStreaksOfType(type:String){
+        repository.deleteStreaksOfType(type)
+    }
+
+    fun deleteAllStreaks(){
+        repository.deleteAllStreaks()
+    }
+
+
 
 
 }
