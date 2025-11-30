@@ -4,10 +4,18 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.view.*
-import android.widget.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.PopupMenu
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -63,7 +71,12 @@ class CalendarFragment : Fragment() {
             }
         }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        setHasOptionsMenu(true)
         return inflater.inflate(R.layout.fragment_calendar, container, false)
     }
 
@@ -335,69 +348,10 @@ class CalendarFragment : Fragment() {
         Toast.makeText(requireContext(), "Google Calendar updated!", Toast.LENGTH_SHORT).show()
     }
 
-    private fun openDayView(date: LocalDate) {
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
 
-        val assignmentsForDay = mutableListOf<Assignment>()
-        val priorityIds = mutableListOf<String>()
-        val pointsList = mutableListOf<Double>()
-        val groupList = mutableListOf<Double>()
+        inflater.inflate(R.menu.search_menu, menu)
 
-        // Canvas
-        canvasAssignments.filter { it.dueAt.startsWith(date.toString()) }.forEach {
-            assignmentsForDay.add(it)
-            priorityIds.add(it.assignmentId.toString())
-            pointsList.add(it.pointsPossible)
-            groupList.add(it.groupWeight)
-        }
-
-        // Google
-        googleEventsByDate[date]?.forEach { e ->
-            val id = "google_${e.id}"
-            assignmentsForDay.add(
-                Assignment(
-                    assignmentId = id.hashCode().toLong(),
-                    courseName = "Google Calendar",
-                    assignmentName = e.summary ?: "Untitled Event",
-                    dueAt = date.toString(),
-                    pointsPossible = 0.0,
-                    groupWeight = 0.0
-                )
-            )
-            priorityIds.add(id)
-            pointsList.add(0.0)
-            groupList.add(0.0)
-        }
-
-        // Custom
-        customTasks.filter { it.date == date.toString() }.forEach {
-            val id = "custom_${it.id}"
-            assignmentsForDay.add(
-                Assignment(
-                    assignmentId = id.hashCode().toLong(),
-                    courseName = "Task",
-                    assignmentName = it.title,
-                    dueAt = it.date,
-                    pointsPossible = 0.0,
-                    groupWeight = 0.0
-                )
-            )
-            priorityIds.add(id)
-            pointsList.add(0.0)
-            groupList.add(0.0)
-        }
-
-        // SEND PARALLEL ARRAYS
-        val intent = Intent(requireContext(), DayViewActivity::class.java)
-        intent.putExtra("selected_date", date.toString())
-
-        intent.putStringArrayListExtra("task_titles", ArrayList(assignmentsForDay.map { it.assignmentName }))
-        intent.putStringArrayListExtra("task_courses", ArrayList(assignmentsForDay.map { it.courseName }))
-        intent.putStringArrayListExtra("task_dates", ArrayList(assignmentsForDay.map { it.dueAt }))
-        intent.putStringArrayListExtra("task_priority_ids", ArrayList(priorityIds))
-        intent.putExtra("task_points", pointsList.toDoubleArray())
-        intent.putExtra("task_groups", groupList.toDoubleArray())
-
-        startActivity(intent)
+        return
     }
-
 }

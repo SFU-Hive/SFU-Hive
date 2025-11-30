@@ -9,12 +9,15 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
@@ -27,6 +30,7 @@ import com.project362.sfuhive.Util.PREFS_KEY
 import com.project362.sfuhive.Util.SubmittedAssignment
 import com.project362.sfuhive.database.DataViewModel
 import com.project362.sfuhive.database.DataViewModelFactory
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -77,6 +81,7 @@ class MainActivity : AppCompatActivity() {
             }
 
         loadButton = findViewById(R.id.load)
+        loadButton.visibility = View.GONE
 
         viewModelFactory = Util.getViewModelFactory(this)
         dataViewModel =
@@ -94,7 +99,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Put thread in onStart
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStart() {
         super.onStart()
@@ -105,6 +109,16 @@ class MainActivity : AppCompatActivity() {
             if (newSubmissions.isNotEmpty()) {
                 runOnUiThread {
                     handleNewSubmissions(newSubmissions)
+
+                    loadButton.visibility = View.VISIBLE
+                    val animation = AnimationUtils.loadAnimation(this, R.anim.fade_in)
+                    loadButton.startAnimation(animation)
+                }
+            } else {
+                runOnUiThread {
+                    loadButton.visibility = View.VISIBLE
+                    val animation = AnimationUtils.loadAnimation(this, R.anim.fade_in)
+                    loadButton.startAnimation(animation)
                 }
             }
         }.start()
