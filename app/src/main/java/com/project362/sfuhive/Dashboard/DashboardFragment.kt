@@ -70,6 +70,11 @@ class DashboardFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadDashboardData()
+    }
+
     private fun openFile(file: StoredFileEntity){
         val intent = Intent(Intent.ACTION_VIEW)
         val uri = file.url?.toUri()
@@ -79,8 +84,6 @@ class DashboardFragment : Fragment() {
         }
         val mimeType = requireContext().contentResolver.getType(uri)
         intent.setDataAndType(uri, mimeType)
-        Log.d("xd", "Opening file with URI: $uri")
-        Log.d("xd", "File type: ${file.type}")
 
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
@@ -89,7 +92,5 @@ class DashboardFragment : Fragment() {
         } catch (e: Exception) {
             Toast.makeText(requireContext(), "Error opening file", Toast.LENGTH_SHORT).show()
         }
-
-
     }
 }
