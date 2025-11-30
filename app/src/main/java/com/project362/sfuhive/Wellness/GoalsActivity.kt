@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import com.project362.sfuhive.R
 import com.project362.sfuhive.Util.getViewModelFactory
 import com.project362.sfuhive.database.DataViewModel
@@ -24,6 +25,7 @@ import com.project362.sfuhive.Util
 import com.project362.sfuhive.database.Badge.BadgeDatabase
 import com.project362.sfuhive.database.Badge.BadgeEntity
 import com.project362.sfuhive.database.DataRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -99,6 +101,21 @@ class GoalsActivity : AppCompatActivity() {
                         3L -> updateGoalRow(3, goal.goalName, goal.completionCount)
                         else -> Log.d("goalActivity", "Unexpected goal id=${goal.id}")
                     }
+
+                    // MIRO: ADD BADGE DIALOG HERE
+                    //Miro added to display goal
+                    if(viewModel.isBadgeLocked(goal.badgeId!!)==false){
+                        Log.d("goalActivity", "Unlock Goal Badge")
+                        Util.UnlockBadgeDialog(goal.id, supportFragmentManager)
+                    }else {
+                        if (goal.badgeId == null) {
+                            Log.d("goalActivity", "WARNING: Goal Badge id is NULL")
+                        } else {
+                            Log.d("goalActivity", "Badge is unlocked??")
+                        }
+                    }
+
+                    // End badge check -Miro
                 }
             }
         }
@@ -194,6 +211,24 @@ class GoalsActivity : AppCompatActivity() {
                 button.isChecked = true
                 button.isEnabled = false
             }
+            val goalFlow =viewModel.getGoalById(goalId)
+            val goalLiveData = goalFlow.asLiveData()
+            val goal = goalLiveData.value
+            if(goal !=null){
+                // MIRO: ADD BADGE DIALOG HERE
+                //Miro added to display goal
+                if(viewModel.isBadgeLocked(goal.badgeId!!)==false){
+                    Log.d("goalActivity", "Unlock Goal Badge")
+                    Util.UnlockBadgeDialog(goal.id, supportFragmentManager)
+                }else {
+                    if (goal.badgeId == null) {
+                        Log.d("goalActivity", "WARNING: Goal Badge id is NULL")
+                    } else {
+                        Log.d("goalActivity", "Badge is unlocked??")
+                    }
+                }
+            }
+            // End badge check -Miro
         }
     }
 
@@ -253,12 +288,21 @@ class GoalsActivity : AppCompatActivity() {
             val goal = viewModel.getGoalByNfcTag(tagId)
 
             if (goal != null) {
+                Log.d("goalActivity", "Unlock Goal Badge")
                 // Found a goal → mark complete
                 viewModel.incrementCompletion(goal.id)
 
                 //Miro added to display goal
                 if(viewModel.isBadgeLocked(goal.badgeId!!)==false){
+                    Log.d("goalActivity", "Unlock Goal Badge")
                     Util.UnlockBadgeDialog(goal.id, supportFragmentManager)
+                }else{
+                    if(goal.badgeId == null){
+                        Log.d("goalActivity", "WARNING: Goal Badge id is NULL")
+                    }else{
+                        Log.d("goalActivity", "Badge is unlocked??")
+                    }
+
                 }
 
                 Toast.makeText(
@@ -304,5 +348,6 @@ class GoalsActivity : AppCompatActivity() {
             }
         }
     }
+
 
 }

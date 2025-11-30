@@ -136,6 +136,7 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
 
     fun incrementCompletion(goalId: Long) {
         viewModelScope.launch {
+            Log.d("ViewModel", "Incrementing Goal Completion")
             // update count
             repository.incrementCompleteCount(goalId)
             // get today's date and also update the completion date
@@ -149,7 +150,7 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
             val newCount = goal.completionCount + 1
 
             // check against default
-            if (goal.completionCount + 1 >= 10) {
+            if (goal.completionCount + 1 >= 1) { // changed this from 10 to 1
                 goal.badgeId?.let { badgeId ->
                     repository.unlockBadge(badgeId)
 
