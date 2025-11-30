@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.project362.sfuhive.Util
 import com.project362.sfuhive.Wellness.GoalDatabase
 import com.project362.sfuhive.database.Badge.BadgeDatabase
 import com.project362.sfuhive.database.Badge.BadgeEntity
@@ -18,9 +19,16 @@ import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 import java.util.Calendar
 import java.util.Date
+import com.project362.sfuhive.Progress.Badges.BadgeFactory.Companion.GOAL1
+import com.project362.sfuhive.Progress.Badges.BadgeFactory.Companion.GOAL2
+import com.project362.sfuhive.Progress.Badges.BadgeFactory.Companion.GOAL3
 
 // adapted from RoomDatabase demo
 class DataViewModel(private val repository: DataRepository) : ViewModel() {
+
+   val goal1BadgeEntity = repository.getBadgeFlow(GOAL1).asLiveData()
+    val goal2BadgeEntity = repository.getBadgeFlow(GOAL2).asLiveData()
+    val goal3BadgeEntity = repository.getBadgeFlow(GOAL3).asLiveData()
 
     val allMyAssignmentsLiveData: LiveData<List<Assignment>> = repository.allAssignments.asLiveData()
     val myUniqueCourseIdsLiveData: LiveData<List<Long>> = repository.myUniqueCourseIds.asLiveData()
@@ -152,8 +160,10 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
             // check against default
             if (goal.completionCount + 1 >= 1) { // changed this from 10 to 1
                 goal.badgeId?.let { badgeId ->
-                    repository.unlockBadge(badgeId)
-
+                    if(repository.getBadge(badgeId)?.isLocked== true) { // Only unlock if badge is currently locked -Miro
+                        Log.d("ViewModel", "Unlocking goal badge")
+                        repository.unlockBadge(badgeId)
+                    }
                 }
             }
         }
