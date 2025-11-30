@@ -1,5 +1,6 @@
 package com.project362.sfuhive.Calendar
 
+import android.content.Context
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
@@ -10,10 +11,12 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
+import com.project362.sfuhive.database.EventPriority.EventPriorityDatabase
+import kotlinx.coroutines.*
 import java.time.LocalDate
 
 class CalendarAdapter(
-    private val days: List<LocalDate?>,
+    private val days: MutableList<LocalDate?>,
     private var assignmentsByDate: MutableMap<LocalDate, List<String>>,
     private var selectedDate: LocalDate?,
     private val onDayClicked: (LocalDate) -> Unit
@@ -39,6 +42,7 @@ class CalendarAdapter(
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: DayViewHolder, position: Int) {
         val date = days[position]
+
         holder.dayText.text = ""
         holder.bgHighlight.visibility = View.GONE
         holder.dotContainer.visibility = View.GONE
@@ -59,7 +63,6 @@ class CalendarAdapter(
                 holder.dayText.setTextColor(
                     ContextCompat.getColor(holder.itemView.context, android.R.color.black)
                 )
-
                 val today = LocalDate.now()
                 if (date == today) {
                     holder.bgHighlight.visibility = View.VISIBLE
@@ -70,23 +73,38 @@ class CalendarAdapter(
                 }
             }
 
-            // Show up to 3 event dots
-            val tasks = assignmentsByDate[date].orEmpty()
-            if (tasks.isNotEmpty()) {
-                holder.dotContainer.visibility = View.VISIBLE
-                tasks.take(3).forEachIndexed { index, task ->
-                    val dot = holder.dots[index]
-                    dot.visibility = View.VISIBLE
+            // SHOW PRIORITY DOTS
+            val ids = assignmentsByDate[date].orEmpty()
 
-                    val colorRes = when {
-                        task.contains("high", true) -> R.color.priority_high
-                        task.contains("medium", true) -> R.color.priority_medium
-                        task.contains("low", true) -> R.color.priority_low
-                        else -> R.color.priority_default
+            if (ids.isNotEmpty()) {
+                holder.dotContainer.visibility = View.VISIBLE
+
+                val ctx = holder.itemView.context
+                val dao = EventPriorityDatabase.getInstance(ctx).assignmentPriorityDao()
+
+                CoroutineScope(Dispatchers.IO).launch {
+
+                    // Fetch priorities in order
+                    val priorities = ids.take(3).map { id ->
+                        dao.getPriority(id) ?: "default"
                     }
 
-                    dot.backgroundTintList =
-                        ContextCompat.getColorStateList(holder.itemView.context, colorRes)
+                    withContext(Dispatchers.Main) {
+                        priorities.forEachIndexed { index, p ->
+                            val dot = holder.dots[index]
+                            dot.visibility = View.VISIBLE
+
+                            val colorRes = when (p) {
+                                "high" -> R.color.priority_high
+                                "medium" -> R.color.priority_medium
+                                "low" -> R.color.priority_low
+                                else -> R.color.priority_default
+                            }
+
+                            dot.backgroundTintList =
+                                ContextCompat.getColorStateList(ctx, colorRes)
+                        }
+                    }
                 }
             }
 
@@ -101,9 +119,15 @@ class CalendarAdapter(
         notifyDataSetChanged()
     }
 
-    fun updateAssignments(newData: Map<LocalDate, List<String>>) {
-        assignmentsByDate.clear()
-        assignmentsByDate.putAll(newData)
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun updateAssignments(newMap: Map<LocalDate, List<String>>) {
+        assignmentsByDate = newMap.toMutableMap()
+        notifyDataSetChanged()
+    }
+
+    fun setDays(newDays: List<LocalDate?>) {
+        (this.days as MutableList).clear()
+        (this.days as MutableList).addAll(newDays)
         notifyDataSetChanged()
     }
 }

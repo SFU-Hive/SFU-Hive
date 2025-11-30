@@ -18,3 +18,6 @@ captures/
 *.so
 *.swp
 /app/google-services.json
+release-key.jks
+*.jks
+*.keystore

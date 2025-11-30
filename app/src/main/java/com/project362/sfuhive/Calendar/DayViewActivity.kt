@@ -4,70 +4,58 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.TextView
 import androidx.annotation.RequiresApi
-import androidx.activity.ComponentActivity
-import androidx.lifecycle.Observer
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
 import com.project362.sfuhive.database.Assignment
-import com.project362.sfuhive.database.DataViewModel
-import com.project362.sfuhive.Util
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
-class DayViewActivity : ComponentActivity() {
+class DayViewActivity : AppCompatActivity() {
 
-    private lateinit var dateTitle: TextView
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: TaskAdapter
-    private lateinit var dataViewModel: DataViewModel
+    private lateinit var tvDate: TextView
+    private lateinit var recycler: androidx.recyclerview.widget.RecyclerView
+    private lateinit var taskAdapter: TaskAdapter
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_day_view)
 
-        dateTitle = findViewById(R.id.dayViewDateTitle)
-        recyclerView = findViewById(R.id.dayViewRecycler)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        // FIXED ID HERE
+        tvDate = findViewById(R.id.dayViewDateTitle)
+        recycler = findViewById(R.id.dayViewRecycler)
 
-        adapter = TaskAdapter(listOf())
-        recyclerView.adapter = adapter
+        recycler.layoutManager = LinearLayoutManager(this)
 
-        dataViewModel = Util.getViewModelFactory(this)
-            .let { androidx.lifecycle.ViewModelProvider(this, it) }
-            .get(DataViewModel::class.java)
+        // Retrieve data passed from CalendarFragment
+        val date = intent.getStringExtra("selected_date") ?: ""
+        tvDate.text = date
 
-        val dateStr = intent.getStringExtra("selected_date") ?: return
-        val date = LocalDate.parse(dateStr)
+        val titles = intent.getStringArrayListExtra("task_titles") ?: arrayListOf()
+        val courses = intent.getStringArrayListExtra("task_courses") ?: arrayListOf()
+        val dates = intent.getStringArrayListExtra("task_dates") ?: arrayListOf()
+        val ids = intent.getStringArrayListExtra("task_priority_ids") ?: arrayListOf()
+        val points = intent.getDoubleArrayExtra("task_points") ?: DoubleArray(titles.size)
+        val groups = intent.getDoubleArrayExtra("task_groups") ?: DoubleArray(titles.size)
 
-        dateTitle.text = date.format(DateTimeFormatter.ofPattern("EEEE, MMM dd"))
+        val tasks = mutableListOf<Assignment>()
 
-        val googleEvents = GoogleEventCache.events[dateStr] ?: listOf()
-
-        /** ⭐ FIX: Observe LiveData instead of using .value */
-        dataViewModel.allMyAssignmentsLiveData.observe(this, Observer { allAssignments ->
-
-            // Canvas + custom tasks
-            val roomTasksForDate = allAssignments.filter {
-                it.dueAt.startsWith(dateStr)
-            }
-
-            // Google events mapped to assignments
-            val googleAsAssignments = googleEvents.map {
+            for (i in titles.indices) {
+            tasks.add(
                 Assignment(
-                    assignmentId = 0L,
-                    courseName = "Google Calendar",
-                    assignmentName = it.summary ?: "Untitled Event",
-                    dueAt = dateStr,
-                    pointsPossible = 0.0
+                    assignmentId = i.toLong(), // temp ID; not used for priority
+                    courseName = courses[i],
+                    assignmentName = titles[i],
+                    dueAt = dates[i],
+                    pointsPossible = points[i],
+                    groupWeight = groups[i]
                 )
-            }
+            )
+        }
 
-            // Combine all 3 sources
-            val combined = roomTasksForDate + googleAsAssignments
-
-            adapter.update(combined)
-        })
+        taskAdapter = TaskAdapter(tasks, ids) {
+            // Refresh month calendar when returning from Day View
+            finish()  // closes day view
+        }
+        recycler.adapter = taskAdapter
     }
 }
