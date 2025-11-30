@@ -15,7 +15,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import com.project362.sfuhive.R
 import com.project362.sfuhive.Util.getViewModelFactory
 import com.project362.sfuhive.database.DataViewModel
@@ -24,8 +27,12 @@ import com.project362.sfuhive.Util
 import com.project362.sfuhive.database.Badge.BadgeDatabase
 import com.project362.sfuhive.database.Badge.BadgeEntity
 import com.project362.sfuhive.database.DataRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import com.project362.sfuhive.Progress.Badges.BadgeFactory.Companion.GOAL1
+import com.project362.sfuhive.Progress.Badges.BadgeFactory.Companion.GOAL2
+import com.project362.sfuhive.Progress.Badges.BadgeFactory.Companion.GOAL3
 
 
 class GoalsActivity : AppCompatActivity() {
@@ -55,11 +62,15 @@ class GoalsActivity : AppCompatActivity() {
     private lateinit var pendingIntent: PendingIntent
     var pendingGoalAssignId: Long? = null
 
+    private var goal1WasLocked: Boolean? = null
+    private var goal2WasLocked: Boolean? = null
+    private var goal3WasLocked: Boolean? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_goals)
+
         // nfc stuff
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
 
@@ -74,7 +85,7 @@ class GoalsActivity : AppCompatActivity() {
         )
 
         // set up the data base stuff
-        val badgeDb = BadgeDatabase.getInstance(this) // Ensure badges are inserted
+        //val badgeDb = BadgeDatabase.getInstance(this) // Ensure badges are inserted
         val factory = getViewModelFactory(this)
         viewModel = ViewModelProvider(this, factory).get(DataViewModel::class.java)
 
@@ -106,6 +117,8 @@ class GoalsActivity : AppCompatActivity() {
         attachCheckboxGuard(findViewById(R.id.goal1_cb), findViewById(R.id.goal1_title), 1)
         attachCheckboxGuard(findViewById(R.id.goal2_cb), findViewById(R.id.goal2_title), 2)
         attachCheckboxGuard(findViewById(R.id.goal3_cb), findViewById(R.id.goal3_title), 3)
+
+        setBadgeObservers() // Miro added to display badges when they are unlocked
     }
 
     // enable scanning
@@ -253,13 +266,9 @@ class GoalsActivity : AppCompatActivity() {
             val goal = viewModel.getGoalByNfcTag(tagId)
 
             if (goal != null) {
+                Log.d("goalActivity", "Unlock Goal Badge")
                 // Found a goal → mark complete
                 viewModel.incrementCompletion(goal.id)
-
-                //Miro added to display goal
-                if(viewModel.isBadgeLocked(goal.badgeId!!)==false){
-                    Util.UnlockBadgeDialog(goal.id, supportFragmentManager)
-                }
 
                 Toast.makeText(
                     this@GoalsActivity,
@@ -305,4 +314,40 @@ class GoalsActivity : AppCompatActivity() {
         }
     }
 
+    private fun setBadgeObservers(){
+
+        viewModel.goal1BadgeEntity.observe(this) { badge ->
+            val wasLocked = goal1WasLocked
+            val isLocked = badge.isLocked
+            if (wasLocked == true && isLocked == false) {
+                Log.d("goalActivity", "are we checking locked goal 1? ${viewModel.goal1BadgeEntity.value.isLocked}")
+                Util.UnlockBadgeDialog(GOAL1, supportFragmentManager)
+            }
+            goal1WasLocked = isLocked
+        }
+
+        viewModel.goal2BadgeEntity.observe(this) { badge ->
+
+            val wasLocked = goal2WasLocked
+            val isLocked = badge.isLocked
+            if (wasLocked == true && isLocked == false) {
+                Log.d("goalActivity", "are we checking locked goal 3? ${viewModel.goal2BadgeEntity.value.isLocked}")
+                Util.UnlockBadgeDialog(GOAL2, supportFragmentManager)
+            }
+            goal2WasLocked = isLocked
+        }
+
+        viewModel.goal3BadgeEntity.observe(this) { badge ->
+
+            val wasLocked = goal3WasLocked
+            val isLocked = badge.isLocked
+            if (wasLocked == true && isLocked == false) {
+                Log.d("goalActivity", "are we checking locked goal 3? ${viewModel.goal3BadgeEntity.value.isLocked}")
+                Util.UnlockBadgeDialog(GOAL3, supportFragmentManager)
+            }
+            goal3WasLocked = isLocked
+        }
+        //Util.UnlockBadgeDialog(goal.id, supportFragmentManager)
+
+    }
 }
