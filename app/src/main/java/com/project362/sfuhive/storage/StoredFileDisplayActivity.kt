@@ -20,6 +20,9 @@ import com.project362.sfuhive.R
 import com.project362.sfuhive.databinding.ActivityFileDisplayBinding
 import kotlinx.coroutines.launch
 import androidx.core.net.toUri
+import com.project362.sfuhive.database.storage.StoredFileDatabase
+import com.project362.sfuhive.database.storage.StoredFileEntity
+import com.project362.sfuhive.database.storage.StoredFileRepository
 
 class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogFragment.ConfirmationListener {
 
@@ -147,6 +150,8 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
     }
 
     private fun handleSelectedFile(uri: Uri){
+        contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
         val (fileName, fileSize) = getFileDetails(uri)
         val timestamp = System.currentTimeMillis()
 

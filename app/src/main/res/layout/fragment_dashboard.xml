@@ -56,73 +56,6 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/streak_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/important_dates_list"
-        android:textSize="18sp"
-        android:text="@string/streak"/>
-
-    <androidx.constraintlayout.helper.widget.Flow
-        android:id="@+id/flow"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:constraint_referenced_ids="streak_item1, streak_item2, streak_item3, streak_item4, streak_item5, streak_item6, streak_item7"
-        app:flow_firstHorizontalBias="0"
-        app:flow_wrapMode="chain"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/streak_title"/>
-
-
-    <ImageView
-        android:id="@+id/streak_item1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/streak_checkmarks"
-        tools:ignore="MissingConstraints" />
-    <ImageView
-        android:id="@+id/streak_item2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/streak_checkmarks"
-        tools:ignore="MissingConstraints" />
-    <ImageView
-        android:id="@+id/streak_item3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/streak_checkmarks"
-        tools:ignore="MissingConstraints" />
-    <ImageView
-        android:id="@+id/streak_item4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/streak_checkmarks"
-        tools:ignore="MissingConstraints" />
-    <ImageView
-        android:id="@+id/streak_item5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/streak_checkmarks"
-        tools:ignore="MissingConstraints" />
-    <ImageView
-        android:id="@+id/streak_item6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/streak_checkmarks"
-        tools:ignore="MissingConstraints" />
-    <ImageView
-        android:id="@+id/streak_item7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/streak_checkmarks"
-        tools:ignore="MissingConstraints" />
 
     <TextView
         android:id="@+id/file"
@@ -133,7 +66,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/flow"
+        app:layout_constraintTop_toBottomOf="@id/important_dates_list"
         android:textSize="18sp"
         />
 

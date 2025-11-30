@@ -12,8 +12,3 @@ data class RecentFile(
     val date: String,
     val size: String
 )
-
-data class StreakInfo(
-    val date: String,
-    val isComplete: Boolean
-)

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
+import com.project362.sfuhive.database.storage.StoredFileEntity
 
 class FolderAdapter(
     private val onItemClicked: (StoredFileEntity) -> Unit,

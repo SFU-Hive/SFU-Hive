@@ -1,19 +1,20 @@
 package com.project362.sfuhive.Dashboard
 
 import android.content.Context
+import android.os.SystemClock.sleep
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.CheckBox
 import android.widget.TextView
 import com.project362.sfuhive.R
+import com.project362.sfuhive.database.Assignment
 
 
 class ImportantDateAdapter(
     private val context: Context,
-    private val importantDates: MutableList<ImportantDate>,
-    private val onDeleteClicked: (ImportantDate) -> Unit
+    private val importantDates: MutableList<Assignment>,
 ) : BaseAdapter(){
 
     private val inflator: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -27,7 +28,7 @@ class ImportantDateAdapter(
     }
 
     override fun getItemId(pos: Int): Long {
-        return pos.toLong()
+        return importantDates[pos].assignmentId
     }
 
     override fun getView(
@@ -40,29 +41,24 @@ class ImportantDateAdapter(
         val courseImageIdentifier = rowView.findViewById<TextView>(R.id.important_date_list_item_image)
         val courseNameTask = rowView.findViewById<TextView>(R.id.course_name)
         val dateText = rowView.findViewById<TextView>(R.id.date_text)
-        val checkbox = rowView.findViewById<CheckBox>(R.id.checkbox)
 
-        val importantDate = getItem(pos) as ImportantDate
+        val assignment = getItem(pos) as Assignment
 
-        courseNameTask.text = importantDate.name + " " + importantDate.task
-        dateText.text = importantDate.date
-        checkbox.setOnCheckedChangeListener(null)
-        checkbox.isChecked = importantDate.isComplete
+        courseNameTask.text = assignment.assignmentName
+        dateText.text = assignment.dueAt
 
-        if (importantDate.name.isNotEmpty()) {
-            courseImageIdentifier.text = importantDate.name.first().toString()
+        if (assignment.courseName.isNotEmpty()) {
+            courseImageIdentifier.text = assignment.courseName.first().toString()
+        }else{
+            courseImageIdentifier.text = "?"
         }
-
-        checkbox.setOnCheckedChangeListener { _, isChecked ->
-            onDeleteClicked(importantDate)
-        }
-
         return rowView
     }
-    fun updateData(newDates: List<ImportantDate>) {
+    fun updateData(newDates: List<Assignment>) {
         importantDates.clear()
         importantDates.addAll(newDates)
         notifyDataSetChanged()
+        Log.d("xd", "Updated important dates: $newDates")
     }
 
 

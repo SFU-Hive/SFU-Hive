@@ -7,26 +7,28 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.widget.TextView
 import com.project362.sfuhive.R
+import com.project362.sfuhive.database.storage.StoredFileEntity
 
 
 class RecentFilesAdapter(
     private val context: Context,
-    private val recentFiles: List<RecentFile>
+    private var recentFiles: List<StoredFileEntity>?,
+    private val onFileClickListener: (StoredFileEntity) -> Unit
 ) : BaseAdapter() {
 
     private val inflator: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
 
     override fun getCount(): Int {
-        return recentFiles.size
+        return recentFiles?.size ?: 0
     }
 
     override fun getItem(pos: Int): Any? {
-        return recentFiles[pos]
+        return recentFiles?.get(pos)
     }
 
     override fun getItemId(pos: Int): Long {
-        return pos.toLong()
+        return recentFiles?.get(pos)?.id ?: pos.toLong()
     }
 
     override fun getView(
@@ -35,18 +37,36 @@ class RecentFilesAdapter(
         parent: ViewGroup?
     ): View? {
         val view : View
+        val viewHolder: ViewHolder
+
         if(convertView == null){
             view = inflator.inflate(R.layout.item_recent_file, parent, false)
+            viewHolder = ViewHolder(view)
+            view.tag = viewHolder
         } else {
             view = convertView
+            viewHolder = view.tag as ViewHolder
         }
 
-        val recentFile = getItem(pos) as RecentFile
+        val file = getItem(pos) as? StoredFileEntity
+        viewHolder.fileName.text = file?.name ?: "..."
 
-        val fileName = view.findViewById<TextView>(R.id.file_name)
-        fileName.text = recentFile.fileName
+        view.setOnClickListener {
+            file?.let { onFileClickListener(it) }
+        }
+
 
         return view
     }
 
+    fun updateData(newRecentFiles: List<StoredFileEntity>?) {
+        recentFiles = newRecentFiles
+        notifyDataSetChanged()
+    }
+
+
+
+    private class ViewHolder(view: View){
+        val fileName: TextView = view.findViewById(R.id.file_name)
+    }
 }
