@@ -18,20 +18,24 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.api.client.util.DateTime
 import com.google.api.services.calendar.model.Event
+import com.google.api.services.calendar.model.EventDateTime
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.project362.sfuhive.R
 import com.project362.sfuhive.Util
 import com.project362.sfuhive.database.Assignment
 import com.project362.sfuhive.database.DataViewModel
+import com.project362.sfuhive.database.Calendar.*
+import kotlinx.coroutines.*
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
-@Suppress("NewApi") // suppress LocalDate API 26 warnings for minSdk 24
+@Suppress("NewApi")
 class CalendarFragment : Fragment() {
 
     private lateinit var monthYearText: TextView
@@ -47,8 +51,13 @@ class CalendarFragment : Fragment() {
 
     private lateinit var dataViewModel: DataViewModel
     private lateinit var googleHelper: GoogleCalendarHelper
+    private lateinit var customVM: CustomTaskViewModel
+
+    private lateinit var calendarAdapter: CalendarAdapter
 
     private val googleEventsByDate = mutableMapOf<LocalDate, List<Event>>()
+    private var canvasAssignments: List<Assignment> = emptyList()
+    private var customTasks: List<CustomTaskEntity> = emptyList()
 
     private var selectedDate: LocalDate = LocalDate.now()
 
@@ -75,215 +84,264 @@ class CalendarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        /** ViewModel **/
         dataViewModel =
             ViewModelProvider(requireActivity(), Util.getViewModelFactory(requireContext()))
                 .get(DataViewModel::class.java)
 
-        /** UI refs **/
+        val customDb = CustomTaskDatabase.getInstance(requireContext())
+        val customRepo = CustomTaskRepository(customDb.customDao())
+        customVM = ViewModelProvider(requireActivity(), CustomTaskVMFactory(customRepo))
+            .get(CustomTaskViewModel::class.java)
+
+
+        // 🔹 Observe Canvas assignments
+        dataViewModel.allMyAssignmentsLiveData.observe(viewLifecycleOwner) { list ->
+            canvasAssignments = list
+            updateCalendar()
+        }
+
+        // 🔹 Observe Custom tasks
+        customVM.allTasks.observe(viewLifecycleOwner) { list ->
+            customTasks = list
+            updateCalendar()
+        }
+
+        // 🔹 UI setup
         monthYearText = view.findViewById(R.id.tvMonthYear)
         selectedDateText = view.findViewById(R.id.tvSelectedDate)
         calendarRecycler = view.findViewById(R.id.calendarRecycler)
         tasksRecycler = view.findViewById(R.id.tasksRecycler)
-
         btnPrev = view.findViewById(R.id.btnPrevMonth)
         btnNext = view.findViewById(R.id.btnNextMonth)
         btnOverflow = view.findViewById(R.id.btnOverflow)
         fabAddEvent = view.findViewById(R.id.fabAddEvent)
 
-        /** Recycler setup **/
         tasksRecycler.layoutManager = LinearLayoutManager(requireContext())
-        taskAdapter = TaskAdapter(listOf())
+        taskAdapter = TaskAdapter(
+            emptyList(),
+            emptyList()
+        ) {
+            // 🔥 Auto-refresh calendar dots when priority changes
+            updateCalendar()
+        }
         tasksRecycler.adapter = taskAdapter
 
-        /** Month Navigation **/
-        btnPrev.setOnClickListener {
-            selectedDate = selectedDate.minusMonths(1)
-            updateCalendar()
+        calendarAdapter = CalendarAdapter(
+            days = mutableListOf(),
+            assignmentsByDate = mutableMapOf(),
+            selectedDate = selectedDate
+        ) { date ->
+            if (date == selectedDate) {
+                // 👉 Open Day View on second click
+                openDayView(date)
+            } else {
+                // 👉 First click just selects
+                selectedDate = date
+                calendarAdapter.updateSelectedDate(date)
+                showAssignmentsForDay(date)
+            }
         }
 
-        btnNext.setOnClickListener {
-            selectedDate = selectedDate.plusMonths(1)
-            updateCalendar()
-        }
+        calendarRecycler.layoutManager = GridLayoutManager(requireContext(), 7)
+        calendarRecycler.adapter = calendarAdapter
 
-        /** GOOGLE SIGN-IN + REFRESH **/
-        googleHelper = GoogleCalendarHelper(requireActivity()) { events ->
-            handleGoogleEvents(events)
-        }
+        btnPrev.setOnClickListener { selectedDate = selectedDate.minusMonths(1); updateCalendar() }
+        btnNext.setOnClickListener { selectedDate = selectedDate.plusMonths(1); updateCalendar() }
+
+        googleHelper = GoogleCalendarHelper(requireActivity()) { handleGoogleEvents(it) }
         googleHelper.setupGoogleSignIn()
 
-        /** OVERFLOW MENU (Sign-in, Refresh, Sign-out) **/
-        btnOverflow.setOnClickListener {
-            val popup = PopupMenu(requireContext(), btnOverflow)
+        btnOverflow.setOnClickListener { v ->
+            val popup = PopupMenu(requireContext(), v)
             popup.menuInflater.inflate(R.menu.calendar_menu, popup.menu)
 
-            // NEW: Dynamic visibility
-            val account = GoogleSignIn.getLastSignedInAccount(requireContext())
-            popup.menu.findItem(R.id.menu_sign_in).isVisible = (account == null)
-            popup.menu.findItem(R.id.menu_sign_out).isVisible = (account != null)
+            lifecycleScope.launch {
+                val dao = GoogleEventDatabase.getInstance(requireContext()).googleEventDao()
+                val hasCached = withContext(Dispatchers.IO) { dao.getEventCount() > 0 }
+
+                val signedIn = googleHelper.isSignedIn() || hasCached
+
+                popup.menu.findItem(R.id.menu_sign_in).isVisible = !signedIn
+                popup.menu.findItem(R.id.menu_refresh).isVisible = true
+                popup.menu.findItem(R.id.menu_sign_out).isVisible = signedIn
+            }
 
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
 
                     R.id.menu_sign_in -> {
                         signInLauncher.launch(googleHelper.getSignInIntent())
+                        true
                     }
 
                     R.id.menu_refresh -> {
-                        val acc = GoogleSignIn.getLastSignedInAccount(requireContext())
-                        if (acc != null) {
-                            googleHelper.fetchCalendarEvents(acc)
-                        } else {
-                            Toast.makeText(requireContext(), "Please sign in first.", Toast.LENGTH_SHORT).show()
-                        }
+                        googleHelper.refreshEvents()
+                        true
                     }
 
                     R.id.menu_sign_out -> {
                         googleHelper.signOut()
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            GoogleEventDatabase.getInstance(requireContext()).googleEventDao()
+                                .deleteAllEvents()
+                        }
                         googleEventsByDate.clear()
                         updateCalendar()
-                        Toast.makeText(requireContext(), "Signed out.", Toast.LENGTH_SHORT).show()
+                        true
                     }
+
+                    else -> false
                 }
-                true
             }
+
             popup.show()
         }
 
-        /** FAB: Add Canvas Task **/
         fabAddEvent.setOnClickListener {
             startActivity(Intent(requireContext(), TaskScanActivity::class.java))
         }
 
-        /** Draw initial calendar **/
-        updateCalendar()
+        // Canvas
+        dataViewModel.allMyAssignmentsLiveData.observe(viewLifecycleOwner) {
+
+            canvasAssignments = it
+            updateCalendar()
+        }
+
+        customVM.allTasks.observe(viewLifecycleOwner) {
+            customTasks = it
+            updateCalendar()
+        }
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val dao = GoogleEventDatabase.getInstance(requireContext()).googleEventDao()
+            val saved = dao.getAllEvents()
+
+            withContext(Dispatchers.Main) {
+                googleEventsByDate.clear()
+
+                saved.forEach { e ->
+                    val date = LocalDate.parse(e.date)
+                    val event = Event().apply {
+                        id = e.eventId
+                        summary = e.title
+                        start = EventDateTime().setDate(DateTime("${e.date}T00:00:00Z"))
+                    }
+                    googleEventsByDate[date] =
+                        googleEventsByDate.getOrDefault(date, emptyList()) + event
+                }
+                updateCalendar()
+            }
+        }
     }
 
-    /** ---------- UPDATE CALENDAR ---------- **/
     @RequiresApi(Build.VERSION_CODES.O)
     private fun updateCalendar() {
-        dataViewModel.allMyAssignmentsLiveData.observe(viewLifecycleOwner) { assignments ->
-            renderCalendar(assignments)
+
+        val merged = mutableMapOf<LocalDate, MutableList<String>>()
+
+        fun put(date: LocalDate, id: String) {
+            merged.getOrPut(date) { mutableListOf() }.add(id)
         }
-    }
 
-    /** ---------- RENDER CALENDAR UI ---------- **/
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun renderCalendar(assignments: List<Assignment>) {
-
-        val prioritizedMap = mutableMapOf<LocalDate, List<String>>()
-
-        fun parseDateFlexible(raw: String): LocalDate? {
-            return try {
-                LocalDate.parse(raw, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-            } catch (_: Exception) {
-                try {
-                    LocalDate.parse(raw.substring(0, 10))
-                } catch (_: Exception) {
-                    null
-                }
+        // CANVAS — store REAL assignmentId
+        canvasAssignments.forEach {
+            if (it.dueAt.length >= 10) {
+                val d = LocalDate.parse(it.dueAt.substring(0, 10))
+                put(d, it.assignmentId.toString())
             }
         }
 
-        /** Canvas tasks **/
-        for (assignment in assignments) {
-            val date = parseDateFlexible(assignment.dueAt)
-            if (date != null) {
-                val diff = date.toEpochDay() - selectedDate.toEpochDay()
-                val priority = when (diff) {
-                    0L -> "high"
-                    -1L, 1L -> "medium"
-                    else -> "low"
-                }
-                val current = prioritizedMap[date] ?: listOf()
-                prioritizedMap[date] = current + priority
+        // GOOGLE — store REAL event priority ID
+        googleEventsByDate.forEach { (d, events) ->
+            events.forEach { e ->
+                val id = "google_${e.id}"
+                put(d, id)
             }
         }
 
-        /** Google Events **/
-        for ((date, events) in googleEventsByDate) {
-            val diff = date.toEpochDay() - selectedDate.toEpochDay()
-            val priority = when (diff) {
-                0L -> "high"
-                -1L, 1L -> "medium"
-                else -> "low"
+        // CUSTOM — store REAL task priority ID
+        customTasks.forEach {
+            if (it.date.length == 10) {
+                val d = LocalDate.parse(it.date)
+                val id = "custom_${it.id}"
+                put(d, id)
             }
-            val current = prioritizedMap[date] ?: listOf()
-            prioritizedMap[date] = current + List(events.size) { priority }
         }
 
-        /** Build Month Grid **/
-        val yearMonth = YearMonth.from(selectedDate)
-        val daysInMonth = yearMonth.lengthOfMonth()
-        val firstDay = selectedDate.withDayOfMonth(1)
-        val shift = firstDay.dayOfWeek.value % 7
+        val ym = YearMonth.from(selectedDate)
+        val first = selectedDate.withDayOfMonth(1)
+        val shift = first.dayOfWeek.value % 7
 
         val days = MutableList(shift) { null } +
-                (1..daysInMonth).map { selectedDate.withDayOfMonth(it) }
+                (1..ym.lengthOfMonth()).map { selectedDate.withDayOfMonth(it) }
 
         monthYearText.text = selectedDate.format(DateTimeFormatter.ofPattern("MMMM yyyy"))
 
-        val adapter = CalendarAdapter(
-            days = days,
-            assignmentsByDate = prioritizedMap,
-            selectedDate = selectedDate
-        ) { date ->
-
-            if (date == selectedDate) {
-                val intent = Intent(requireContext(), DayViewActivity::class.java)
-                intent.putExtra("selected_date", date.toString())
-                GoogleEventCache.events[date.toString()] =
-                    googleEventsByDate[date] ?: listOf()
-                startActivity(intent)
-            } else {
-                selectedDate = date
-                (calendarRecycler.adapter as CalendarAdapter).updateSelectedDate(date)
-                showAssignmentsForDay(date)
-            }
-        }
-
-        calendarRecycler.layoutManager = GridLayoutManager(requireContext(), 7)
-        calendarRecycler.adapter = adapter
+        calendarAdapter.setDays(days)
+        calendarAdapter.updateAssignments(merged)
+        calendarAdapter.updateSelectedDate(selectedDate)
 
         showAssignmentsForDay(selectedDate)
     }
 
-    /** ---------- TASKS BELOW CALENDAR ---------- **/
     @RequiresApi(Build.VERSION_CODES.O)
     private fun showAssignmentsForDay(date: LocalDate) {
 
         selectedDateText.text = date.format(DateTimeFormatter.ofPattern("MMM dd"))
 
-        val canvasAssignments = dataViewModel.allMyAssignmentsLiveData.value?.filter {
-            it.dueAt.startsWith(date.toString())
-        }.orEmpty()
 
-        val googleAssignments = googleEventsByDate[date]?.map {
-            Assignment(
-                assignmentId = 0L,
-                courseName = "Google Calendar",
-                assignmentName = it.summary ?: "Untitled Event",
-                dueAt = date.toString(),
-                pointsPossible = 0.0
+        val assignmentsForDay = mutableListOf<Assignment>()
+        val priorityIds = mutableListOf<String>()
+
+        // Canvas
+        canvasAssignments.filter { it.dueAt.startsWith(date.toString()) }.forEach {
+            assignmentsForDay.add(it)
+            priorityIds.add(it.assignmentId.toString())
+        }
+
+        // Google
+        googleEventsByDate[date]?.forEach { e ->
+            val id = "google_${e.id}"
+            assignmentsForDay.add(
+                Assignment(
+                    assignmentId = id.hashCode().toLong(),
+                    courseName = "Google Calendar",
+                    assignmentName = e.summary ?: "Untitled Event",
+                    dueAt = date.toString(),
+                    pointsPossible = 0.0
+                )
             )
-        }.orEmpty()
+            priorityIds.add(id)
+        }
 
-        taskAdapter.update(canvasAssignments + googleAssignments)
+        // Custom
+        customTasks.filter { it.date == date.toString() }.forEach {
+            val id = "custom_${it.id}"
+            assignmentsForDay.add(
+                Assignment(
+                    assignmentId = id.hashCode().toLong(),
+                    courseName = "Task",
+                    assignmentName = it.title,
+                    dueAt = it.date,
+                    pointsPossible = 0.0
+                )
+            )
+            priorityIds.add(id)
+        }
+
+        taskAdapter.update(assignmentsForDay, priorityIds)
     }
 
-    /** ---------- GOOGLE EVENTS ---------- **/
     @RequiresApi(Build.VERSION_CODES.O)
     private fun handleGoogleEvents(events: List<Event>) {
         googleEventsByDate.clear()
 
-        for (event in events) {
-            val start = event.start?.dateTime ?: event.start?.date
-            if (start != null) {
-                val date = LocalDate.parse(start.toString().substring(0, 10))
-                googleEventsByDate[date] =
-                    googleEventsByDate.getOrDefault(date, listOf()) + event
-            }
+        events.forEach { e ->
+            val start = e.start?.dateTime ?: e.start?.date ?: return@forEach
+            val d = LocalDate.parse(start.toString().substring(0, 10))
+            googleEventsByDate[d] =
+                googleEventsByDate.getOrDefault(d, emptyList()) + e
         }
 
         updateCalendar()

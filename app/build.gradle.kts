@@ -24,15 +24,41 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Release signing config
+    signingConfigs {
+        create("release") {
+            // Points to keystore in project root
+            storeFile = file("../release-key.jks")
+
+            // These values are loaded from ~/.gradle/gradle.properties
+            storePassword = project.findProperty("RELEASE_STORE_PASSWORD") as String?
+            keyAlias = project.findProperty("RELEASE_KEY_ALIAS") as String?
+            keyPassword = project.findProperty("RELEASE_KEY_PASSWORD") as String?
+        }
+    }
+
     buildTypes {
         release {
+            //Only apply signing if passwords exist
+            if (
+                project.findProperty("RELEASE_STORE_PASSWORD") != null &&
+                project.findProperty("RELEASE_KEY_PASSWORD") != null
+            ) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
+
+        debug {
+            //debug builds stay same
+        }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -86,6 +112,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-config")
 
     // for chrome custom tabs
     implementation("androidx.browser:browser:1.9.0")
@@ -119,7 +146,6 @@ dependencies {
     implementation("com.google.http-client:google-http-client-gson:1.43.3")
     implementation("com.google.api-client:google-api-client-android:1.33.0")
     implementation("com.google.http-client:google-http-client-android:1.44.1")
-    // NOTE: this version tag must have "-1.34.0" suffix — older tags don't resolve correctly
     implementation("com.google.apis:google-api-services-calendar:v3-rev411-1.25.0")
 
     // youtube video player

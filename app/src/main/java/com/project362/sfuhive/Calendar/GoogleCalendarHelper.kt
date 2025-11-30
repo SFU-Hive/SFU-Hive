@@ -2,9 +2,7 @@ package com.project362.sfuhive.Calendar
 
 import android.app.Activity
 import android.content.Intent
-import android.os.Build
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -15,9 +13,9 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.calendar.CalendarScopes
 import com.google.api.services.calendar.model.Event
-import com.google.api.client.util.DateTime
+import com.project362.sfuhive.database.Calendar.GoogleEventDatabase
+import com.project362.sfuhive.database.Calendar.GoogleEventEntity
 import kotlinx.coroutines.*
-import java.time.LocalDate
 
 class GoogleCalendarHelper(
     private val activity: Activity,
@@ -28,7 +26,6 @@ class GoogleCalendarHelper(
     }
 
     private lateinit var googleSignInClient: GoogleSignInClient
-    fun getSignInIntent(): Intent = googleSignInClient.signInIntent
 
     fun setupGoogleSignIn() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -39,9 +36,10 @@ class GoogleCalendarHelper(
         googleSignInClient = GoogleSignIn.getClient(activity, gso)
     }
 
-    fun signIn() {
-        val signInIntent = googleSignInClient.signInIntent
-        activity.startActivityForResult(signInIntent, RC_SIGN_IN)
+    fun getSignInIntent(): Intent = googleSignInClient.signInIntent
+
+    fun isSignedIn(): Boolean {
+        return GoogleSignIn.getLastSignedInAccount(activity) != null
     }
 
     fun signOut() {
@@ -65,6 +63,15 @@ class GoogleCalendarHelper(
         }
     }
 
+    fun refreshEvents() {
+        val account = GoogleSignIn.getLastSignedInAccount(activity)
+        if (account != null) {
+            fetchCalendarEvents(account)
+        } else {
+            Toast.makeText(activity, "Please sign in first", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     fun fetchCalendarEvents(account: GoogleSignInAccount) {
         val credential = GoogleAccountCredential.usingOAuth2(
             activity, listOf(CalendarScopes.CALENDAR_READONLY)
@@ -80,17 +87,35 @@ class GoogleCalendarHelper(
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val events = service.events().list("primary")
-                    .setMaxResults(2500) // Google Calendar limit
+                    .setMaxResults(2500)
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .execute()
-                val items = events.items
+
+                val items = events.items ?: emptyList()
+
+                val dao = GoogleEventDatabase.getInstance(activity).googleEventDao()
+                dao.deleteAllEvents()
+
+                val entities = items.mapNotNull { event ->
+                    val start = event.start?.dateTime ?: event.start?.date ?: return@mapNotNull null
+                    val dateStr = start.toString().substring(0, 10)
+
+                    GoogleEventEntity(
+                        eventId = event.id ?: "",
+                        title = event.summary ?: "Untitled Event",
+                        date = dateStr,
+                        startTime = event.start.dateTime?.toString(),
+                        endTime = event.end?.dateTime?.toString()
+                    )
+                }
+
+                dao.insertEvents(entities)
 
                 withContext(Dispatchers.Main) {
                     onEventsFetched(items)
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
                 withContext(Dispatchers.Main) {
                     Toast.makeText(activity, "Failed to fetch Google events", Toast.LENGTH_SHORT).show()
                 }
