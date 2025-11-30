@@ -95,6 +95,18 @@ class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
         }
     }
 
+    fun getAllBadgesState(): Flow<List<BadgeEntity>>{
+
+        return badgeDatabaseDao.getAllBadges()
+
+    }
+
+    fun getBadgeFlow(id:Long):Flow<BadgeEntity>{
+
+        return badgeDatabaseDao.getBadgeFlow(id)
+
+    }
+
 
 
     // This section for the remote database

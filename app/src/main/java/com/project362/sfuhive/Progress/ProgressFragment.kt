@@ -14,6 +14,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.Progress.Badges.BadgeActivity
@@ -50,7 +51,7 @@ class ProgressFragment : Fragment() {
         progressViewModel=ProgressViewModel()
         var vmFactory =  Util.getViewModelFactory(requireActivity())
         repoVM=ViewModelProvider(this, vmFactory).get(DataViewModel::class.java)
-        initBadgeStatus()
+        //initBadgeStatus()
 
         val badgesTitleView: TextView =view.findViewById<TextView>(R.id.badges_title)
         val rewardsTitleView: TextView =view.findViewById<TextView>(R.id.rewards_title)
@@ -93,7 +94,7 @@ class ProgressFragment : Fragment() {
 
         val rewardActivityVM=RewardActivityViewModel(progressViewModel.getAllPinnedRewards())
 
-        val badgeActivityVM = BadgeActivityViewModel(badges.mutableBadges)
+        val badgeActivityVM = BadgeActivityViewModel(badges.getAllBadges(), repoVM)
 
         // Note: RewardsVM isn't needed here I'm just using it to reuse other objects I've written already
         // sorry 'bout it -Miro
@@ -117,18 +118,13 @@ class ProgressFragment : Fragment() {
 
         pinnedBadgesView.layoutManager = GridLayoutManager(context, 3)
         pinnedBadgesView.adapter=pinnedBadgesAdapter
-
-
-
-
         return view
     }
 
     override fun onResume() {
         super.onResume()
-        initBadgeStatus()
+        //initBadgeStatus()
     }
-
 
     private fun registerBadgeActivity(): ActivityResultLauncher<Intent> {
         val result =registerForActivityResult(
@@ -175,8 +171,8 @@ class ProgressFragment : Fragment() {
     private fun initBadgeStatus() {
         println("Loading badges...")
         for (badge in badges.getAllBadges()) {
-            val savedState = repoVM.isBadgeLocked(badge.getId())
-            badge.setIsLocked(savedState)
+            //val savedState = repoVM.isBadgeLocked(badge.getId())
+            badge.badgeEntity = repoVM.getBadgeFlow(badge.getId()).asLiveData()
         }
     }
 }

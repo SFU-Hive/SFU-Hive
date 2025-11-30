@@ -23,4 +23,7 @@ interface BadgeDatabaseDao {
     @Query("UPDATE badge_table SET is_locked=:isLocked WHERE badgeId = :id")
     fun updateIsLocked(id : Long, isLocked: Boolean)
 
+    @Query("SELECT * FROM badge_table WHERE badgeId = :key LIMIT 1")
+    fun getBadgeFlow(key: Long): Flow<BadgeEntity>
+
 }
