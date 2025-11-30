@@ -55,4 +55,7 @@
     <string name="rename">Rename</string>
     <string name="name_of_folder">Name of Folder</string>
     <string name="cmpt_110_assignments">CMPT 110 Assignments</string>
+    <string name="my_calendar">My Calendar</string>
+    <string name="wellness">Wellness</string>
+    <string name="progression">Progression</string>
 </resources>
