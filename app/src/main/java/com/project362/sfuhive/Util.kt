@@ -445,26 +445,28 @@ object Util {
         val goalDatabase = GoalDatabase.getInstance(context)
         val goalDatabaseDao = goalDatabase.goalDatabaseDao()
 
+        // streaks database
+        val streakDatabase = StreakDatabase.getInstance(context)
+        val streakDatabaseDao = streakDatabase.streakDatabaseDao
+
+
         repository = DataRepository(
             databaseDao,
             fileDatabaseDao,
             remoteDatabase,
             badgeDatabaseDao,
-            goalDatabaseDao
+            goalDatabaseDao,
+            streakDatabaseDao
         )
 
-
-    fun formatDoubleToText(value: Double): String {
-        return String.format("%.1f", value)
-    }
-
-// streaks database
-        val streakDatabase = StreakDatabase.getInstance(context)
-        val streakDatabaseDao = streakDatabase.streakDatabaseDao
 
         repository = DataRepository(databaseDao, fileDatabaseDao, remoteDatabase,badgeDatabaseDao, goalDatabaseDao, streakDatabaseDao)
         viewModelFactory = DataViewModelFactory(repository)
         return viewModelFactory
+    }
+
+    fun formatDoubleToText(value: Double): String {
+        return String.format("%.1f", value)
     }
     fun updateCoinTotal(context: Context, newTotal: Long?) {
         // add name to prefs
