@@ -106,9 +106,8 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
             Log.d("ViewModel", "Starting goal initialization...")
 
             // Ensure badges exist
-            val badgeDb = BadgeDatabase.getInstance(context)
             for (id in 1..3L) {
-                val badge = badgeDb.badgeDatabaseDao.getBadge(id)
+                val badge = repository.getBadge(id)
                 Log.d("ViewModel", "Badge $id exists: ${badge != null}")
             }
 
