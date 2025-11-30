@@ -50,6 +50,7 @@ class BadgeAdapter(
         val lifeCycleOwner=context as LifecycleOwner
         badge.badgeEntity.observe(lifeCycleOwner, Observer {
             holder.badgeIconView.setImageResource(badge.getIconId())
+            viewModel.setFeaturedBadge(badge)
         })
     }
 
