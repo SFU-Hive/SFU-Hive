@@ -1,24 +1,37 @@
 package com.project362.sfuhive.Progress.Badges
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
+import com.project362.sfuhive.database.Badge.BadgeEntity
+import com.project362.sfuhive.database.DataViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlin.collections.mutableListOf
 
 class BadgeActivityViewModel(
-    private var allBadges: MutableLiveData<List<Badge>>
+    private var allBadges:List<Badge>,
+    private var dataViewModel : DataViewModel
+
 ):ViewModel(){
+    //public var badgeStates : MutableLiveData<List<BadgeEntity>> =
 
-    public lateinit var mutableBadges :  MutableList<MutableLiveData<Badge>>
     init{
-        mutableBadges = mutableListOf<MutableLiveData<Badge>>()
-        allBadges.value.forEach { badge ->
+        allBadges.forEach { badge ->
+            val id = badge.getId()
+            var flow = dataViewModel.getBadgeFlow(id)
+            badge.badgeEntity = flow.asLiveData()
 
-            var liveDataBadge = MutableLiveData<Badge>(badge)
-            mutableBadges.add(liveDataBadge)
+            if(flow == null){
+                Log.d("BadgeActivityViewModel", "Flow is NULL ")
+            }
+
+            Log.d("BadgeActivityViewModel", "Badge entity == ${flow.asLiveData()}")
+
         }
     }
-    public var featuredBadge: MutableLiveData<Badge> = MutableLiveData<Badge>(allBadges.value.get(1))
+    public var featuredBadge: MutableLiveData<Badge> = MutableLiveData<Badge>(allBadges.get(1))
 
 
     public fun getFeaturedBadge(): Badge{
@@ -31,13 +44,9 @@ class BadgeActivityViewModel(
 
     }
 
-    public fun setBadgeList(theList : List<Badge>){
-        allBadges = MutableLiveData<List<Badge>>(theList)
-
-    }
 
     public fun getBadgeList(): List<Badge>{
-        return allBadges.value
+        return allBadges
     }
 
 

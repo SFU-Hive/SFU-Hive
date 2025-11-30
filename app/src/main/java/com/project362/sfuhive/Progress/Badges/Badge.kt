@@ -1,6 +1,9 @@
 package com.project362.sfuhive.Progress.Badges
 
 import android.graphics.drawable.Drawable
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.project362.sfuhive.database.Badge.BadgeEntity
 
 data class Badge(
     private val id :  Long,
@@ -9,17 +12,19 @@ data class Badge(
     private val iconLocked :  Int, // this is the id Int of the R.drawable.lockedBadgeIcon
     private val description :  String) {
 
-    private var isLocked: Boolean = true
+    public var badgeEntity: LiveData<BadgeEntity> = MutableLiveData<BadgeEntity>(null)
 
+    public var iconID :MutableLiveData<Int> = MutableLiveData<Int>(iconLocked)
     private fun updateProgress(){
 
     }
 
     public fun getIconId(): Int{
-        if(isLocked == true){
-            return iconLocked
+        var theId= iconLocked
+        if(badgeEntity.value?.isLocked == false){
+            theId= iconComplete
         }
-        return iconComplete
+        return theId
     }
 
     public fun getDescription():String{
@@ -29,8 +34,10 @@ data class Badge(
 
 
     public fun isCompleteStatus():Boolean{
-
-        return !isLocked
+        if(badgeEntity.value?.isLocked== false){
+            return true
+        }
+        return false
     }
 
     // Call this function to run
@@ -55,13 +62,14 @@ data class Badge(
         return id
     }
 
-    public fun setIsLocked(newState: Boolean?){
-        if(newState != null){
-            isLocked=newState
-        }else{
-            println("ERROR: new state is null!")
-        }
-    }
+//    public fun setIsLocked(newState: Boolean?){
+//        if(newState != null){
+//
+//            //isLocked.value=newState
+//        }else{
+//            println("ERROR: new state is null!")
+//        }
+//    }
 
     public fun getUnlockedIcon(): Int{
         return iconComplete

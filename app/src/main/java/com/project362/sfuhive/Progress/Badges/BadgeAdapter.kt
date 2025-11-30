@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.observe
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
 import okhttp3.internal.notify
@@ -37,24 +38,23 @@ class BadgeAdapter(
         holder: ViewHolder,
         position: Int
     ) {
-        var badge = viewModel.mutableBadges.get(position)
+        var badge = viewModel.getBadgeList().get(position)
 
-        holder.badgeIconView.setImageResource(badge.value.getIconId())
-        holder.badgeTitleView.text = badge.value.getTitle()
+        holder.badgeIconView.setImageResource(badge.getIconId()) // set observer for this
+        holder.badgeTitleView.text = badge.getTitle()
         holder.view.setOnClickListener {
-            println("setting featured badge to {${badge.value.getTitle()}}")
-            viewModel.setFeaturedBadge(badge.value)
+            println("setting featured badge to {${badge.getTitle()}}")
+            viewModel.setFeaturedBadge(badge)
             //Change theme here
         }
         val lifeCycleOwner=context as LifecycleOwner
-        badge.observe(lifeCycleOwner, Observer {
-            holder.badgeIconView.setImageResource(badge.value.getIconId())
-            holder.badgeTitleView.text = badge.value.getTitle()
+        badge.badgeEntity.observe(lifeCycleOwner, Observer {
+            holder.badgeIconView.setImageResource(badge.getIconId())
         })
     }
 
     override fun getItemCount(): Int {
-        return viewModel.mutableBadges.size
+        return viewModel.getBadgeList().size
     }
 
 
@@ -68,6 +68,9 @@ class BadgeAdapter(
         init {
             badgeIconView = view.findViewById<ImageView>(R.id.icon_view)
             badgeTitleView= view.findViewById<TextView>(R.id.badge_title_view)
+
+            // observe live badge data here
+
         }
 
     }

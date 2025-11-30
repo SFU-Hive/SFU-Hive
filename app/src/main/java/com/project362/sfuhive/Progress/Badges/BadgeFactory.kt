@@ -39,7 +39,7 @@ class BadgeFactory( ){
             "Bank Breaker",
             R.drawable.bank_breaker_badge,
             R.drawable.badge_locked,
-            "Try breaking the bank!")
+            "Try spending all your coins!")
 
     )
 
