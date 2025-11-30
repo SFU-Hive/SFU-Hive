@@ -152,21 +152,34 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
     }
 
     // daily reset
-    fun resetDailyGoalsIfNeeded() = viewModelScope.launch {
-        val todayStartMillis = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
+    fun resetDailyGoalsIfNeeded() {
+        viewModelScope.launch {
+            val today = getTodayEpochDay()
 
-        repository.getAllGoals().first().forEach { goal ->
-            if (goal.lastCompletionDate != todayStartMillis) {
-                // reset completion count and update lastCompletionDate
-                repository.updateLastCompletionDate(goal.id, todayStartMillis)
-                repository.updateCompletionCount(goal.id, 0)
-            }
+            repository.getAllGoals()
+                .first()   // only run once when screen opens
+                .forEach { goal ->
+
+                    val lastDay = epochDay(goal.lastCompletionDate)
+
+                    if (lastDay != today) {
+                        Log.d("DailyReset", "Resetting goal ${goal.id}")
+                        repository.updateCompletionCount(goal.id, 0)
+                        repository.updateLastCompletionDate(goal.id, currentMillis())
+                    }
+                }
         }
+    }
+
+    // utils for date
+    fun currentMillis(): Long = System.currentTimeMillis()
+
+    fun epochDay(millis: Long): Long {
+        return millis / (1000L * 60 * 60 * 24)  // total days since 1970
+    }
+
+    fun getTodayEpochDay(): Long {
+        return epochDay(System.currentTimeMillis())
     }
 
     fun updateNfcTag(goalId: Long, tag: String?) {
