@@ -1,6 +1,8 @@
 package com.project362.sfuhive.storage
 
 import androidx.lifecycle.*
+import com.project362.sfuhive.database.storage.StoredFileEntity
+import com.project362.sfuhive.database.storage.StoredFileRepository
 
 class StoredFileViewModel(private val repository: StoredFileRepository) : ViewModel() {
 

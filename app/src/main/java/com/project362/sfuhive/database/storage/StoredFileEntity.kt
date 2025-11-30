@@ -1,8 +1,9 @@
-package com.project362.sfuhive.storage
+package com.project362.sfuhive.database.storage
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.project362.sfuhive.storage.FileSource
 
 @Entity(tableName = "stored_file_table")
 data class StoredFileEntity(
@@ -32,4 +33,4 @@ data class StoredFileEntity(
     @ColumnInfo(name = "stored_file_source")
     var source: FileSource = FileSource.USER_UPLOAD,
 
-)
+    )

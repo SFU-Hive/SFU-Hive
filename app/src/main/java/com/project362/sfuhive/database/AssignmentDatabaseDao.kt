@@ -24,4 +24,7 @@ interface AssignmentDatabaseDao {
 
     @Query("SELECT DISTINCT course_id_column FROM assignment_table")
     fun getUniqueCourseIds(): Flow<List<Long>>
+
+    @Query("SELECT * FROM assignment_table WHERE assignmentId IN (:assignmentIds)")
+    fun getAssignmentsByAssignmentId(assignmentIds: List<Long>): Flow<List<Assignment>>
 }

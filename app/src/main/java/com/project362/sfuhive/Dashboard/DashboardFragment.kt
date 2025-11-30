@@ -1,7 +1,9 @@
 package com.project362.sfuhive.Dashboard
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,17 +11,21 @@ import android.widget.GridView
 import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.project362.sfuhive.R
 import com.project362.sfuhive.storage.StoredFileDisplayActivity
+import com.project362.sfuhive.database.storage.StoredFileEntity
+import androidx.core.net.toUri
 
 class DashboardFragment : Fragment() {
 
     private val viewModel: DashboardViewModel by viewModels()
-    private lateinit var streakIcons: Array<ImageView?>
 
     private lateinit var importantDateAdapter: ImportantDateAdapter
+    private lateinit var recentFilesAdapter: RecentFilesAdapter
+
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -36,21 +42,14 @@ class DashboardFragment : Fragment() {
         val showMoreFilesButton = view.findViewById<ImageView>(R.id.more_files_arrow)
 
 
-        streakIcons = arrayOf(
-            view.findViewById(R.id.streak_item1),
-            view.findViewById(R.id.streak_item2),
-            view.findViewById(R.id.streak_item3),
-            view.findViewById(R.id.streak_item4),
-            view.findViewById(R.id.streak_item5),
-            view.findViewById(R.id.streak_item6),
-            view.findViewById(R.id.streak_item7)
-        )
+        importantDateAdapter = ImportantDateAdapter(requireContext(), mutableListOf())
 
-        importantDateAdapter = ImportantDateAdapter(requireContext(), mutableListOf()) {
-            viewModel.deleteImportantDate(it)
+        recentFilesAdapter = RecentFilesAdapter(requireContext(), null){ file ->
+            openFile(file)
         }
 
         importantDatesListView.adapter = importantDateAdapter
+        recentFilesGridView.adapter = recentFilesAdapter
 
         viewModel.welcomeMessage.observe(viewLifecycleOwner) { message ->
             welcomeMessageView.text = message
@@ -61,26 +60,36 @@ class DashboardFragment : Fragment() {
         }
 
         viewModel.recentFiles.observe(viewLifecycleOwner) { files ->
-            recentFilesGridView.adapter = RecentFilesAdapter(requireContext(), files)
+            recentFilesAdapter.updateData(files)
         }
 
-
-        viewModel.streakStatus.observe(viewLifecycleOwner) { statusList ->
-            statusList.forEachIndexed { index, isComplete ->
-                if(index < streakIcons.size){
-                    val icon = when (isComplete) {
-                        true -> R.drawable.ic_checkmark
-                        false -> R.drawable.ic_cross
-                        null -> R.drawable.ic_ring
-                    }
-                    streakIcons[index]?.setImageResource(icon)
-                }
-            }
-        }
 
         showMoreFilesButton.setOnClickListener {
             val intent = Intent(requireContext(), StoredFileDisplayActivity::class.java)
             startActivity(intent)
         }
+    }
+
+    private fun openFile(file: StoredFileEntity){
+        val intent = Intent(Intent.ACTION_VIEW)
+        val uri = file.url?.toUri()
+        if (uri == null) {
+            Toast.makeText(requireContext(), "Cannot open file", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val mimeType = requireContext().contentResolver.getType(uri)
+        intent.setDataAndType(uri, mimeType)
+        Log.d("xd", "Opening file with URI: $uri")
+        Log.d("xd", "File type: ${file.type}")
+
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+        try {
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Error opening file", Toast.LENGTH_SHORT).show()
+        }
+
+
     }
 }

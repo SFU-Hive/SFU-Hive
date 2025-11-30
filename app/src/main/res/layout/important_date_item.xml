@@ -40,16 +40,5 @@
         android:textColor="@color/black"
         />
 
-    <CheckBox
-        android:id="@+id/checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        />
-
-
-
-
-
 
 </RelativeLayout>
