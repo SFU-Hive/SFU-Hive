@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import java.util.Calendar
 
+// Note: Streaks feature was not implemented due to time constraints
 class StreakActivity : AppCompatActivity() {
     private lateinit var repoVM : DataViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,16 +34,19 @@ class StreakActivity : AppCompatActivity() {
 
         repoVM=ViewModelProvider(this, vmFactory).get(DataViewModel::class.java)
 
-
+        // Code written to test out StreakDatabase functionality
         val theDate=Calendar.getInstance()
         val date2022=Calendar.getInstance()
         val date2017=Calendar.getInstance()
         val year = theDate.get(Calendar.YEAR)
         val month = theDate.get(Calendar.MONTH)
         val day = theDate.get(Calendar.DAY_OF_MONTH)
+
+        // get instances of different years
         date2022.set(Calendar.YEAR,2022)
         date2017.set(Calendar.YEAR,2017)
 
+        // get instances of different dates to populate database
         repoVM.addStreak("login",theDate)
         repoVM.addStreak("login",date2022)
         repoVM.addStreak("login",date2017)
