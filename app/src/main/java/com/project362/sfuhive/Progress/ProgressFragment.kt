@@ -29,82 +29,78 @@ import com.project362.sfuhive.Progress.Streaks.StreakActivity
 import com.project362.sfuhive.Util
 import com.project362.sfuhive.database.DataViewModel
 
+// Progress Fragment displays all of the rewards and badges that are possible to redeem
+// Note: Streaks was supposed to be part of this but we ran out of time to implement it
 class ProgressFragment : Fragment() {
     private lateinit var progressViewModel : ProgressViewModel
 
-    private lateinit var repoVM : DataViewModel
-    private lateinit var badgeActivity: BadgeActivity
-    private lateinit var rewardsActivity: RewardActivity
-    //private lateinit var streaksActivity: StreakActivity
+    private lateinit var repoVM : DataViewModel // view model to access all of the room databases
+    private lateinit var badgeActivity: BadgeActivity // holds an instance of BadgeActivity()
+    private lateinit var rewardsActivity: RewardActivity // holds an instance of RewardActivity()
+    private lateinit var badgeResult: ActivityResultLauncher<Intent> // holds result for badgeActivity
+    private lateinit var rewardResult: ActivityResultLauncher<Intent> // holds result for rewardActivity
 
-    private lateinit var badgeResult: ActivityResultLauncher<Intent>
-    private lateinit var rewardResult: ActivityResultLauncher<Intent>
-    //private lateinit var streakResult: ActivityResultLauncher<Intent>
+    private var rewards = RewardFactory() // The object holding all types of rewards
+    private var badges = BadgeFactory() //  The object holding all types of badges
 
-    private var rewards = RewardFactory()
-    private var badges = BadgeFactory()
-
-
+    // Creates the view for Progress Fragment
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        // inflate fragment
         val view=inflater.inflate(R.layout.fragment_progress, container, false)
+
+        // initialize the ViewModels needed for ProgressFragment
         progressViewModel=ProgressViewModel()
         var vmFactory =  Util.getViewModelFactory(requireActivity())
-        repoVM=ViewModelProvider(this, vmFactory).get(DataViewModel::class.java)
-        //initBadgeStatus()
+        repoVM=ViewModelProvider(this, vmFactory).get(DataViewModel::class.java) // RepoVM is the ViewModel that is used to access data at the data layer
 
-        val badgesTitleView: TextView =view.findViewById<TextView>(R.id.badges_title)
-        val rewardsTitleView: TextView =view.findViewById<TextView>(R.id.rewards_title)
-        //val streaksTitleView: TextView =view.findViewById<TextView>(R.id.streaks_title)
-        badgeActivity = BadgeActivity()
-        rewardsActivity= RewardActivity()
-        //streaksActivity= StreakActivity()
 
-        val badgeIntent = Intent(activity, BadgeActivity::class.java)
-        val rewardIntent = Intent(activity, RewardActivity::class.java)
-        //val streakIntent = Intent(activity, StreakActivity::class.java)
+        val badgesTitleView: TextView =view.findViewById<TextView>(R.id.badges_title) // get access to the "Badge" title of our fragment layout
+        val rewardsTitleView: TextView =view.findViewById<TextView>(R.id.rewards_title) // get access to the "Reward" title of our fragment layout
 
+        badgeActivity = BadgeActivity() // get an instance of our badge activity for later launch
+        rewardsActivity= RewardActivity() // get an instance of our reward activity for later launch
+
+        val badgeIntent = Intent(activity, BadgeActivity::class.java) // Create the intent used to launch our Badge Activity
+        val rewardIntent = Intent(activity, RewardActivity::class.java) // Create the intent to launch our Reward Activity
+
+        // Register both activities in case we need to get a result from them
         badgeResult=registerBadgeActivity()
         rewardResult=registerRewardActivity()
-        //streakResult=registerStreakActivity()
 
-        // Set onClickListener on all titles to change the fragment to the fragment associated with it
-
+        // Set onClickListener on all badge title to launch the "BadgeActivity" on "Badges" title click
         badgesTitleView.setOnClickListener {
             // on click take user to all the badges
             badgeResult.launch(badgeIntent)
-
         }
 
+        // Set onClickListener on the reward title to launch the "RewardActivity" on "Rewards" title click
         rewardsTitleView.setOnClickListener {
             // on click take user to all the rewards
             rewardResult.launch(rewardIntent)
         }
 
-//        streaksTitleView.setOnClickListener {
-//            // on click take user to all the streaks
-//            streakResult.launch(streakIntent)
-//        }
 
-
+        // Access the Badge RecyclerView grid to populate with all possible badges
         val pinnedBadgesView: RecyclerView=view.findViewById<RecyclerView>(R.id.pinned_badges)
 
-
+        // Access the Reward RecyclerView grid to populate with all possible rewards
         val pinnedRewardsView: RecyclerView=view.findViewById<RecyclerView>(R.id.pinned_rewards)
 
+        //Get an instance of the rewardActivity View model to use with the RecyclerView adapter
         val rewardActivityVM=RewardActivityViewModel(progressViewModel.getAllPinnedRewards())
 
+        //Get an instance of the badgeActivity View model to use with the RecyclerView adapter
         val badgeActivityVM = BadgeActivityViewModel(badges.getAllBadges(), repoVM)
 
-        // Note: RewardsVM isn't needed here I'm just using it to reuse other objects I've written already
-        // sorry 'bout it -Miro
+        // create the adapter for our Rewards RecyclerView
         val pinnedRewardsAdapter = context?.let {
             RewardAdapter(it,
                 rewards.getAllRewards(),
                 rewardActivityVM)
         }
 
-
+        // create the adapter for our Badge RecyclerView
         val pinnedBadgesAdapter = context?.let {
             BadgeAdapter(
                 it,
@@ -113,17 +109,14 @@ class ProgressFragment : Fragment() {
             )
         }
 
+        // Create a Grid layout manager for our Rewards RecyclerView
         pinnedRewardsView.layoutManager= GridLayoutManager(context,3)
-        pinnedRewardsView.adapter=pinnedRewardsAdapter
+        pinnedRewardsView.adapter=pinnedRewardsAdapter // Set the rewards RecyclerView adapter
 
+        // Create a Grid layout manager for our Badge RecyclerView
         pinnedBadgesView.layoutManager = GridLayoutManager(context, 3)
-        pinnedBadgesView.adapter=pinnedBadgesAdapter
+        pinnedBadgesView.adapter=pinnedBadgesAdapter // Set the badge RecyclerView adapter
         return view
-    }
-
-    override fun onResume() {
-        super.onResume()
-        //initBadgeStatus()
     }
 
     private fun registerBadgeActivity(): ActivityResultLauncher<Intent> {
@@ -154,25 +147,4 @@ class ProgressFragment : Fragment() {
         return result
     }
 
-//    private fun registerStreakActivity(): ActivityResultLauncher<Intent> {
-//        val result = registerForActivityResult(
-//            ActivityResultContracts.StartActivityForResult()
-//        ) { result: ActivityResult ->
-//            if (result.resultCode == Activity.RESULT_OK) {
-//                println("Streak result was ok!")
-//                println("Activity was ${result.data}")
-//
-//            } else {
-//                println("Streak result NOT OK!")
-//            }
-//        }
-//        return result
-    //}
-    private fun initBadgeStatus() {
-        println("Loading badges...")
-        for (badge in badges.getAllBadges()) {
-            //val savedState = repoVM.isBadgeLocked(badge.getId())
-            badge.badgeEntity = repoVM.getBadgeFlow(badge.getId()).asLiveData()
-        }
-    }
 }
