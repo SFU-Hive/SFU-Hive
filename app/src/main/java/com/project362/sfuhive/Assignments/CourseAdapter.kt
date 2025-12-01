@@ -17,6 +17,7 @@ class CourseAdapter(private val onItemClick: (Course) -> Unit) : RecyclerView.Ad
 
     private var displayList: List<Any> = emptyList()
 
+    // class for title list items
     inner class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val headerText: TextView = itemView.findViewById(R.id.headerTitle)
 
@@ -26,6 +27,7 @@ class CourseAdapter(private val onItemClick: (Course) -> Unit) : RecyclerView.Ad
         }
     }
 
+    // class for course list items
     inner class CourseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val courseNameText: TextView = itemView.findViewById(R.id.text)
 
@@ -46,6 +48,7 @@ class CourseAdapter(private val onItemClick: (Course) -> Unit) : RecyclerView.Ad
         parent: ViewGroup,
         viewType: Int
     ): RecyclerView.ViewHolder {
+        // set ViewHolder based on viewType
         if (viewType == TYPE_HEADER) {
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_header, parent, false)
@@ -75,6 +78,7 @@ class CourseAdapter(private val onItemClick: (Course) -> Unit) : RecyclerView.Ad
 
     fun setCourses(myCourses: List<Course>, restCourses: List<Course>) {
 
+        // sets all content in the recylcer view
         val list = mutableListOf<Any>()
         if (myCourses.isNotEmpty()) {
             list.add("My Courses")

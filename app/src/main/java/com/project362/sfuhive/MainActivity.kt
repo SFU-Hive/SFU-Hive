@@ -33,9 +33,6 @@ import com.project362.sfuhive.database.DataViewModelFactory
 
 
 class MainActivity : AppCompatActivity() {
-
-    private lateinit var viewModelFactory: DataViewModelFactory
-    private lateinit var dataViewModel: DataViewModel
     private lateinit var loadButton: Button
     private lateinit var auth: FirebaseAuth
     private var user: FirebaseUser? = null
@@ -50,6 +47,7 @@ class MainActivity : AppCompatActivity() {
 //        val prefs = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
 //        prefs.edit().putLong(LAST_SYNC_KEY, 0).apply()
 
+        // check for notification permission
         checkNotificationPermission()
 
         // add notification channel
@@ -68,6 +66,7 @@ class MainActivity : AppCompatActivity() {
         FirebaseApp.initializeApp(this)
         auth = Firebase.auth
 
+        // firebase anon sign in (needed for database access)
         auth.signInAnonymously()
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
@@ -80,12 +79,9 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+        // hide start button until thread done getting submission data
         loadButton = findViewById(R.id.load)
         loadButton.visibility = View.GONE
-
-        viewModelFactory = Util.getViewModelFactory(this)
-        dataViewModel =
-            ViewModelProvider(this, viewModelFactory).get(DataViewModel::class.java)
 
         loadButton.setOnClickListener {
             // put all assignments into database on start if not there
@@ -103,6 +99,7 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
+        // when the app starts, launch a thread that gets new submissions from Canvas API
         Thread {
             val newSubmissions = Util.getNewlySubmittedAssignments(this)
             Log.d("Submission", "New submissions count: ${newSubmissions.size}")
@@ -110,12 +107,14 @@ class MainActivity : AppCompatActivity() {
                 runOnUiThread {
                     handleNewSubmissions(newSubmissions)
 
+                    // when done show button
                     loadButton.visibility = View.VISIBLE
                     val animation = AnimationUtils.loadAnimation(this, R.anim.fade_in)
                     loadButton.startAnimation(animation)
                 }
             } else {
                 runOnUiThread {
+                    // when done show button
                     loadButton.visibility = View.VISIBLE
                     val animation = AnimationUtils.loadAnimation(this, R.anim.fade_in)
                     loadButton.startAnimation(animation)
@@ -125,7 +124,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleNewSubmissions(newSubmissions: List<SubmittedAssignment>, index: Int = 0) {
-
+        // creates a custom dialog for each new submitted assignment
         if (index >= newSubmissions.size) {
             val prefs = getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
             prefs.edit().putLong(LAST_SYNC_KEY, System.currentTimeMillis()).apply()

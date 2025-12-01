@@ -113,8 +113,8 @@ object Util {
             editor.putString(NAME_KEY, name)
             editor.apply()
 
+            // get courses from API call
             val coursesURL = URL("https://canvas.sfu.ca/api/v1/courses?enrollment_state=active")
-
             val coursesArray = getJsonArrayFromURL(coursesURL, token)
 
             // for course id and course names
@@ -265,8 +265,8 @@ object Util {
             // master return array
             val allSubmissions = JSONArray()
 
+            // API call to get course
             val coursesURL = URL("https://canvas.sfu.ca/api/v1/courses?enrollment_state=active")
-
             val coursesArray = getJsonArrayFromURL(coursesURL, token)
 
             // for course id and course names
@@ -449,17 +449,6 @@ object Util {
         val streakDatabase = StreakDatabase.getInstance(context)
         val streakDatabaseDao = streakDatabase.streakDatabaseDao
 
-
-        repository = DataRepository(
-            databaseDao,
-            fileDatabaseDao,
-            remoteDatabase,
-            badgeDatabaseDao,
-            goalDatabaseDao,
-            streakDatabaseDao
-        )
-
-
         repository = DataRepository(databaseDao, fileDatabaseDao, remoteDatabase,badgeDatabaseDao, goalDatabaseDao, streakDatabaseDao)
         viewModelFactory = DataViewModelFactory(repository)
         return viewModelFactory
@@ -468,6 +457,7 @@ object Util {
     fun formatDoubleToText(value: Double): String {
         return String.format("%.1f", value)
     }
+
     fun updateCoinTotal(context: Context, newTotal: Long?) {
         // add name to prefs
         val oldTotal=getCoinTotal(context)

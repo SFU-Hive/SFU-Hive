@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.project362.sfuhive.Assignments.RateSubmissionDialog
 import com.project362.sfuhive.Util
 import com.project362.sfuhive.Wellness.GoalDatabase
 import com.project362.sfuhive.database.Badge.BadgeDatabase
@@ -86,19 +87,21 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
     }
 
 
-    // This section for remote database
-    // 💡 Expose the course data to the Fragment for the RecyclerView
+    // This section for remote database (Firebase implementation adapted from Gemini and Firebase docs)
     val courseListLiveData = repository.courseFlow.asLiveData()
 
-    // You can expose all assignments as needed, or let the Fragment access the repo data
     val allAssignmentsStateFlow = repository.allAssignmentsFlow.asLiveData()
 
-    // Function to trigger data loading
     fun loadCourses() {
         viewModelScope.launch {
             repository.fetchAssignmentData()
         }
     }
+
+    fun insertRatedAssignment(ratedAssignment: RateSubmissionDialog.RatedAssignment, userUid: String){
+        repository.insertRatedAssignment(ratedAssignment, userUid)
+    }
+
 
     // goals section
     fun initializeGoals(context: Context) {
