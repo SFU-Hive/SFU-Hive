@@ -7,6 +7,8 @@ import com.project362.sfuhive.Progress.Badges.Badge
 import com.project362.sfuhive.Progress.Rewards.Reward
 import com.project362.sfuhive.R
 
+// DEPRECATED!
+// Progress View model held progress related data in the early stages of demos
 class ProgressViewModel : ViewModel(){
     private var pinnedBadges : MutableLiveData<List<Badge>> = MutableLiveData<List<Badge>>();
     private var pinnedRewards : MutableLiveData<List<Reward>> = MutableLiveData<List<Reward>>();

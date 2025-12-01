@@ -40,8 +40,8 @@ class ProgressFragment : Fragment() {
     private lateinit var badgeResult: ActivityResultLauncher<Intent> // holds result for badgeActivity
     private lateinit var rewardResult: ActivityResultLauncher<Intent> // holds result for rewardActivity
 
-    private var rewards = RewardFactory() // The object holding all types of rewards
-    private var badges = BadgeFactory() //  The object holding all types of badges
+    private var rewards = RewardFactory() // The object holding all possible types of rewards
+    private var badges = BadgeFactory() //  The object holding all possible types of badges
 
     // Creates the view for Progress Fragment
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
