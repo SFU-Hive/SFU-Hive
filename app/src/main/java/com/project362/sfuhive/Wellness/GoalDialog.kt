@@ -84,17 +84,17 @@ class GoalDialog (): DialogFragment() {
 
 
         assignBtn.setOnClickListener {
-
+            // enforce goal name before assigning tag
             val name = editName.text.toString().trim()
             if (name.isEmpty()) {
                 Toast.makeText(requireContext(), "Please enter a goal name first", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-
+            // if clicked then we wait for nfc
             (activity as? GoalsActivity)?.pendingGoalAssignId = goalId
             nfcStatusText.text = "Waiting for NFC scan..."
         }
-
+        // clear the button and update text
         clearBtn.setOnClickListener {
             lifecycleScope.launch {
                 viewModel.updateNfcTag(goalId, null)
@@ -112,7 +112,7 @@ class GoalDialog (): DialogFragment() {
 
             btnSave.setOnClickListener {
                 val name = editName.text.toString().trim()
-                if (name.isEmpty()) {
+                if (name.isEmpty()) { // make sure there is a goal name to save
                     Toast.makeText(requireContext(), "Please enter a goal name", Toast.LENGTH_SHORT)
                         .show()
                     return@setOnClickListener
@@ -137,7 +137,7 @@ class GoalDialog (): DialogFragment() {
 
         return dialog
     }
-
+    // helper to update status text and show clear button
     fun updateNfcStatus(tagId: String) {
         nfcStatusText.text = "Assigned: $tagId"
         clearBtn.visibility = View.VISIBLE
