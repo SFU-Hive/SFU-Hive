@@ -38,6 +38,7 @@ class DashboardViewModel (application: Application): AndroidViewModel(applicatio
 
 
     init {
+        // Initialize the repository and fetch recent files
         val storedFileDatabaseDao =
             StoredFileDatabase.getInstance(application).storedFileDatabaseDao
         val repository = StoredFileRepository(storedFileDatabaseDao)
@@ -47,21 +48,20 @@ class DashboardViewModel (application: Application): AndroidViewModel(applicatio
     }
 
     fun loadDashboardData() {
+        //sets the welcome message that can be adapted to show the user name in future updates
         _welcomeMessage.value = "Welcome!"
 
         fetchImportantDates()
     }
 
+    //fetch the high priority assignment from the database
     fun fetchImportantDates() {
         viewModelScope.launch {
             val highPriorityList = priorityDatabase.getHighPriorityAssignments().first()
-            Log.d("xd", "1. High priority items found: ${highPriorityList.size}")
             val priorityIds = highPriorityList.mapNotNull { it.assignmentId.toLongOrNull() }
-            Log.d("xd", "2. Extracted IDs: $priorityIds")
             val assignments = if(priorityIds.isNotEmpty()) {
                 assignmentDatabase.getAssignmentsByAssignmentId(priorityIds).filter { it.isNotEmpty() }.first()
             }else{
-                Log.d("xd", "3. Empty")
                 emptyList()
             }
 

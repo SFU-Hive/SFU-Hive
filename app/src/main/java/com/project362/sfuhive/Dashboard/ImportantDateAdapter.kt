@@ -46,18 +46,21 @@ class ImportantDateAdapter(
         courseNameTask.text = assignment.assignmentName
         dateText.text = assignment.dueAt
 
+
+        //takes the first letter of the course name and displays it on the file icon
         if (assignment.courseName.isNotEmpty()) {
             courseImageIdentifier.text = assignment.courseName.first().toString()
         }else{
+            //if the course name is empty, display a question mark
             courseImageIdentifier.text = "?"
         }
         return rowView
     }
+    //updates the data in the adapter
     fun updateData(newDates: List<Assignment>) {
         importantDates.clear()
         importantDates.addAll(newDates)
         notifyDataSetChanged()
-        Log.d("xd", "Updated important dates: $newDates")
     }
 
 

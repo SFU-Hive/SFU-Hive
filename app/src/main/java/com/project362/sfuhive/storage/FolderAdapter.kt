@@ -7,8 +7,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.project362.sfuhive.R
 import com.project362.sfuhive.database.storage.StoredFileEntity
@@ -29,6 +27,7 @@ class FolderAdapter(
         fun bind(file: StoredFileEntity){
             nameTextView.text = file.name
 
+            //shows the correct icon based on the file type
             if(file.type == "folder"){
                 iconImageView.setImageResource(R.drawable.ic_directory)
             }else{
@@ -84,15 +83,6 @@ class FolderAdapter(
             }
         }
         popupMenu.show()
-    }
-}
-class FolderDiffCallback : DiffUtil.ItemCallback<StoredFileEntity>(){
-    override fun areItemsTheSame(oldItem: StoredFileEntity, newItem: StoredFileEntity): Boolean {
-        return oldItem.id == newItem.id
-    }
-
-    override fun areContentsTheSame(oldItem: StoredFileEntity, newItem: StoredFileEntity): Boolean {
-        return oldItem == newItem
     }
 }
 

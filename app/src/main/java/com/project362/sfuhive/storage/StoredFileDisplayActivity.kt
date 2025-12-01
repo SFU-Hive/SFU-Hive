@@ -31,6 +31,7 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
     private var fileIdToDelete: Long? = null
 
     private val viewModel: StoredFileViewModel by viewModels(){
+        //gets the database and repository from the view model factory
         val database = StoredFileDatabase.getInstance(this)
         val repository = StoredFileRepository(database.storedFileDatabaseDao)
         StoredFileViewModel.StoredFileViewModelFactory(repository)
@@ -38,6 +39,7 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
 
     //https://developer.android.com/training/basics/intents/result
     //https://developer.android.com/reference/androidx/activity/result/contract/ActivityResultContracts.OpenDocument
+    //Registers a launcher for the file picker to select a file
     private val filePickerLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()){ uri ->
         if(uri != null){
             handleSelectedFile(uri)
@@ -51,8 +53,11 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
         binding = ActivityFileDisplayBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Set up the RecyclerView
         val adapter = FolderAdapter(
+            //opens the file in the default application
             onItemClicked = { file -> onFileClicked(file) },
+            //deletes the file
             onDeleteClicked = { file ->
                 lifecycleScope.launch {
                     if(file.type == "folder"){
@@ -62,9 +67,16 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
                                 supportFragmentManager,
                                 "delete_confirmation"
                             )
-                        }else
-                            Toast.makeText(this@StoredFileDisplayActivity, "Folder is not empty", Toast.LENGTH_SHORT).show()
+                        }else {
+                            //if the folder is not empty, tell the user that the folder is not empty
+                            Toast.makeText(
+                                this@StoredFileDisplayActivity,
+                                "Folder is not empty",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }else{
+                        //if the file is not a folder, delete it
                         fileIdToDelete = file.id
                         DeleteConfirmationDialogFragment().show(
                             supportFragmentManager,
@@ -73,6 +85,7 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
                     }
                 }
             },
+            //renames the file
             onRenameClicked = { file ->
                 showRenameDialog(file)
             }
@@ -88,6 +101,7 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
             }
         }
 
+        // Set up the add button to display the file button and add folder button
         binding.addButton.setOnClickListener {
             val areButtonsVisible = binding.addFile.visibility == View.VISIBLE
             if (areButtonsVisible){
@@ -99,17 +113,21 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
             }
         }
 
+        // Set up the add file button to open the file picker and hide the add file and folder button
         binding.addFile.setOnClickListener {
             filePickerLauncher.launch(arrayOf("*/*"))
             binding.addFile.visibility = View.GONE
             binding.addDirectory.visibility = View.GONE
         }
+
+        // Set up the add folder button to show the new folder dialog and hide the add file and folder button
         binding.addDirectory.setOnClickListener {
             showNewFolderDialog()
             binding.addFile.visibility = View.GONE
             binding.addDirectory.visibility = View.GONE
         }
 
+        // Set up the back button to go back to the previous folder
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (!viewModel.goBack()) {
@@ -119,21 +137,23 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
         }
 
         onBackPressedDispatcher.addCallback(this, callback)
-
+        // Observe the current folder ID to update the callback's enabled state
         viewModel.currFolderId.observe(this) { folderId ->
             callback.isEnabled = folderId != null && folderId != 0L
         }
     }
 
     private fun onFileClicked(file: StoredFileEntity) {
+        //opens the folder if it is a folder, otherwise opens the file
         if (file.type == "folder") {
             viewModel.openFolder(file.id)
         }else{
+            //if the file doesn't have a url, the folder cannot be opened
             if(file.url == null) {
                 Toast.makeText(this, "Cannot open file", Toast.LENGTH_SHORT).show()
                 return
             }
-
+            //get the file type and open it in the default application
             val uri = file.url!!.toUri()
             val mimeType = contentResolver.getType(uri)
 
@@ -151,10 +171,10 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
 
     private fun handleSelectedFile(uri: Uri){
         contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-
+        //get the file details
         val (fileName, fileSize) = getFileDetails(uri)
         val timestamp = System.currentTimeMillis()
-
+        //add the file to the database
         val file = StoredFileEntity(
             id = timestamp,
             parentId = viewModel.getCurrFolderId(),
@@ -192,6 +212,7 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
         return fileName.substringAfterLast('.', "file")
     }
 
+    //adds a folder to the database
     private fun addFolder(folderName: String){
         val timestamp = System.currentTimeMillis()
         val folder = StoredFileEntity(
@@ -207,7 +228,7 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
         viewModel.insertFile(folder)
     }
 
-
+    //deletes the file from the database
     override fun onDeleteConfirmed() {
         fileIdToDelete?.let {
             viewModel.deleteFile(it)
@@ -215,6 +236,7 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
         fileIdToDelete = null
     }
 
+    //Opens the dialog to add a new folder
     private fun showNewFolderDialog(){
         val dialogView = LayoutInflater.from(this).inflate(R.layout.new_folder_name_dialog, null)
         val folderNameInput = dialogView.findViewById<EditText>(R.id.folder_name)
@@ -234,6 +256,7 @@ class StoredFileDisplayActivity : AppCompatActivity(), DeleteConfirmationDialogF
         dialog.show()
     }
 
+    //Shows the dialog to rename the file
     private fun showRenameDialog(fileRename: StoredFileEntity){
         val dialogView = LayoutInflater.from(this).inflate(R.layout.new_folder_name_dialog, null)
         val folderNameInput = dialogView.findViewById<EditText>(R.id.folder_name)

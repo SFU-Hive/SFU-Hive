@@ -23,6 +23,7 @@ class StoredFileViewModel(private val repository: StoredFileRepository) : ViewMo
         openFolder(null)
     }
 
+    //Opens the folder with the given ID or the root folder if null
     fun openFolder(folderId: Long?) {
         val targetFolderId = folderId ?: ROOT_FOLDER_ID
         if(_currFolderId.value != targetFolderId) {
