@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".storage.StoredFileDisplayActivity">
+    tools:context=".storage.StoredFileDisplayActivity"
+    android:layout_marginTop="30dp">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/file_recycler_view"
