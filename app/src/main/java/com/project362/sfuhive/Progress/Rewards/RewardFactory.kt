@@ -3,6 +3,8 @@ package com.project362.sfuhive.Progress.Rewards
 import com.project362.sfuhive.Progress.Badges.Badge
 import com.project362.sfuhive.R
 
+// Describes all instances of the app's rewards.
+// Contains all the reward details, icon ids, etc.
 class RewardFactory {
 
     private var allRewards = listOf<Reward>(
@@ -37,6 +39,8 @@ class RewardFactory {
             10,
             "Go take a 20 minute nap! (We know you're sleep deprived)")
     )
+
+    // Returns a list of all possible rewards the user can redeem
     public fun getAllRewards(): List<Reward>{
 
         return allRewards

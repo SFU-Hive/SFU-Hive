@@ -449,6 +449,17 @@ object Util {
         val streakDatabase = StreakDatabase.getInstance(context)
         val streakDatabaseDao = streakDatabase.streakDatabaseDao
 
+
+        repository = DataRepository(
+            databaseDao,
+            fileDatabaseDao,
+            remoteDatabase,
+            badgeDatabaseDao,
+            goalDatabaseDao,
+            streakDatabaseDao
+        )
+
+
         repository = DataRepository(databaseDao, fileDatabaseDao, remoteDatabase,badgeDatabaseDao, goalDatabaseDao, streakDatabaseDao)
         viewModelFactory = DataViewModelFactory(repository)
         return viewModelFactory
@@ -458,8 +469,10 @@ object Util {
         return String.format("%.1f", value)
     }
 
+    // Update the coin total in shared prefs. Show a toast with the coin difference
     fun updateCoinTotal(context: Context, newTotal: Long?) {
-        // add name to prefs
+
+        // Get old value and update sharedPrefs to hold new value
         val oldTotal=getCoinTotal(context)
         val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
         val editor = prefs.edit()
@@ -469,27 +482,36 @@ object Util {
         // Probably better ways to do this -Miro
         var toastText = "Coins Spent! +"
 
+        // Calculate the difference between old and new coin total
         val difference = newTotal - oldTotal!!
 
+        //Sanity log check
         Log.d("Coin Update","Old total: ${oldTotal}")
         Log.d("Coin Update","New total: ${newTotal}")
         Log.d("Coin Update","Coin difference: ${difference}")
 
-        if(oldTotal!!<newTotal){
+        // Display different toast message depending on if the coin total increased or decreased
+
+        if(oldTotal!!<newTotal){ //Case 1: Total increased
+
+            // Build and show toast
             toastText = "Coins Earned! +"
             val coinToast = Toast.makeText(context,"${toastText}${difference}",Toast.LENGTH_LONG)
             coinToast.show()
-        }else if(oldTotal!!>newTotal){
+
+        }else if(oldTotal!!>newTotal){ //Case 2: Total decreased
+
+            // Build and show toast
             toastText = "Coins Spent! "
             val coinToast = Toast.makeText(context,"${toastText}${difference}",Toast.LENGTH_LONG)
             coinToast.show()
-        }else{
-            Log.d("Coin Update","Coin value didn't change")
 
+        }else{ //Case 3: No change in coin total
+            Log.d("Coin Update","Coin value didn't change")
         }
-        // notify user of coin gain via toast
     }
 
+    // Get the coin total stored in sharedPrefs
     fun getCoinTotal(context: Context): Long? {
         val prefs = context.getSharedPreferences(PREFS_KEY, Context.MODE_PRIVATE)
         val total = prefs.getLong(COIN_KEY, 0)
@@ -548,16 +570,14 @@ object Util {
         Log.d("ReminderDebug", "Scheduled reminder for '${title}' in $dueDate")
     }
 
-    fun coinsSpentToast(context: Context,amountSpent: Long){
-        val toastText = "Coins Spent! -"
-        val coinToast = Toast.makeText(context,"${toastText}${amountSpent}",Toast.LENGTH_LONG)
-        coinToast.show()
-    }
-
+    // Show the user the "badge unlocked" dialog of badge with given badgeId
     fun UnlockBadgeDialog(badgeId : Long, theSupportFragmentManager : FragmentManager){
-        val badgeFactory=BadgeFactory()
-        val badge=badgeFactory.getBageById(badgeId)
+
+        val badgeFactory=BadgeFactory() // Get all the possible badges a user can unlock
+        val badge=badgeFactory.getBageById(badgeId) // get the info of the badge being unlocked
         if(badge!=null){
+
+            // Create and show the "you've unlocked a badge" dialog
             val dialog=UnlockedDialog(badge)
             dialog.show(theSupportFragmentManager, badgeId.toString())
         }

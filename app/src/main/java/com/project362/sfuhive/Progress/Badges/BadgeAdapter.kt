@@ -15,7 +15,6 @@ import com.project362.sfuhive.R
 import okhttp3.internal.notify
 
 // The Adapter to be used with a RecyclerView displaying badge objects
-//
 class BadgeAdapter(
     private val context: Context, // Context of the activity the RecyclerView will be displayed
     private val badges : List<Badge>, // I would delete this but it would break the rest of the instances that use it; so I will leave it as is.

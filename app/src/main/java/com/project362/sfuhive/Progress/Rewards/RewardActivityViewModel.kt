@@ -2,23 +2,23 @@ package com.project362.sfuhive.Progress.Rewards
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.project362.sfuhive.Progress.Badges.Badge
-import com.project362.sfuhive.Util.coinsSpentToast
 
-
+// Holds and maintains the data for the Reward Activity:
+// - An instance of all possible rewards user can redeem
+// - The details of our currently selected "Featured Reward"
 class RewardActivityViewModel(
-        private var allRewards: List<Reward>
+        private var allRewards: List<Reward> // All the possible rewards the use can redeem
     ):ViewModel(){
 
+        // Set the default featured reward to be the reward at index 1
         public var featuredReward: MutableLiveData<Reward> = MutableLiveData<Reward>(allRewards.get(1))
-
-        public var currencyCount: MutableLiveData<Long> = MutableLiveData<Long>() // temporary start with 100 currency always. Change this later!!
+        public var currencyCount: MutableLiveData<Long> = MutableLiveData<Long>()
         public fun getFeaturedReward(): Reward{
 
             return featuredReward.value
         }
 
-        public fun setFeaturedBadge(reward :Reward){
+        public fun setFeaturedReward(reward :Reward){
             featuredReward.value= reward
         }
 

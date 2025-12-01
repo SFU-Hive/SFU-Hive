@@ -19,7 +19,7 @@ import com.project362.sfuhive.R
 import com.project362.sfuhive.Util
 import com.project362.sfuhive.database.DataViewModel
 
-// This activity displays all the possible badges and provides
+// This activity displays all the possible badges
 // Allows the user to click on a badge to see more detailed information
 // The current badge with details being displayed is called the "featured badge"
 class BadgeActivity : AppCompatActivity(){
@@ -28,7 +28,7 @@ class BadgeActivity : AppCompatActivity(){
     private lateinit var badgeActivityVM : BadgeActivityViewModel // Holds all the detailed info for the selected "featured" badge
     private lateinit var repoVM : DataViewModel // provides access between the view layer and the data layer
     private var badgeFactory = BadgeFactory() // Describes all instances of the app's badges. Contains all the badge details, icon ids, etc.
-    private var tmpBadgesList = badgeFactory.getAllBadges() // Describes all instances of the app's rewards. Contains all reward details
+    private var tmpBadgesList = badgeFactory.getAllBadges() // Describes all instances of the app's badge. Contains all badge details
 
     // Badge Views
     private lateinit var featuredBadgeView : CardView // Provides access to the "featured badge"/ details of selected badge

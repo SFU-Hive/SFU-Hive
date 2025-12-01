@@ -8,7 +8,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
-import com.project362.sfuhive.Progress.Rewards.Reward
 import com.project362.sfuhive.R
 
 // Build the dialog that displays when a user unlocks a badge
