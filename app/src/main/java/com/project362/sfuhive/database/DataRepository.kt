@@ -137,6 +137,12 @@ class DataRepository(private val assignmentDatabaseDao: AssignmentDatabaseDao,
         }
     }
 
+    fun insertRatedAssignment(ratedAssignment: RateSubmissionDialog.RatedAssignment, userUid: String){
+        CoroutineScope(IO).launch {
+            remoteDatabase.insertRatedAssignment(ratedAssignment, userUid)
+        }
+    }
+
     // adapted from Firebase Docs and ChatGPT
     suspend fun ensureFirebaseAuth() {
         val auth = FirebaseAuth.getInstance()

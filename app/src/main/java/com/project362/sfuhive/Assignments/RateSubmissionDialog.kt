@@ -13,10 +13,12 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
 import com.google.firebase.database.database
 import com.project362.sfuhive.R
 import com.project362.sfuhive.Util
+import com.project362.sfuhive.database.DataViewModel
 import kotlinx.parcelize.Parcelize
 
 class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
@@ -97,28 +99,22 @@ class RateSubmissionDialog : DialogFragment(), DialogInterface.OnClickListener {
         when (p1) {
             DialogInterface.BUTTON_POSITIVE -> {
 
+                // get values from view inputs
                 val difficulty = ratingBar.rating.toString().toDoubleOrNull() ?: 0.0
                 val timeSpent = timeEditText.text.toString().toDoubleOrNull() ?: 0.0
 
                 ratedAssignment.difficulty = difficulty
                 ratedAssignment.hoursSpent = timeSpent
 
-                // Write a message to the database
-                val database = Firebase.database
-                val myRef = database.getReference("rated_assignments").child(userUid ?: return)
-
-                myRef.push().setValue(ratedAssignment)
-                    .addOnSuccessListener {
-                        Log.d("FirebaseDB", "Rated assignment saved successfully")
-                    }
-                    .addOnFailureListener { e ->
-                        Log.d("FirebaseDB", "Failed to save rated assignment")
-                    }
+                // insert into database
+                val viewModelFactory = Util.getViewModelFactory(requireContext())
+                val dataViewModel = ViewModelProvider(this, viewModelFactory).get(DataViewModel::class.java)
+                dataViewModel.insertRatedAssignment(ratedAssignment, userUid ?: return)
 
                 // log result
                 Log.d(
                     "RateSubmission",
-                    "Rated $assignmentName with difficulty $difficulty, time $timeSpent min"
+                    "Rated $userUid $assignmentName with difficulty $difficulty, time $timeSpent min"
                 )
 
                 // notify parent from ChatGPT

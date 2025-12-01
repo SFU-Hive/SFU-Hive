@@ -89,8 +89,10 @@ class ListAssignmentsActivity: AppCompatActivity() {
 
     private fun displayRatedAssignment(assignmentList: RatedAssignment, assignments: List<RatedAssignment>) {
 
+        // filter assignment list by selected assignment id
         val filteredAssignments = filterAssignmentsById(assignmentList.assignmentId, assignments)
 
+        // launch display assignment activity
         val intent = Intent(this, DisplayRatedAssignmentActivity::class.java)
         intent.putParcelableArrayListExtra("assignments", ArrayList(filteredAssignments) )
         startActivity(intent)

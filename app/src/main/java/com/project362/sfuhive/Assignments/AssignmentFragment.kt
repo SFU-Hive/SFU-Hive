@@ -89,7 +89,7 @@ class AssignmentFragment : Fragment() {
         val searchItem = menu.findItem(R.id.actionSearch)
         val searchView = searchItem.actionView as SearchView
 
-        // below line is to call set on query text listener method.
+        // set query text listener
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
                 return false
@@ -104,6 +104,7 @@ class AssignmentFragment : Fragment() {
     }
 
     private fun filter(text: String) {
+        // filter my courses and all other courses seperately
         val filteredMyCourses = ArrayList<Course>()
         val filteredOtherCourses = ArrayList<Course>()
 

@@ -39,4 +39,18 @@ class FirebaseRemoteDatabase {
         return Pair(courseList, allAssignments)
 
     }
+
+    suspend fun insertRatedAssignment(ratedAssignment: RatedAssignment, userUid: String?) {
+        // Write a message to the database
+        val database = Firebase.database
+        val myRef = database.getReference("rated_assignments").child(userUid ?: return)
+
+        myRef.push().setValue(ratedAssignment)
+            .addOnSuccessListener {
+                Log.d("FirebaseDB", "Rated assignment saved successfully")
+            }
+            .addOnFailureListener { e ->
+                Log.d("FirebaseDB", "Failed to save rated assignment")
+            }
+    }
 }
