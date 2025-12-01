@@ -48,6 +48,7 @@ class RecentFilesAdapter(
             viewHolder = view.tag as ViewHolder
         }
 
+        // Set the file name
         val file = getItem(pos) as? StoredFileEntity
         viewHolder.fileName.text = file?.name ?: "..."
 

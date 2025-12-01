@@ -72,16 +72,20 @@ class DashboardFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        //refresh the data when the fragment is resumed
         viewModel.loadDashboardData()
     }
 
+    //opens the file in the default application
     private fun openFile(file: StoredFileEntity){
         val intent = Intent(Intent.ACTION_VIEW)
+        //Get the file URL
         val uri = file.url?.toUri()
         if (uri == null) {
             Toast.makeText(requireContext(), "Cannot open file", Toast.LENGTH_SHORT).show()
             return
         }
+        //Get the file type
         val mimeType = requireContext().contentResolver.getType(uri)
         intent.setDataAndType(uri, mimeType)
 
