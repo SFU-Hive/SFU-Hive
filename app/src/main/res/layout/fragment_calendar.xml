@@ -7,39 +7,45 @@
     android:background="@color/white"
     android:orientation="vertical">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:background="@color/dark_red"/>
-
-    <!-- Header with Title + Overflow Menu -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@color/dark_red"
-        android:gravity="center_vertical">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvTitle"
-            android:layout_width="0dp"
-            android:layout_height="?attr/actionBarSize"
-            android:layout_weight="1"
-            android:background="@color/dark_red"
-            android:gravity="bottom"
-            android:text="@string/my_calendar"
-            android:textColor="@android:color/black"
-            android:textSize="26sp"
-            android:padding="10dp"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="@color/dark_red"/>
 
-        <!-- Overflow Button -->
-        <ImageButton
-            android:id="@+id/btnOverflow"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:padding="6dp"
+        <!-- Header with Title + Overflow Menu -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:background="@color/dark_red"
-            android:src="@drawable/ic_more_vert" />
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="0dp"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_weight="1"
+                android:background="@color/dark_red"
+                android:gravity="bottom"
+                android:text="@string/my_calendar"
+                android:textColor="@android:color/black"
+                android:textSize="26sp"
+                android:padding="10dp"/>
+
+            <!-- Overflow Button -->
+            <ImageButton
+                android:id="@+id/btnOverflow"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="6dp"
+                android:background="@color/dark_red"
+                android:src="@drawable/ic_more_vert" />
+        </LinearLayout>
     </LinearLayout>
 
 
