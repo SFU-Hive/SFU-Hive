@@ -39,7 +39,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="17sp"
                 android:text="Hi, how are you feeling today?"
-                app:layout_constraintTop_toBottomOf="@id/tvTitle"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
