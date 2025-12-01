@@ -248,7 +248,7 @@ object Util {
             }
 
 //            // test reminder scheduling
-//            scheduleReminder(context, 9999, "Final Project", "2025-11-29T23:12:00Z")
+//            scheduleReminder(context, 9999, "Final Project", "2025-12-01T05:35:00Z")
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -511,7 +511,7 @@ object Util {
     fun scheduleReminder(context: Context, assignmentId: Long, title: String, dueDate: String) {
 
         // skip if no due date
-        if (dueDate.isNullOrBlank()) {
+        if (dueDate.isBlank() || dueDate == "null") {
             return
         }
 
