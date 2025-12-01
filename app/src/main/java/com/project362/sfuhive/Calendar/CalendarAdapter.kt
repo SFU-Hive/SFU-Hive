@@ -15,6 +15,7 @@ import com.project362.sfuhive.database.EventPriority.EventPriorityDatabase
 import kotlinx.coroutines.*
 import java.time.LocalDate
 
+// Displays a month grid where each cell represents a day.
 class CalendarAdapter(
     private val days: MutableList<LocalDate?>,
     private var assignmentsByDate: MutableMap<LocalDate, List<String>>,
@@ -43,6 +44,7 @@ class CalendarAdapter(
     override fun onBindViewHolder(holder: DayViewHolder, position: Int) {
         val date = days[position]
 
+        // Default cell state: empty text and hidden indicators
         holder.dayText.text = ""
         holder.bgHighlight.visibility = View.GONE
         holder.dotContainer.visibility = View.GONE
@@ -51,7 +53,7 @@ class CalendarAdapter(
         if (date != null) {
             holder.dayText.text = date.dayOfMonth.toString()
 
-            // Selected date highlight
+            // Highlight selected or today's date. Keep UI updates on main thread.
             if (date == selectedDate) {
                 holder.bgHighlight.visibility = View.VISIBLE
                 holder.bgHighlight.setBackgroundResource(R.drawable.bg_day_selected)
@@ -65,6 +67,7 @@ class CalendarAdapter(
                 )
                 val today = LocalDate.now()
                 if (date == today) {
+                    // Special style for today so users can spot it quickly
                     holder.bgHighlight.visibility = View.VISIBLE
                     holder.bgHighlight.setBackgroundResource(R.drawable.bg_day_today)
                     holder.dayText.setTextColor(
@@ -73,7 +76,7 @@ class CalendarAdapter(
                 }
             }
 
-            // SHOW PRIORITY DOTS
+            // SHOW PRIORITY DOTS: resolve priority strings from the EventPriority DB
             val ids = assignmentsByDate[date].orEmpty()
 
             if (ids.isNotEmpty()) {
@@ -82,13 +85,15 @@ class CalendarAdapter(
                 val ctx = holder.itemView.context
                 val dao = EventPriorityDatabase.getInstance(ctx).assignmentPriorityDao()
 
+                // Kick off DB reads on IO dispatcher to avoid blocking UI thread
                 CoroutineScope(Dispatchers.IO).launch {
 
-                    // Fetch priorities in order
+                    // Fetch priorities for up to three items; default to "default" when missing
                     val priorities = ids.take(3).map { id ->
                         dao.getPriority(id) ?: "default"
                     }
 
+                    // Switch back to Main to update view state safely
                     withContext(Dispatchers.Main) {
                         priorities.forEachIndexed { index, p ->
                             val dot = holder.dots[index]
@@ -101,6 +106,7 @@ class CalendarAdapter(
                                 else -> R.color.priority_default
                             }
 
+                            // Apply tint using a ColorStateList so shapes keep their padding and size
                             dot.backgroundTintList =
                                 ContextCompat.getColorStateList(ctx, colorRes)
                         }
@@ -108,6 +114,7 @@ class CalendarAdapter(
                 }
             }
 
+            // Report clicks back to the fragment/activity so it can manage selection/navigation
             holder.itemView.setOnClickListener { onDayClicked(date) }
         }
     }

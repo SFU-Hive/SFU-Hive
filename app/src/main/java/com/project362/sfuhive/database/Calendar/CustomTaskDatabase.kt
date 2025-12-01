@@ -5,6 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
+/**
+ * Room database storing `CustomTaskEntity` rows created by the user.
+ * The builder uses destructive migration fallback so schema mismatches reset the DB.
+ * (this is intentional for the app's simple use-case)
+ */
 @Database(entities = [CustomTaskEntity::class], version = 1, exportSchema = false)
 abstract class CustomTaskDatabase : RoomDatabase() {
 

@@ -28,6 +28,10 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+/**
+ * Activity that allows the user to take a photo or pick an image from the gallery,
+ * run OCR on the image, and quickly create a task from the scanned text.
+ */
 class TaskScanActivity : AppCompatActivity() {
 
     private lateinit var etTitle: EditText
@@ -39,6 +43,7 @@ class TaskScanActivity : AppCompatActivity() {
 
     private var selectedBytes: ByteArray? = null
 
+    // Simple camera launcher that receives a small bitmap in `data.extras["data"]`
     private val cameraLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             val bmp = it.data?.extras?.get("data") as? Bitmap
@@ -50,6 +55,7 @@ class TaskScanActivity : AppCompatActivity() {
             }
         }
 
+    // Gallery launcher that returns a single image URI
     private val galleryLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { loadGalleryImage(it) }
@@ -67,7 +73,7 @@ class TaskScanActivity : AppCompatActivity() {
             CustomTaskVMFactory(repo)
         ).get(CustomTaskViewModel::class.java)
 
-        // ---- REMOTE CONFIG ----
+        // ---- REMOTE CONFIG: fetch Azure OCR credentials ----
         remoteConfig = FirebaseRemoteConfig.getInstance()
         remoteConfig.setConfigSettingsAsync(
             FirebaseRemoteConfigSettings.Builder()
@@ -119,6 +125,7 @@ class TaskScanActivity : AppCompatActivity() {
     }
 
     private fun runOCR(bytes: ByteArray) {
+        // Read Azure config from Remote Config; show a helpful message if missing
         val key = remoteConfig.getString("AZURE_OCR_KEY")
         val endpoint = remoteConfig.getString("AZURE_OCR_ENDPOINT")
 
@@ -127,6 +134,7 @@ class TaskScanActivity : AppCompatActivity() {
             return
         }
 
+        // Create helper and run; helper will callback on the UI thread when ready
         val helper = AzureOcrHelper(
             activity = this,
             subscriptionKey = key,
@@ -139,10 +147,12 @@ class TaskScanActivity : AppCompatActivity() {
     }
 
     private fun processOCR(raw: String) {
+        // Split into non-empty trimmed lines; use first line as a suggested title
         val lines = raw.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
 
         if (lines.isNotEmpty()) etTitle.setText(lines[0])
 
+        // Try to pre-fill date and time fields using simple regex heuristics
         fillDateAndTime(raw)
 
         Toast.makeText(this, "OCR Extraction Complete", Toast.LENGTH_SHORT).show()

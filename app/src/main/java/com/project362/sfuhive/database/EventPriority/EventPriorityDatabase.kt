@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
+
+ // Room database that stores `AssignmentPriority` entities.
 @Database(
     entities = [AssignmentPriority::class],
     version = 1,

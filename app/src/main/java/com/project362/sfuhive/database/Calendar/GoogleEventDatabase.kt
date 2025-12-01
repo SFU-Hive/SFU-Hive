@@ -7,6 +7,10 @@ import androidx.room.RoomDatabase
 import com.project362.sfuhive.database.Calendar.GoogleEventDao
 import com.project362.sfuhive.database.Calendar.GoogleEventEntity
 
+/**
+ * Room database that stores a local cache of Google Calendar events. This cache
+ * allows the app to show Google events offline or quickly after fetching.
+ */
 @Database(entities = [GoogleEventEntity::class], version = 1)
 abstract class GoogleEventDatabase : RoomDatabase() {
     abstract fun googleEventDao(): GoogleEventDao

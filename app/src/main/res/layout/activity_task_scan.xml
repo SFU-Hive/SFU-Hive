@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Layout for scanning or entering a task manually -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -19,14 +20,14 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="📸"
+                android:text="@string/photo_label"
                 android:textSize="40sp"
                 android:gravity="center" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Upload Task Photo"
+                android:text="@string/upload_task_photo"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:gravity="center"
@@ -36,21 +37,21 @@
                 android:id="@+id/btnTakePhoto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Take Photo"
+                android:text="@string/take_photo"
                 android:layout_marginTop="16dp" />
 
             <Button
                 android:id="@+id/btnUploadFromGallery"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Upload From Gallery"
+                android:text="@string/upload_from_gallery"
                 android:layout_marginTop="8dp" />
         </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="OR\nEnter Manually"
+            android:text="@string/or_enter_manually"
             android:textSize="14sp"
             android:gravity="center"
             android:layout_marginVertical="16dp" />
@@ -59,13 +60,13 @@
             android:id="@+id/etTaskTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Task Title" />
+            android:hint="@string/task_title_hint" />
 
         <EditText
             android:id="@+id/etDueDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Due Date (yyyy-MM-dd)"
+            android:hint="@string/due_date_hint"
             android:focusable="false"
             android:layout_marginTop="12dp" />
 
@@ -73,7 +74,7 @@
             android:id="@+id/etTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Time (HH:mm)"
+            android:hint="@string/time_hint"
             android:focusable="false"
             android:layout_marginTop="12dp" />
 
@@ -81,7 +82,7 @@
             android:id="@+id/btnSubmitTask"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Submit"
+            android:text="@string/submit"
             android:layout_marginTop="24dp" />
     </LinearLayout>
 

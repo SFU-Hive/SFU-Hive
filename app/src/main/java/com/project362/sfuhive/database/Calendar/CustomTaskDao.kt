@@ -6,6 +6,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
+
+// DAO for user-created custom tasks.
 @Dao
 interface CustomTaskDao {
 

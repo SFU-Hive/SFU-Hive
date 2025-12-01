@@ -45,7 +45,7 @@
         <activity android:name=".Progress.Rewards.RewardActivity" />
         <meta-data
             android:name="keyValue"
-            android:value = "${KEY}"/>
+            android:value = "hR8hZ4yFU9VZF9GRNM4hXk6WrzrZQZ7n9mucHZfhQfVBQxXDK9LwnmCVhyXX62aT"/>
     </application>
 
 </manifest>

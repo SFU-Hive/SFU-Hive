@@ -5,6 +5,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
+
+// DAO for persisted Google Calendar events used as a cache.
 @Dao
 interface GoogleEventDao {
 
@@ -20,7 +22,7 @@ interface GoogleEventDao {
     @Query("DELETE FROM google_events")
     suspend fun deleteAllEvents()
 
-    // ⭐ NEW — fixes your unresolved reference
+    // Helper to return the number of cached events; useful for UI logic
     @Query("SELECT COUNT(*) FROM google_events")
     suspend fun getEventCount(): Int
 }
