@@ -13,10 +13,11 @@ import com.project362.sfuhive.database.EventPriority.AssignmentPriority
 import com.project362.sfuhive.database.EventPriority.EventPriorityDatabase
 import kotlinx.coroutines.*
 
+// Adapter used to display a vertical list of assignments/tasks.
 class TaskAdapter(
     private var items: List<Assignment>,
     private var priorityIds: List<String>,
-    private val onPriorityChanged: (() -> Unit)? = null   // 🔥 NEW CALLBACK
+    private val onPriorityChanged: (() -> Unit)? = null
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     inner class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -44,6 +45,7 @@ class TaskAdapter(
         val priorityId = priorityIds[position]
         val dao = EventPriorityDatabase.getInstance(ctx).assignmentPriorityDao()
 
+        // Read stored priority off the main thread and update UI on the main thread
         CoroutineScope(Dispatchers.IO).launch {
             val stored = dao.getPriority(priorityId) ?: "default"
 
@@ -55,6 +57,9 @@ class TaskAdapter(
             }
         }
     }
+
+
+     //Apply priority styling and text to the priority TextView.
 
     private fun applyPriorityUI(tv: TextView, p: String) {
         val ctx = tv.context
@@ -78,6 +83,10 @@ class TaskAdapter(
         }
     }
 
+    /**
+     * Show a simple popup menu to let the user change the priority. The selected
+     * value is written back to the EventPriority DB on a background thread.
+     */
     private fun showPriorityMenu(holder: TaskViewHolder, id: String, old: String) {
         val ctx = holder.itemView.context
         val popup = PopupMenu(ctx, holder.tvPriority)
@@ -97,11 +106,12 @@ class TaskAdapter(
 
             val dao = EventPriorityDatabase.getInstance(ctx).assignmentPriorityDao()
 
+            // Persist the chosen priority on IO and update UI on Main when done
             CoroutineScope(Dispatchers.IO).launch {
                 dao.setPriority(AssignmentPriority(id, chosen))
                 withContext(Dispatchers.Main) {
                     applyPriorityUI(holder.tvPriority, chosen)
-                    onPriorityChanged?.invoke()   // 🔥 TRIGGER CALLBACK
+                    onPriorityChanged?.invoke()
                 }
             }
             true
@@ -110,6 +120,7 @@ class TaskAdapter(
         popup.show()
     }
 
+    // Allow the fragment to replace the adapter data when day changes
     fun update(newItems: List<Assignment>, newIds: List<String>) {
         items = newItems
         priorityIds = newIds

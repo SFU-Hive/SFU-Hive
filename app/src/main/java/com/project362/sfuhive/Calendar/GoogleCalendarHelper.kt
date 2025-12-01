@@ -17,6 +17,9 @@ import com.project362.sfuhive.database.Calendar.GoogleEventDatabase
 import com.project362.sfuhive.database.Calendar.GoogleEventEntity
 import kotlinx.coroutines.*
 
+
+// Helper class that handles Google Sign-In and fetching events from the user's primary Google Calendar.
+
 class GoogleCalendarHelper(
     private val activity: Activity,
     private val onEventsFetched: (List<Event>) -> Unit
@@ -27,6 +30,8 @@ class GoogleCalendarHelper(
 
     private lateinit var googleSignInClient: GoogleSignInClient
 
+    //Configure the GoogleSignIn client with the Calendar readonly scope.
+
     fun setupGoogleSignIn() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
@@ -36,18 +41,25 @@ class GoogleCalendarHelper(
         googleSignInClient = GoogleSignIn.getClient(activity, gso)
     }
 
+    // Return the sign-in intent so callers can launch the sign-in flow
     fun getSignInIntent(): Intent = googleSignInClient.signInIntent
 
+    // Simple helper to check whether a user is already signed in
     fun isSignedIn(): Boolean {
         return GoogleSignIn.getLastSignedInAccount(activity) != null
     }
 
+    // Sign out the current user and show a toast on completion
     fun signOut() {
         googleSignInClient.signOut().addOnCompleteListener {
             Toast.makeText(activity, "Signed out", Toast.LENGTH_SHORT).show()
         }
     }
 
+    /**
+     * Handle result returned from the Google sign in intent. If sign-in succeeds
+     * the helper will fetch calendar events for the signed-in account.
+     */
     fun handleSignInResult(requestCode: Int, data: Intent?) {
         if (requestCode != RC_SIGN_IN) return
 
@@ -63,6 +75,7 @@ class GoogleCalendarHelper(
         }
     }
 
+    // Convenience: refresh events for the last signed-in account
     fun refreshEvents() {
         val account = GoogleSignIn.getLastSignedInAccount(activity)
         if (account != null) {
@@ -72,6 +85,7 @@ class GoogleCalendarHelper(
         }
     }
 
+    // Fetch events using Google Calendar API and persist them into the local DB.
     fun fetchCalendarEvents(account: GoogleSignInAccount) {
         val credential = GoogleAccountCredential.usingOAuth2(
             activity, listOf(CalendarScopes.CALENDAR_READONLY)
@@ -94,6 +108,7 @@ class GoogleCalendarHelper(
 
                 val items = events.items ?: emptyList()
 
+                // Persist into local DB as a cache — keep only basic fields used by UI
                 val dao = GoogleEventDatabase.getInstance(activity).googleEventDao()
                 dao.deleteAllEvents()
 
@@ -112,6 +127,7 @@ class GoogleCalendarHelper(
 
                 dao.insertEvents(entities)
 
+                // Deliver the raw Event objects back on the main thread for immediate UI updates
                 withContext(Dispatchers.Main) {
                     onEventsFetched(items)
                 }

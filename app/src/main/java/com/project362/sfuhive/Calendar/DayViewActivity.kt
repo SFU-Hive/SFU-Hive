@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.project362.sfuhive.R
 import com.project362.sfuhive.database.Assignment
 
+
+ // Shows a simple list of assignments/tasks for a single selected date.
 class DayViewActivity : AppCompatActivity() {
 
     private lateinit var tvDate: TextView
@@ -20,13 +22,13 @@ class DayViewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_day_view)
 
-        // FIXED ID HERE
+        // Find and wire up views
         tvDate = findViewById(R.id.dayViewDateTitle)
         recycler = findViewById(R.id.dayViewRecycler)
 
         recycler.layoutManager = LinearLayoutManager(this)
 
-        // Retrieve data passed from CalendarFragment
+        // Retrieve data passed from CalendarFragment via intent extras
         val date = intent.getStringExtra("selected_date") ?: ""
         tvDate.text = date
 
@@ -37,6 +39,7 @@ class DayViewActivity : AppCompatActivity() {
         val points = intent.getDoubleArrayExtra("task_points") ?: DoubleArray(titles.size)
         val groups = intent.getDoubleArrayExtra("task_groups") ?: DoubleArray(titles.size)
 
+        // Build Assignment list to feed TaskAdapter — use temporary IDs for display only
         val tasks = mutableListOf<Assignment>()
 
             for (i in titles.indices) {
@@ -52,6 +55,7 @@ class DayViewActivity : AppCompatActivity() {
             )
         }
 
+        // Create adapter and finish the activity when it signals an update so the month view can refresh
         taskAdapter = TaskAdapter(tasks, ids) {
             // Refresh month calendar when returning from Day View
             finish()  // closes day view

@@ -58,4 +58,15 @@
     <string name="my_calendar">My Calendar</string>
     <string name="wellness">Wellness</string>
     <string name="progression">Progression</string>
+
+    <!-- Strings for activity_task_scan.xml -->
+    <string name="photo_label">📷</string>
+    <string name="upload_task_photo">Upload Task Photo</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="upload_from_gallery">Upload From Gallery</string>
+    <string name="or_enter_manually">OR\nEnter Manually</string>
+    <string name="task_title_hint">Task Title</string>
+    <string name="due_date_hint">Due Date (yyyy-MM-dd)</string>
+    <string name="time_hint">Time (HH:mm)</string>
+    <string name="submit">Submit</string>
 </resources>
