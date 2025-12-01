@@ -7,10 +7,11 @@ import com.project362.sfuhive.Progress.Badges.Badge
 import com.project362.sfuhive.Progress.Rewards.Reward
 import com.project362.sfuhive.R
 
+// DEPRECATED!
+// Progress View model held progress related data in the early stages of demos
 class ProgressViewModel : ViewModel(){
     private var pinnedBadges : MutableLiveData<List<Badge>> = MutableLiveData<List<Badge>>();
     private var pinnedRewards : MutableLiveData<List<Reward>> = MutableLiveData<List<Reward>>();
-    private var currency : MutableLiveData<Int> = MutableLiveData();
 
 
     private var tmpBadgesList = listOf<Badge>(
@@ -57,23 +58,8 @@ class ProgressViewModel : ViewModel(){
         pinnedRewards.value=tmpRewardsList // temp until a database integration exists?
     }
 
-    public fun getPinnedBadge(position: Int): Badge{
-
-        return pinnedBadges.value!!.get(position)
-    }
-
-    public fun getPinnedReward(position: Int): Reward{
-
-        return pinnedRewards.value!!.get(position)
-    }
-
     public fun getAllPinnedRewards(): List<Reward>{
         return tmpRewardsList
     }
-
-    public fun getAllPinnedBadges(): List<Badge>{
-        return tmpBadgesList
-    }
-
 
 }
