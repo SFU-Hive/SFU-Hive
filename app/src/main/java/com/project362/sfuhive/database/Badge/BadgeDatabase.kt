@@ -23,7 +23,7 @@ abstract class BadgeDatabase : RoomDatabase() {
         private var allBadges = BadgeFactory().getAllBadges()
         @Volatile
         private var INSTANCE: BadgeDatabase? = null
-
+        // Populates database with the badges from BadgeFactory if the badge database doesn't exist
         fun getInstance(context: Context): BadgeDatabase {
             synchronized(this) {
                 var instance = INSTANCE
@@ -52,6 +52,7 @@ abstract class BadgeDatabase : RoomDatabase() {
 
                     INSTANCE = instance
                 } else {
+                    // An instance of the badge database already exists ==> no need to populate it with badges
                     Log.d("BadgeDB", "Returning existing BadgeDatabase instance")
                 }
                 return instance

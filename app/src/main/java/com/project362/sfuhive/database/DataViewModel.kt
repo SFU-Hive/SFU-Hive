@@ -26,7 +26,8 @@ import com.project362.sfuhive.Progress.Badges.BadgeFactory.Companion.GOAL3
 // adapted from RoomDatabase demo
 class DataViewModel(private val repository: DataRepository) : ViewModel() {
 
-   val goal1BadgeEntity = repository.getBadgeFlow(GOAL1).asLiveData()
+    // Goal specific Badge flows to notify GoalsActivity() of badge locking/unlocking change
+    val goal1BadgeEntity = repository.getBadgeFlow(GOAL1).asLiveData()
     val goal2BadgeEntity = repository.getBadgeFlow(GOAL2).asLiveData()
     val goal3BadgeEntity = repository.getBadgeFlow(GOAL3).asLiveData()
 
@@ -243,7 +244,6 @@ class DataViewModel(private val repository: DataRepository) : ViewModel() {
     }
 
     // streaks section
-
     fun addStreak(type:String, calendar: Calendar ){
         repository.addStreak(type, calendar)
     }
