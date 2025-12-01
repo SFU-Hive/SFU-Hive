@@ -99,7 +99,7 @@ class GoalsActivity : AppCompatActivity() {
             Log.d("goalActivity", "Calling initializeGoals()")
             viewModel.initializeGoals(this@GoalsActivity)
 
-            // Collect all goals and update UI on changes
+            // collect all goals and update UI on changes
             viewModel.getAllGoals().collect { goals ->
                 Log.d("goalActivity", "Received ${goals.size} goals")
                 // Guard: if not exactly 3 rows we still handle gracefully
@@ -163,6 +163,7 @@ class GoalsActivity : AppCompatActivity() {
         goal2Cb = findViewById(R.id.goal2_cb)
         goal3Cb = findViewById(R.id.goal3_cb)
     }
+    // listeners for cards
     private fun setupGoalCardClicks() {
         card1.setOnClickListener { openGoalDialog(1L) }
         menu1.setOnClickListener { openGoalDialog(1L) }
@@ -189,21 +190,21 @@ class GoalsActivity : AppCompatActivity() {
             if (isChecked) {
                 val title = titleView.text?.toString()?.trim()
 
-                // Block checking if name not set
+                // block checking if name not set
                 if (title.isNullOrEmpty() || title == "Tap to set goal") {
                     button.isChecked = false
                     Toast.makeText(this, "Please set a goal name first!", Toast.LENGTH_SHORT).show()
                     return@setOnCheckedChangeListener
                 }
 
-                // Allowed → mark complete
+                // allowed -> mark complete
                 viewModel.incrementCompletion(goalId)
 
                 // Lock checkbox
                 button.isEnabled = false
 
             } else {
-                // Prevent unchecking after marking complete
+                // prevent unchecking after marking complete
                 button.isChecked = true
                 button.isEnabled = false
             }
@@ -240,6 +241,7 @@ class GoalsActivity : AppCompatActivity() {
         }
     }
 
+    // check for a new intent from nfc
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
@@ -267,7 +269,7 @@ class GoalsActivity : AppCompatActivity() {
 
             if (goal != null) {
                 Log.d("goalActivity", "Unlock Goal Badge")
-                // Found a goal → mark complete
+                // found a goal -> mark complete
                 viewModel.incrementCompletion(goal.id)
 
                 Toast.makeText(
@@ -314,6 +316,7 @@ class GoalsActivity : AppCompatActivity() {
         }
     }
 
+    // checks badge states, if already unlocked then dont want to show the dialog again
     private fun setBadgeObservers(){
 
         viewModel.goal1BadgeEntity.observe(this) { badge ->
@@ -347,7 +350,5 @@ class GoalsActivity : AppCompatActivity() {
             }
             goal3WasLocked = isLocked
         }
-        //Util.UnlockBadgeDialog(goal.id, supportFragmentManager)
-
     }
 }

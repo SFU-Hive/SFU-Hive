@@ -55,6 +55,7 @@ class EnergyMgmtActivity : AppCompatActivity() {
         energyBtn4.tag = 4
         energyBtn5.tag = 5
 
+        // youtube link unique ids
         val id1 = "inpok4MKVLM"
         val id2 = "ZToicYcHIOU"
         val id3 = "2OEL4P1Rz04"
@@ -80,7 +81,7 @@ class EnergyMgmtActivity : AppCompatActivity() {
         // load energies
         energyViewModel.loadEnergies(this)
 
-
+        // add energy on click
         val clickListener = View.OnClickListener { view ->
             val value = view.tag as Int
             Toast.makeText(this, "Your energy is saved", Toast.LENGTH_SHORT).show()
@@ -156,6 +157,7 @@ class EnergyMgmtActivity : AppCompatActivity() {
     }
 
     // youtube media ==============================================================================
+    // show the thumbnail
     fun loadThumbnail(imageView: ImageView, videoId: String) {
         val thumbnailUrl = "https://img.youtube.com/vi/$videoId/hqdefault.jpg"
         Glide.with(this).load(thumbnailUrl).into(imageView)

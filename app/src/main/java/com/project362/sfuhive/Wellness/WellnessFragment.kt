@@ -121,7 +121,7 @@ class WellnessFragment : Fragment() {
         setYoutubeClick(video3, id3)
 
         // goals functionality  ===================================================================
-        // need to make sure the titles and checkboxes are in sync with the goals activity
+        // just display the text of the goals
         goal1Title = view.findViewById(R.id.goal1_title)
         goal2Title = view.findViewById(R.id.goal2_title)
         goal3Title = view.findViewById(R.id.goal3_title)
@@ -164,7 +164,6 @@ class WellnessFragment : Fragment() {
     // for the goal stuff ========================================
     private fun updateGoalUI(index: Int, goal: Goal?) {
         val titleView: TextView
-        val checkBox: CheckBox
 
         when (index) {
             1 -> { titleView = goal1Title }

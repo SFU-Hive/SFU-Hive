@@ -44,7 +44,7 @@ abstract class GoalDatabase : RoomDatabase() {
         val badgeDao = badgeDatabaseDao()
         val dao = goalDatabaseDao()
 
-        // ensure badges exist
+        // ensure badges exist first before inserting goals, otherwise FK constraint error
         for (id in 1..3L) {
             val existing = badgeDao.getBadge(id)
             if (existing == null) {
@@ -53,6 +53,7 @@ abstract class GoalDatabase : RoomDatabase() {
             }
         }
 
+        // want to insert 3 goals right away, there can only be 3 goals in this database
         val existingGoals = dao.getAllGoals().firstOrNull() ?: emptyList()
         if (existingGoals.isEmpty()) {
             Log.d("GoalDB", "No goals found, inserting default goals...")
