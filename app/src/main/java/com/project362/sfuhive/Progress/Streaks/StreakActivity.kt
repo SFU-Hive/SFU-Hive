@@ -3,24 +3,13 @@ package com.project362.sfuhive.Progress.Streaks
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.collectAsState
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.project362.sfuhive.R
 import com.project362.sfuhive.Util
 import com.project362.sfuhive.database.DataViewModel
-import com.project362.sfuhive.database.Streak.StreakEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import java.util.Calendar
 
 // Note: Streaks feature was not implemented due to time constraints
@@ -52,27 +41,12 @@ class StreakActivity : AppCompatActivity() {
         repoVM.addStreak("login",date2017)
         val theFlow = repoVM.getStreaksOfType("login")
 
-            val allStreaksFlow = repoVM.getAllStreaks()
-            val allStreaks = allStreaksFlow.asLiveData()
+        val allStreaksFlow = repoVM.getAllStreaks()
+        val allStreaks = allStreaksFlow.asLiveData()
         val scope = CoroutineScope(Dispatchers.Main)
 
-            Log.d("Streak Activity","All Streaks: ${allStreaks}")
-            Log.d("Streak Activity","Saved Streak: ${allStreaks}")
-
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-    }
-
-    public suspend fun collectFlow(theFlow: Flow<List<StreakEntity>>){
-        runBlocking {
-            val theFlow=repoVM.getStreaksOfType("login")
-            theFlow.collect(){ it ->
-                Log.d("Streak Activity","streak login type: ${it}")
-            }
-        }
+        Log.d("Streak Activity","All Streaks: ${allStreaks}")
+        Log.d("Streak Activity","Saved Streak: ${allStreaks}")
 
     }
 }
